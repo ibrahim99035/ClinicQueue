@@ -1,6 +1,19 @@
 from django.urls import path
-from accounts.views import index
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+
+from accounts.views import UserRegistrationView, UserLoginView, UserProfileView, UserListView, PatientProfileView, DoctorProfileView
 
 urlpatterns = [
-    path('', index, name='index'),
+    path('register/', UserRegistrationView.as_view(), name='user-register'),
+    path('login/', UserLoginView.as_view(), name='user-login'),
+    
+    path('token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),
+    
+    path('profile/', UserProfileView.as_view(), name='user-profile'),
+    
+    path('users/', UserListView.as_view({'get': 'list', 'post': 'create'}), name='user-list'),
+    path('users/<int:pk>/', UserListView.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'}), name='user-detail'),
+    
+    path('patient-profile/', PatientProfileView.as_view(), name='patient-profile'),
+    path('doctor-profile/', DoctorProfileView.as_view(), name='doctor-profile'),
 ]
