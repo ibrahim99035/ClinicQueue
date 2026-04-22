@@ -1,3 +1,6 @@
+from django.contrib.auth.models import Group
+from accounts.models.patient import PatientProfile
+from accounts.models.doctor import DoctorProfile
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from accounts.models.user import User
@@ -12,10 +15,15 @@ class PatientProfileSerializer(serializers.ModelSerializer):
         read_only_fields = ['user']
 
 class DoctorProfileSerializer(serializers.ModelSerializer):
+    approved_by_email = serializers.SerializerMethodField(read_only=True)
+    
     class Meta:
         model = DoctorProfile
-        fields = ['user', 'specialization', 'consultationDuration']
-        read_only_fields = ['user']
+        fields = ['user', 'specialization', 'consultationDuration', 'bio', 'is_approved', 'approved_by_email', 'approved_at']
+        read_only_fields = ['user', 'is_approved', 'approved_by_email', 'approved_at']
+    
+    def get_approved_by_email(self, obj):
+        return obj.approved_by.first_name if obj.approved_by else None
 
 class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -46,21 +54,40 @@ class UserProfileSerializer(serializers.ModelSerializer):
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
     password_confirm = serializers.CharField(write_only=True)
+    user_role = serializers.ChoiceField(choices=['patient', 'doctor'])
 
     class Meta:
         model = User
-        fields = ['email', 'first_name', 'last_name', 'phone', 'password', 'password_confirm']
+        fields = ['email', 'first_name', 'last_name', 'phone', 'password', 'password_confirm', 'user_role']
 
     def validate(self, data):
         if data['password'] != data['password_confirm']:
             raise serializers.ValidationError("Passwords do not match.")
+        if data['user_role'] not in ['patient', 'doctor']:
+            raise serializers.ValidationError("user_role must be 'patient' or 'doctor'.")
         return data
 
     def create(self, validated_data):
         validated_data.pop('password_confirm')
-        validated_data.pop('username', None)  
-        user = User.create_user(**validated_data)
-        return user 
+        user_role = validated_data.pop('user_role')
+        validated_data.pop('username', None)
+        
+        user = User.create_user(**validated_data)        
+        
+        if user_role == 'patient':
+            group = Group.objects.get(name='Patients')
+            user.groups.add(group)
+            PatientProfile.create_patient(user)
+            user.is_active = True
+        
+        elif user_role == 'doctor':
+            group = Group.objects.get(name='Doctors')
+            user.groups.add(group)
+            DoctorProfile.create_doctor(user)
+            user.is_active = False 
+        
+        user.save()
+        return user
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     username_field = 'email'
@@ -69,4 +96,4 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         data = super().validate(attrs)
         data['user'] = UserSerializer(self.user).data
         data['roles'] = [group.name for group in self.user.groups.all()]
-        return data 
+        return data
