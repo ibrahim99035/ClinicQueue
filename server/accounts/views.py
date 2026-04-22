@@ -8,6 +8,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from django.utils import timezone
+from django.contrib.auth.models import Group
 
 from accounts.serializers import UserRegistrationSerializer, UserProfileSerializer, UserSerializer, CustomTokenObtainPairSerializer, PatientProfileSerializer, DoctorProfileSerializer, NotificationSerializer
 
@@ -133,3 +135,76 @@ class UserListView(ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, IsAdmin]
+
+class AdminUserCreateView(APIView):
+    permission_classes = [IsAuthenticated, IsAdmin]
+
+    def post(self, request):
+        email = request.data.get('email')
+        password = request.data.get('password')
+        first_name = request.data.get('first_name')
+        last_name = request.data.get('last_name')
+        role = request.data.get('role')
+        
+        if not all([email, password, first_name, last_name, role]):
+            return Response({'detail': 'Missing required fields'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if role not in ['admin', 'receptionist']:
+            return Response({'detail': 'Role must be admin or receptionist'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if User.objects.filter(email=email).exists():
+            return Response({'detail': 'User with this email already exists'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        user = User.create_user(
+            email=email,
+            password=password,
+            first_name=first_name,
+            last_name=last_name,
+            username=email
+        )
+        
+        if role == 'admin':
+            group = Group.objects.get(name='Admins')
+        else:
+            group = Group.objects.get(name='Receptionists')
+        
+        user.groups.add(group)
+        user.is_active = True
+        user.save()
+        
+        return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
+
+
+class ApproveDoctorView(APIView):
+    permission_classes = [IsAuthenticated, IsAdmin]
+
+    def post(self, request, pk):
+        try:
+            doctor_profile = DoctorProfile.objects.get(pk=pk)
+        except DoctorProfile.DoesNotExist:
+            return Response({'detail': 'Doctor not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        if doctor_profile.is_approved:
+            return Response({'detail': 'Doctor is already approved'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        doctor_profile.is_approved = True
+        doctor_profile.approved_by = request.user
+        doctor_profile.approved_at = timezone.now()
+        doctor_profile.save()
+        
+        doctor_profile.user.is_active = True
+        doctor_profile.user.save()
+        
+        return Response({
+            'message': 'Doctor approved successfully',
+            'doctor': DoctorProfileSerializer(doctor_profile).data
+        }, status=status.HTTP_200_OK)
+
+
+class PendingDoctorsListView(APIView):
+    permission_classes = [IsAuthenticated, IsAdmin]
+
+    def get(self, request):
+        pending_doctors = DoctorProfile.objects.filter(is_approved=False)
+        serializer = DoctorProfileSerializer(pending_doctors, many=True)
+        return Response(serializer.data)
