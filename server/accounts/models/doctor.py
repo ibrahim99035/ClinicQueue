@@ -5,7 +5,8 @@ from accounts.models.user import User
 class DoctorProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='doctor_profile')
     specialization = models.CharField(max_length=100, blank=True)
-    consultationDuration = models.PositiveIntegerField(default=15, validators=[MinValueValidator(15), MaxValueValidator(120)]) 
+    bio = models.TextField(blank=True)
+    consultationDuration = models.PositiveIntegerField(default=15, validators=[MinValueValidator(15), MaxValueValidator(30)]) 
 
     def __str__(self):
         return f"Doctor Profile for {self.user.first_name} {self.user.last_name}"
