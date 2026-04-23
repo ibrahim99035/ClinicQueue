@@ -4,7 +4,7 @@ from accounts.models.user import User
 class PatientProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='patient_profile')
     dateOfBirth = models.DateField(null=True, blank=True)
-    gender = models.CharField(max_length=10, choices=[('M', 'Male'), ('F', 'Female')], blank=True)
+    gender = models.CharField(max_length=10, choices=[('M', 'Male'), ('F', 'Female')], blank=True, default='')
     
     def __str__(self):
         return f"Patient Profile for {self.user.first_name} {self.user.last_name}"
@@ -14,7 +14,7 @@ class PatientProfile(models.Model):
         return cls.objects.all()
     
     @classmethod
-    def createPatient(cls, user, dateOfBirth=None, gender=None):
+    def createPatient(cls, user, dateOfBirth=None, gender=''):
         profile = cls(user=user, dateOfBirth=dateOfBirth, gender=gender)
         profile.save()
 

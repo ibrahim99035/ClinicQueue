@@ -4,8 +4,6 @@ from accounts.models.doctor import DoctorProfile
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from accounts.models.user import User
-from accounts.models.patient import PatientProfile
-from accounts.models.doctor import DoctorProfile
 from accounts.models.notification import Notification
 
 class PatientProfileSerializer(serializers.ModelSerializer):
@@ -15,14 +13,14 @@ class PatientProfileSerializer(serializers.ModelSerializer):
         read_only_fields = ['user']
 
 class DoctorProfileSerializer(serializers.ModelSerializer):
-    approved_by_email = serializers.SerializerMethodField(read_only=True)
+    approved_by_name = serializers.SerializerMethodField(read_only=True) 
     
     class Meta:
         model = DoctorProfile
-        fields = ['user', 'specialization', 'consultationDuration', 'bio', 'is_approved', 'approved_by_email', 'approved_at']
-        read_only_fields = ['user', 'is_approved', 'approved_by_email', 'approved_at']
+        fields = ['id', 'user', 'specialization', 'consultationDuration', 'bio', 'is_approved', 'approved_by_name', 'approved_at']
+        read_only_fields = ['id', 'user', 'is_approved', 'approved_by_name', 'approved_at']
     
-    def get_approved_by_email(self, obj):
+    def get_approved_by_name(self, obj): 
         return obj.approved_by.first_name if obj.approved_by else None
 
 class NotificationSerializer(serializers.ModelSerializer):
@@ -77,13 +75,13 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         if user_role == 'patient':
             group = Group.objects.get(name='Patients')
             user.groups.add(group)
-            PatientProfile.create_patient(user)
+            PatientProfile.createPatient(user)
             user.is_active = True
         
         elif user_role == 'doctor':
             group = Group.objects.get(name='Doctors')
             user.groups.add(group)
-            DoctorProfile.create_doctor(user)
+            DoctorProfile.createDoctor(user)
             user.is_active = False 
         
         user.save()

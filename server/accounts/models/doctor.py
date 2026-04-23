@@ -5,7 +5,7 @@ from accounts.models.user import User
 
 class DoctorProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='doctor_profile')
-    specialization = models.CharField(max_length=100, blank=True)
+    specialization = models.CharField(max_length=100, blank=True, default='')
     bio = models.TextField(blank=True)
     consultationDuration = models.PositiveIntegerField(default=15, validators=[MinValueValidator(15), MaxValueValidator(30)]) 
     
@@ -21,7 +21,7 @@ class DoctorProfile(models.Model):
         return cls.objects.all()
     
     @classmethod
-    def createDoctor(cls, user, specialization=None, consultationDuration=15):
+    def createDoctor(cls, user, specialization='', consultationDuration=15):
         profile = cls(user=user, specialization=specialization, consultationDuration=consultationDuration)
         profile.save()
 

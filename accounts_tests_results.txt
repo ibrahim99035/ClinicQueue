@@ -1,0 +1,36 @@
+
+==================================================
+ 1. ADMIN LOGIN
+==================================================
+POST /accounts/login/ → 200: {'refresh': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoicmVmcmVzaCIsImV4cCI6MTc3NzAwNTM0MSwiaWF0IjoxNzc2OTE4OTQxLCJqdGkiOiJlMjRiMjMzZWJiYTk0MjZjOTRlMjI3MTA3ZDM4YjMxMyIsInVzZXJfaWQiOiI0In0.dMDRIMbQrG2Sh_oUrQ3YvU7-h5OvGclawgiveKn7_rw', 'access': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzc2OTE5MjQxLCJpYXQiOjE3NzY5MTg5NDEsImp0aSI6IjAzNjgwMWY4NTkzMzQxNWVhNDdmZmU4MmYzOWE2MmE1IiwidXNlcl9pZCI6IjQifQ.4BPS5srIrgigDwauwb5wlIDM8MljNPrKeBRkD2ZwPyw', 'user': {'id': 4, 'email': 'admin@clinic.com', 'first_name': 'Admin', 'last_name': 'User', 'phone': '', 'is_active': True, 'groups': ['Admins'], 'patient_profile': None, 'doctor_profile': None}, 'roles': ['Admins']}
+  ✓  admin gets token
+
+==================================================
+ 2. REGISTER PATIENT
+==================================================
+POST /accounts/register/ → 201: {'id': 22, 'email': 'patient8935@clinic.com', 'first_name': 'Ahmed', 'last_name': 'Ali', 'phone': '01012345678', 'is_active': True, 'groups': ['Patients'], 'patient_profile': {'user': 22, 'dateOfBirth': None, 'gender': ''}, 'doctor_profile': None}
+  ✓  patient registered (201)
+  ✓  patient is active
+  ✓  patient_profile created
+  ✓  patient role assigned
+
+==================================================
+ 3. REGISTER DOCTOR
+==================================================
+POST /accounts/register/ → 201: {'id': 23, 'email': 'doctor8935@clinic.com', 'first_name': 'Sara', 'last_name': 'Hassan', 'phone': '', 'is_active': False, 'groups': ['Doctors'], 'patient_profile': None, 'doctor_profile': {'id': 6, 'user': 23, 'specialization': '', 'consultationDuration': 15, 'bio': '', 'is_approved': False, 'approved_by_name': None, 'approved_at': None}}
+  ✓  doctor registered (201)
+  ✓  doctor is inactive
+  ✓  doctor_profile created
+  ✓  doctor role assigned
+
+==================================================
+ 4. DOCTOR CANNOT LOGIN BEFORE APPROVAL
+==================================================
+POST /accounts/login/ → 401: {'detail': 'No active account found with the given credentials'}
+  ✓  doctor login blocked (401)
+
+==================================================
+ 5. ADMIN CREATES RECEPTIONIST
+==================================================
+POST /accounts/admin/create-internal-user/ → 404: [non-JSON 6108 chars]
+  ✗ FAIL  receptionist created (201)

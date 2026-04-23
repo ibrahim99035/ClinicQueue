@@ -6,8 +6,6 @@ from rest_framework.permissions import BasePermission, IsAuthenticated, AllowAny
 
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
 from django.utils import timezone
 from django.contrib.auth.models import Group
 
@@ -34,7 +32,6 @@ class IsReceptionist(BasePermission):
     def has_permission(self, request, view):
         return request.user and request.user.is_authenticated and request.user.isReceptionist
 
-@method_decorator(csrf_exempt, name='dispatch')
 class UserRegistrationView(APIView):
     permission_classes = [AllowAny]
 
@@ -78,6 +75,9 @@ class PatientProfileView(APIView):
             return Response({"detail": "Patient profile not found."}, status=status.HTTP_404_NOT_FOUND)
 
     def post(self, request):
+        if hasattr(request.user, 'patient_profile'):
+            return Response({"detail": "Patient profile already exists."}, status=status.HTTP_400_BAD_REQUEST)
+        
         serializer = PatientProfileSerializer(data=request.data)
         
         if serializer.is_valid():
@@ -111,6 +111,9 @@ class DoctorProfileView(APIView):
             return Response({"detail": "Doctor profile not found."}, status=status.HTTP_404_NOT_FOUND)
 
     def post(self, request):
+        if hasattr(request.user, 'doctor_profile'):
+            return Response({"detail": "Doctor profile already exists. Use PUT to update."}, status=status.HTTP_400_BAD_REQUEST)
+
         serializer = DoctorProfileSerializer(data=request.data)
         
         if serializer.is_valid():
