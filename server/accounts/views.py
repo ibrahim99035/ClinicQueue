@@ -15,7 +15,6 @@ from accounts.models.user import User
 from accounts.models.doctor import DoctorProfile
 from accounts.models.patient import PatientProfile
 from accounts.models.notification import Notification
-
 class IsAdmin(BasePermission):
     def has_permission(self, request, view):
         return request.user and request.user.is_authenticated and request.user.isAdmin

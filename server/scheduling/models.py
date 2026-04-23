@@ -1,3 +1,4 @@
+
 import datetime
 
 from django.db import models
@@ -73,3 +74,4 @@ class TimeSlot(models.Model):
         start_of_day = datetime.datetime.combine(date, datetime.time.min)
         end_of_day = datetime.datetime.combine(date, datetime.time.max)
         return cls.objects.filter(doctor_id=doctorId, start_datetime__gte=start_of_day, end_datetime__lte=end_of_day, is_available=True)
+
