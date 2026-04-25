@@ -10,7 +10,7 @@ from .serializers import ConsultationRecordSerializer
 
 # Create your views here.
 
-class IsDoctorUser(permissions.BasePermission):
+class IsDoctorUser(BasePermission):
     """1- Allows only doctors
        2- Used for create/update consultation records"""
     def has_permission(self, request, view):
@@ -19,7 +19,7 @@ class IsDoctorUser(permissions.BasePermission):
         else:
             return True
         
-class IsReceptionistUser(permissions.BasePermission):
+class IsReceptionistUser(BasePermission):
     """access denied for receptionist to access EMR"""
     def has_permission(self, request, view):
         if not request.user or not request.user.is_authenticated:
@@ -50,7 +50,7 @@ class CanViewConsultationRecord(permissions.BasePermission):
 
         return False
  
-class CanUpdateConsultationRecord(permissions.BasePermission):
+class CanUpdateConsultationRecord(BasePermission):
     """Allow only doctor to update his own consultations"""
     def has_object_permission(self, request, view, obj):
         user = request.user
@@ -109,6 +109,28 @@ class DoctorPatientViewConsultationRecord(APIView):
         
         
 class ConsultationRecordUpdateView(APIView):
+    def get(self, request, pk):
+        if not IsAuthenticated().has_permission(request, self):
+            raise NotAuthenticated("Authentication is required.")
+
+        if not IsDoctorUser().has_permission(request, self):
+            raise PermissionDenied("You aren't allowed to view this consultation for editing.")
+
+        consultation = get_object_or_404(ConsultationRecord, pk=pk)
+
+        can_edit = CanUpdateConsultationRecord().has_object_permission(
+            request,
+            self,
+            consultation
+        )
+
+        if not can_edit:
+            raise PermissionDenied("You do not have permission to edit this consultation.")
+
+        serializer = ConsultationRecordSerializer(consultation)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
     def put(self, request, pk):
         if not IsAuthenticated().has_permission(request, self):
             raise NotAuthenticated("Authentication is required.")
