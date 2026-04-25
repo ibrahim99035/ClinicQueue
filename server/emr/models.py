@@ -12,14 +12,14 @@ class ConsultationRecord(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 class PrescriptionItem(models.Model):
-    consultation_id = models.ForeignKey(ConsultationRecord, on_delete=models.CASCADE)
+    consultation_id = models.ForeignKey(ConsultationRecord, on_delete=models.CASCADE, related_name="prescription_items")
     
     drug_name = models.CharField(max_length=255)
     dose = models.CharField(max_length=255)
     duration = models.CharField(max_length=255)
 
 class RequestedTest(models.Model):
-    consultation_id = models.ForeignKey(ConsultationRecord, on_delete=models.CASCADE)
+    consultation_id = models.ForeignKey(ConsultationRecord, on_delete=models.CASCADE, related_name="requested_tests")
     
     test_name = models.CharField(max_length=255)
     notes = models.TextField(null=True, blank=True)
