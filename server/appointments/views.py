@@ -7,7 +7,9 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
 from .models import Appointment, RescheduleHistory, WaitingList
+from scheduling.models import TimeSlot
 
 from .permissions import (
     IsPatient, IsDoctor, IsReceptionist, IsDoctorOrReceptionist,
@@ -66,15 +68,23 @@ def _apply_transition(appointment, actionName, user):
         return False, (f"Your role ('{role}') is not allowed to perform '{actionName}'.")
     
     if actionName == 'complete':
-        consultation = getattr(appointment, 'consultation', None)
+        consultation = getattr(appointment, 'consultationrecord', None)
         if consultation is None:
             return False, ("Cannot mark as completed: consultation record is missing.")
         
     appointment.status = nextStatus
+    updateFields = ['status', 'updated_at']
+    if actionName == 'confirm':
+        appointment.confirmed_at = timezone.now()
+        updateFields.append('confirmed_at')
     if actionName == 'check_in':
         appointment.checked_in_at = timezone.now()
-        
-    appointment.save(update_fields=['status', 'checked_in_at', 'updated_at'])
+        updateFields.append('checked_in_at')
+    if actionName == 'complete':
+        appointment.completed_at = timezone.now()
+        updateFields.append('completed_at')
+
+    appointment.save(update_fields=updateFields)
     return True, None
 
 class AppointmentViewSet(viewsets.ModelViewSet):
@@ -177,7 +187,7 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         )
         serializer.is_valid(raise_exception=True)
  
-        newSlot = serializer.validated_data['new_slot']
+        newSlot = get_object_or_404(TimeSlot, pk=serializer.validated_data['new_slot'])
         reason = serializer.validated_data.get('reason', '')
  
         with transaction.atomic():
@@ -189,7 +199,7 @@ class AppointmentViewSet(viewsets.ModelViewSet):
                 reason=reason,
             )
             appointment.slot_id = newSlot
-            appointment.save(update_fields=['slot', 'updated_at'])
+            appointment.save(update_fields=['slot_id', 'updated_at'])
  
         return Response(
             AppointmentReadSerializer(appointment, context={'request': request}).data

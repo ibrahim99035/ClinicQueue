@@ -13,12 +13,22 @@ class PatientProfileSerializer(serializers.ModelSerializer):
         read_only_fields = ['user']
 
 class DoctorProfileSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
     approved_by_name = serializers.SerializerMethodField(read_only=True) 
     
     class Meta:
         model = DoctorProfile
         fields = ['id', 'user', 'specialization', 'consultationDuration', 'bio', 'is_approved', 'approved_by_name', 'approved_at']
-        read_only_fields = ['id', 'user', 'is_approved', 'approved_by_name', 'approved_at']
+        read_only_fields = ['id', 'is_approved', 'approved_by_name', 'approved_at']
+    
+    def get_user(self, obj):
+        return {
+            'id': obj.user.id,
+            'email': obj.user.email,
+            'first_name': obj.user.first_name,
+            'last_name': obj.user.last_name,
+            'phone': obj.user.phone,
+        }
     
     def get_approved_by_name(self, obj): 
         return obj.approved_by.first_name if obj.approved_by else None
