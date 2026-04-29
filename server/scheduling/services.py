@@ -15,6 +15,7 @@ def generate_slots(start_date, end_date, doctor_id):
     duration = datetime.timedelta(minutes=doctor.consultationDuration)
     
     finalSlots = []
+    skipReasons = []
     
     for i in range(delta_days + 1):
         currentDate = start_date + datetime.timedelta(days=i)
@@ -23,9 +24,14 @@ def generate_slots(start_date, end_date, doctor_id):
         
         exception = ScheduleException.objects.filter(doctor=doctor, exception_date=currentDate).first()
         if exception:
-            if exception.type in ['DAY_OFF', 'VACATION']:
+            if exception.type == 'DAY_OFF':
+                skipReasons.append(f"Cannot generate slots for {currentDate} because this date is marked as Day Off.")
                 continue
-            
+
+            elif exception.type == 'VACATION':
+                skipReasons.append(f"Cannot generate slots for {currentDate} because this date is marked as Vacation.")
+                continue
+
             elif exception.type == 'EXTRA_WORKING':
                 workStartTime = exception.start_time
                 workEndTime = exception.end_time
@@ -36,6 +42,8 @@ def generate_slots(start_date, end_date, doctor_id):
             if schedule:
                 workStartTime = schedule.start_time
                 workEndTime = schedule.end_time
+            else:
+                skipReasons.append(f"No active weekly schedule found for {currentDate}.")
                 
         if workStartTime and workEndTime:
             newCurrentDate = datetime.datetime.combine(currentDate, workStartTime)
@@ -62,5 +70,16 @@ def generate_slots(start_date, end_date, doctor_id):
                 
     if finalSlots:
         TimeSlot.objects.bulk_create(finalSlots, ignore_conflicts=True)
-        
-    return {"message": "Success", "count": len(finalSlots)}
+        return {"message": "Success", "count": len(finalSlots)}
+
+    if skipReasons:
+        return {
+            "warning": skipReasons[0],
+            "count": 0,
+            "reasons": skipReasons
+        }
+
+    return {
+        "warning": "No slots were generated.",
+        "count": 0
+    }

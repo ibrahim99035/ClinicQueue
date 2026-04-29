@@ -147,6 +147,7 @@ class AdminUserCreateView(APIView):
         password = request.data.get('password')
         first_name = request.data.get('first_name')
         last_name = request.data.get('last_name')
+        phone = request.data.get('phone')
         role = request.data.get('role')
         
         if not all([email, password, first_name, last_name, role]):
@@ -163,6 +164,7 @@ class AdminUserCreateView(APIView):
             password=password,
             first_name=first_name,
             last_name=last_name,
+            phone=phone,
             username=email
         )
         
