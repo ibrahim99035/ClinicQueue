@@ -11,7 +11,7 @@ class AppointmentWriteSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model  = Appointment
-        fields = ('slot', 'doctor', 'reason')
+        fields = ('slot_id', 'doctor_id', 'reason')
     def validate_slot(self, slot):
         if hasattr(slot, 'appointment'):
             raise serializers.ValidationError(
@@ -28,23 +28,41 @@ class AppointmentWriteSerializer(serializers.ModelSerializer):
 class AppointmentReadSerializer(serializers.ModelSerializer):
     patient_name = serializers.SerializerMethodField()
     doctor_name = serializers.SerializerMethodField()
-    slot_time = serializers.DateTimeField(source='slot.start_time', read_only=True)
+    slot_time = serializers.DateTimeField(source='slot_id.start_datetime', read_only=True)
     
     class Meta:
         model = Appointment
         fields = (
             'id', 'status',
-            'patient', 'patient_name',
-            'doctor',  'doctor_name',
-            'slot', 'slot_time',
+            'patient_id', 'patient_name',
+            'doctor_id',  'doctor_name',
+            'slot_id', 'slot_time',
             'reason',
             'checked_in_at',
-            'created_at', 'updated_at',
+            'created_at',
         )
         read_only_fields = fields
 
     def get_patient_name(self, obj):
-        return obj.patient.get_full_name() or obj.patient.email
+        user = obj.patient_id.user
+
+        full_name = (user.first_name + " " + user.last_name).strip()
+
+        if full_name:
+            return full_name
+
+        return user.email
+    
+    def get_doctor_name(self, obj):
+        user = obj.doctor_id.user
+
+        full_name = (user.first_name + " " + user.last_name).strip()
+
+        if full_name:
+            return full_name
+
+        return user.email
+    
     def get_waiting_minutes(self, obj):
         if obj.checked_in_at:
             delta = timezone.now() - obj.checked_in_at
@@ -81,7 +99,47 @@ class WaitingListReadSerializer(serializers.ModelSerializer):
         model  = WaitingList
         fields = ('id', 'doctor', 'doctor_name', 'date', 'note', 'joined_at')
         read_only_fields = fields
-    def get_doctor_name(self, obj):
-        return obj.doctor.get_full_name() or obj.doctor.email
-        
+    # def get_doctor_name(self, obj):
+    #     user = obj.doctor_id.user
+
+    #     full_name = (user.first_name + " " + user.last_name).strip()
+
+    #     if full_name:
+    #         return full_name
+
+    #     return user.email
     
+    
+class RescheduleHistorySerializer(serializers.ModelSerializer):
+        old_slot_start = serializers.DateTimeField(
+        source='old_slot_id.start_datetime',
+        read_only=True
+    )
+        new_slot_start = serializers.DateTimeField(
+        source='new_slot_id.start_datetime',
+        read_only=True
+    )
+        changed_by_name = serializers.SerializerMethodField()
+
+        class Meta:
+            model = RescheduleHistory
+            fields = (
+                'id',
+                'old_slot_id',
+                'new_slot_id',
+                'old_slot_start',
+                'new_slot_start',
+                'changed_by',
+                'changed_by_name',
+            )
+            read_only_fields = fields
+
+        def get_changed_by_name(self, obj):
+            user = obj.changed_by
+
+            full_name = (user.first_name + " " + user.last_name).strip()
+
+            if full_name:
+                return full_name
+
+            return user.email

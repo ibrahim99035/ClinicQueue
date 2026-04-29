@@ -25,7 +25,7 @@ class IsReceptionistUser(BasePermission):
         if not request.user or not request.user.is_authenticated:
             return False
         if request.user.isReceptionist:
-            return PermissionDenied("Receptionists cannot access medical records.")
+            raise PermissionDenied("Receptionists cannot access medical records.")
 
 class CanViewConsultationRecord(permissions.BasePermission):
     """
@@ -42,7 +42,7 @@ class CanViewConsultationRecord(permissions.BasePermission):
         if not request.user or not request.user.is_authenticated:
             return False
         if request.user.isReceptionist:
-            return PermissionDenied("Receptionists cannot access medical records")
+            raise PermissionDenied("Receptionists cannot access medical records")
         if request.user.isDoctor:
             return obj.appointment_id.doctor_id.user == user
         if user.isPatient:

@@ -15,27 +15,28 @@ from .permissions import (
 from .serializers import (
     AppointmentReadSerializer,
     AppointmentWriteSerializer,
-    RescheduleSerializer,
+    # RescheduleSerializer,
     RescheduleHistorySerializer,
-    QueueSerializer,
+    # QueueSerializer,
     WaitingListReadSerializer,
     WaitingListWriteSerializer,
+    
 )
 
 
 # logic : current_state -> action -> (next_status, allowed_roles)
 TRANSITIONS = {
-    Appointment.status.REQUESTED: {
-        'confirm': (Appointment.status.CONFIRMED, ['doctor', 'receptionist']),
-        'cancel': (Appointment.status.CANCELLED, ['patient', 'doctor', 'receptionist']),
+    "REQUESTED": {
+        'confirm': ("CONFIRMED", ['doctor', 'receptionist']),
+        'cancel': ("CANCELLED", ['patient', 'doctor', 'receptionist']),
     }, 
-    Appointment.status.CONFIRMED: {
-        'check_in': (Appointment.status.CHECKED_IN, ['receptionist']),
-        'cancel': (Appointment.status.CANCELLED, ['patient', 'doctor', 'receptionist']),
-        'no_show': (Appointment.status.NO_SHOW, ['doctor', 'receptionist']),
+    "CONFIRMED": {
+        'check_in': ("CHECKED_IN", ['receptionist']),
+        'cancel': ("CANCELLED", ['patient', 'doctor', 'receptionist']),
+        'no_show': ("NO_SHOW", ['doctor', 'receptionist']),
     }, 
-    Appointment.status.CHECKED_IN:{
-        'complete': (Appointment.Status.COMPLETED,  ['doctor']),
+    "CHECKED_IN":{
+        'complete': ("COMPLETED",  ['doctor']),
     },
 }
 
@@ -95,8 +96,8 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         user = self.request.user
         qs = (
             Appointment.objects
-            .select_related('patient', 'doctor', 'slot')
-            .prefetch_related('reschedule_history')
+            .select_related("doctor_id", "patient_id", "slot_id")
+            .order_by("-id")
         )
         if user.isPatient:
             return qs.filter(patient=user)
@@ -213,8 +214,8 @@ class AppointmentViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['get'], url_path='history')
     def history(self, request, pk=None):
         appointment = self.get_object()
-        qs = appointment.reschedule_history.select_related(
-            'old_slot', 'new_slot', 'rescheduled_by'
+        qs = appointment.reschedulehistory_set.select_related(
+            'old_slot_id', 'new_slot_id', 'changed_by'
         )
         serializer = RescheduleHistorySerializer(qs, many=True)
         return Response(serializer.data)

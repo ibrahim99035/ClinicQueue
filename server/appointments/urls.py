@@ -1,5 +1,5 @@
 from django.urls import path , include
-from appointments.views import index
+# from appointments.views import index
 from rest_framework.routers import DefaultRouter
 from .views import AppointmentViewSet, WaitingListViewSet
 
