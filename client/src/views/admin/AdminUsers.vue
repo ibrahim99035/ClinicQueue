@@ -73,8 +73,6 @@ const editForm = ref({
   first_name: "",
   last_name: "",
   phone: "",
-  role: "",
-  is_active: "true",
 });
 
 function getUserGroup(user) {
@@ -289,8 +287,6 @@ function startEdit(user) {
     first_name: user.first_name || "",
     last_name: user.last_name || "",
     phone: user.phone || "",
-    role: getRoleValue(user),
-    is_active: user.is_active ? "true" : "false",
   };
 }
 
@@ -302,8 +298,6 @@ function cancelEdit() {
     first_name: "",
     last_name: "",
     phone: "",
-    role: "",
-    is_active: "true",
   };
 }
 
@@ -325,8 +319,6 @@ await updateUser(user.id, {
   first_name: editForm.value.first_name,
   last_name: editForm.value.last_name,
   phone: editForm.value.phone,
-  role: editForm.value.role,
-  is_active: editForm.value.is_active === "true",
 });
 
     successMessage.value = "User updated successfully.";
@@ -527,8 +519,6 @@ onMounted(() => {
             <option value="">Select role</option>
             <option value="receptionist">Receptionist</option>
             <option value="admin">Admin</option>
-            <option value="doctor">Doctor</option>
-            <option value="patient">Patient</option>
           </select>
         </div>
 
@@ -698,26 +688,16 @@ onMounted(() => {
                 </td>
 
                 <td class="px-6 py-4">
-                  <select
-                    v-model="editForm.role"
-                    class="rounded-lg border border-blue-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-100"
+                  <span
+                    class="inline-flex rounded-full px-3 py-1 text-sm font-semibold"
+                    :class="getRoleBadgeClass(user)"
                   >
-                    <option value="">Select role</option>
-                    <option value="admin">Admin</option>
-                    <option value="receptionist">Receptionist</option>
-                    <option value="doctor">Doctor</option>
-                    <option value="patient">Patient</option>
-                  </select>
+                    {{ getPrimaryRoleOfUser(user) }}
+                  </span>
                 </td>
 
                 <td class="px-6 py-4">
-                  <select
-                    v-model="editForm.is_active"
-                    class="rounded-lg border border-blue-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-100"
-                  >
-                    <option value="true">Active</option>
-                    <option value="false">Inactive</option>
-                  </select>
+                  <StatusBadge :status="user.is_active ? 'active' : 'inactive'" />
                 </td>
 
                 <td class="px-6 py-4">

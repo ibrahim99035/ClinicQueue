@@ -88,15 +88,8 @@ function logout() {
           <span class="text-lg">📋</span>
           <span>Appointments</span>
         </RouterLink>
-        
-      </nav>
 
-      <!-- Sidebar Footer -->
-      <div class="absolute bottom-0 left-0 right-0 border-t border-slate-700 bg-slate-900/50 px-4.5 py-4">
-        <p class="text-[11px] font-medium uppercase tracking-wider text-slate-500">
-          Clinic Management System v1.0
-        </p>
-      </div>
+      </nav>
     </aside>
 
     <!-- Main Content -->
