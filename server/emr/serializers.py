@@ -32,91 +32,79 @@ class ConsultationRecordSerializer(serializers.ModelSerializer):
             'prescription_items',
             'requested_tests',
         ]
-        read_only_fields = [
-            'id',
-            'created_by',
-            'created_at',
-            'updated_at',
-        ]
+        
+        read_only_fields = ['id', 'created_by',  'created_at', 'updated_at',]
        
     def validate(self, data):
-        appointment = data.get("appointment_id")
+        appointmentRecord = data.get("appointment_id")
         diagnosis = data.get("diagnosis")
         
         if self.instance is None:
-            if not appointment:
-                raise serializers.ValidationError({
-                    "appointment_id": "Appointment is required."
-                })
+            if not appointmentRecord:
+                raise serializers.ValidationError({"appointment_id": "Appointment is required."})
 
-            if appointment.status != "CHECKED_IN":
-                raise serializers.ValidationError({
-                    "appointment_id": "Consultation can only be created for a CHECKED_IN appointment."
-                })
+            if appointmentRecord.status != "CHECKED_IN":
+                raise serializers.ValidationError({"appointment_id": "Consultation can only be created for a CHECKED_IN appointment."})
 
-            if ConsultationRecord.objects.filter(appointment_id=appointment).exists():
-                raise serializers.ValidationError({ 
-                    "appointment_id":"A consultation record already exists for this appointment."
-                })
+            if ConsultationRecord.objects.filter(appointment_id=appointmentRecord).exists():
+                raise serializers.ValidationError({ "appointment_id":"A consultation record already exists for this appointment."})
 
             if not diagnosis or diagnosis.strip() == "":
-                raise serializers.ValidationError({
-                    "diagnosis": "Diagnosis cannot be empty."
-                })
+                raise serializers.ValidationError({"diagnosis": "Diagnosis cannot be empty."})
 
         return data
 
-    def _create_prescription_items(self, consultation, prescription_items_data):
-        for item_data in prescription_items_data:
+    def _createPrescriptionItems(self, consultationRecord, prescriptionItemsData):
+        for itemData in prescriptionItemsData:
             PrescriptionItem.objects.create(
-                consultation_id=consultation,
-                drug_name=item_data["drug_name"],
-                dose=item_data["dose"],
-                duration=item_data["duration"],
+                consultation_id=consultationRecord,
+                drug_name=itemData["drug_name"],
+                dose=itemData["dose"],
+                duration=itemData["duration"],
             )
 
-    def _create_requested_tests(self, consultation, requested_tests_data):
-        for test_data in requested_tests_data:
+    def _createRequestedTests(self, consultationRecord, requestedTestsData):
+        for testData in requestedTestsData:
             RequestedTest.objects.create(
-                consultation_id=consultation,
-                test_name=test_data["test_name"],
-                notes=test_data.get("notes"),
+                consultation_id=consultationRecord,
+                test_name=testData["test_name"],
+                notes=testData.get("notes"),
             )
 
 
 
     @transaction.atomic
-    def create(self, validated_data):
-        prescription_items_data = validated_data.pop('prescription_items', [])
-        requested_tests_data = validated_data.pop('requested_tests', [])
+    def create(self, validatedData):
+        prescriptionItemsData = validatedData.pop('prescription_items', [])
+        requestedTestsData = validatedData.pop('requested_tests', [])
 
-        consultation = ConsultationRecord.objects.create(
-        appointment_id=validated_data["appointment_id"],
-        created_by=validated_data["created_by"],
-        diagnosis=validated_data["diagnosis"],
-        notes=validated_data["notes"],
-    )
+        consultationRecord = ConsultationRecord.objects.create(
+            appointment_id=validatedData["appointment_id"],
+            created_by=validatedData["created_by"],
+            diagnosis=validatedData["diagnosis"],
+            notes=validatedData["notes"],
+        )
 
-        self._create_prescription_items(consultation, prescription_items_data)
-        self._create_requested_tests(consultation, requested_tests_data)
+        self._createPrescriptionItems(consultationRecord, prescriptionItemsData)
+        self._createRequestedTests(consultationRecord, requestedTestsData)
 
-        return consultation
+        return consultationRecord
     @transaction.atomic
-    def update(self, instance, validated_data):
-        prescription_items_data = validated_data.pop("prescription_items", None)
-        requested_tests_data = validated_data.pop("requested_tests", None)
+    def update(self, instance, validatedData):
+        prescriptionItemsData = validatedData.pop("prescription_items", None)
+        requestedTestsData = validatedData.pop("requested_tests", None)
         
-        instance.diagnosis = validated_data.get('diagnosis', instance.diagnosis)
-        instance.notes = validated_data.get('notes', instance.notes)
+        instance.diagnosis = validatedData.get('diagnosis', instance.diagnosis)
+        instance.notes = validatedData.get('notes', instance.notes)
         instance.save()
         
-        if prescription_items_data is not None:
+        if prescriptionItemsData is not None:
             instance.prescription_items.all().delete()
-            self._create_prescription_items(instance, prescription_items_data)
+            self._createPrescriptionItems(instance, prescriptionItemsData)
 
-        if requested_tests_data is not None:
+        if requestedTestsData is not None:
             instance.requested_tests.all().delete()
-            self._create_requested_tests(instance, requested_tests_data)
+            self._createRequestedTests(instance, requestedTestsData)
 
         return instance
     
