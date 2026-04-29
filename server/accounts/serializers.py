@@ -69,22 +69,21 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         validated_data.pop('password_confirm')
         user_role = validated_data.pop('user_role')
         validated_data.pop('username', None)
-        
-        user = User.create_user(**validated_data)        
-        
+
+        user = User.create_user(**validated_data)
+
         if user_role == 'patient':
             group = Group.objects.get(name='Patients')
             user.groups.add(group)
             PatientProfile.createPatient(user)
-            user.is_active = True
-        
+
         elif user_role == 'doctor':
             group = Group.objects.get(name='Doctors')
             user.groups.add(group)
             DoctorProfile.createDoctor(user)
-            user.is_active = False 
-        
-        user.save()
+            user.is_active = False
+            user.save(update_fields=['is_active'])
+
         return user
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
