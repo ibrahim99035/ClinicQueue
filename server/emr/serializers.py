@@ -54,7 +54,7 @@ class ConsultationRecordSerializer(serializers.ModelSerializer):
 
         return data
 
-    def _createPrescriptionItems(self, consultationRecord, prescriptionItemsData):
+    def createPrescriptionItems(self, consultationRecord, prescriptionItemsData):
         for itemData in prescriptionItemsData:
             PrescriptionItem.objects.create(
                 consultation_id=consultationRecord,
@@ -63,7 +63,7 @@ class ConsultationRecordSerializer(serializers.ModelSerializer):
                 duration=itemData["duration"],
             )
 
-    def _createRequestedTests(self, consultationRecord, requestedTestsData):
+    def createRequestedTests(self, consultationRecord, requestedTestsData):
         for testData in requestedTestsData:
             RequestedTest.objects.create(
                 consultation_id=consultationRecord,
@@ -85,8 +85,8 @@ class ConsultationRecordSerializer(serializers.ModelSerializer):
             notes=validatedData["notes"],
         )
 
-        self._createPrescriptionItems(consultationRecord, prescriptionItemsData)
-        self._createRequestedTests(consultationRecord, requestedTestsData)
+        self.createPrescriptionItems(consultationRecord, prescriptionItemsData)
+        self.createRequestedTests(consultationRecord, requestedTestsData)
 
         return consultationRecord
     @transaction.atomic
@@ -100,11 +100,11 @@ class ConsultationRecordSerializer(serializers.ModelSerializer):
         
         if prescriptionItemsData is not None:
             instance.prescription_items.all().delete()
-            self._createPrescriptionItems(instance, prescriptionItemsData)
+            self.createPrescriptionItems(instance, prescriptionItemsData)
 
         if requestedTestsData is not None:
             instance.requested_tests.all().delete()
-            self._createRequestedTests(instance, requestedTestsData)
+            self.createRequestedTests(instance, requestedTestsData)
 
         return instance
     
