@@ -2,13 +2,7 @@ from django.utils import timezone
 from rest_framework import serializers
 from .models import Appointment, RescheduleHistory, WaitingList
 
-##app -> write (booking)
 class AppointmentWriteSerializer(serializers.ModelSerializer):
-    """
-    Used for POST /appointments/ (booking).
-    Patient is injected from request — not supplied by the caller.
-    Validates the slot is not already taken.
-    """
     class Meta:
         model  = Appointment
         fields = ('slot_id', 'doctor_id', 'reason')
@@ -18,13 +12,10 @@ class AppointmentWriteSerializer(serializers.ModelSerializer):
                 "This slot is already booked."
             )
         return slot
-    def create(self, validated_data):
-        validated_data['patient'] = self.context['request'].user
-        return super().create(validated_data)
+    def create(self, validatedData):
+        validatedData['patient_id'] = self.context['request'].user.patientprofile
+        return super().create(validatedData)
     
-    
-#app -> read(list/detaiul)
-
 class AppointmentReadSerializer(serializers.ModelSerializer):
     patient_name = serializers.SerializerMethodField()
     doctor_name = serializers.SerializerMethodField()
@@ -45,22 +36,16 @@ class AppointmentReadSerializer(serializers.ModelSerializer):
 
     def get_patient_name(self, obj):
         user = obj.patient_id.user
-
-        full_name = (user.first_name + " " + user.last_name).strip()
-
-        if full_name:
-            return full_name
-
+        fullName = (user.first_name + " " + user.last_name).strip()
+        if fullName:
+            return fullName
         return user.email
     
     def get_doctor_name(self, obj):
         user = obj.doctor_id.user
-
-        full_name = (user.first_name + " " + user.last_name).strip()
-
-        if full_name:
-            return full_name
-
+        fullName = (user.first_name + " " + user.last_name).strip()
+        if fullName:
+            return fullName
         return user.email
     
     def get_waiting_minutes(self, obj):
@@ -69,77 +54,94 @@ class AppointmentReadSerializer(serializers.ModelSerializer):
             return max(0, int(delta.total_seconds() // 60))
         return None
     
-## waiting list
-##write
 class WaitingListWriteSerializer(serializers.ModelSerializer):
     class Meta:
-        model  = WaitingList
-        fields = ('doctor', 'date', 'note')
+        model = WaitingList
+        fields = ('doctor_id', 'preferred_date')
     
     def validate(self, attrs):
         patient = self.context['request'].user
         if WaitingList.objects.filter(
-            patient=patient,
-            doctor=attrs['doctor'],
-            date=attrs['date'],
+            patient_id__user=patient,
+            doctor_id=attrs['doctor_id'],
+            preferred_date=attrs['preferred_date'],
         ).exists():
             raise serializers.ValidationError(
                 "You are already on the waiting list for this doctor on that date."
             )
         return attrs
     
-    def create(self, validated_data):
-        validated_data['patient'] = self.context['request'].user
-        return super().create(validated_data)
+    def create(self, validatedData):
+        validatedData['patient_id'] = self.context['request'].user.patientprofile
+        return super().create(validatedData)
     
-##read
 class WaitingListReadSerializer(serializers.ModelSerializer):
     doctor_name = serializers.SerializerMethodField()
     class Meta:
-        model  = WaitingList
-        fields = ('id', 'doctor', 'doctor_name', 'date', 'note', 'joined_at')
+        model = WaitingList
+        fields = ('id', 'doctor_id', 'doctor_name', 'preferred_date', 'created_at')
         read_only_fields = fields
-    # def get_doctor_name(self, obj):
-    #     user = obj.doctor_id.user
-
-    #     full_name = (user.first_name + " " + user.last_name).strip()
-
-    #     if full_name:
-    #         return full_name
-
-    #     return user.email
+    
+    def get_doctor_name(self, obj):
+        user = obj.doctor_id.user
+        fullName = (user.first_name + " " + user.last_name).strip()
+        if fullName:
+            return fullName
+        return user.email
     
     
 class RescheduleHistorySerializer(serializers.ModelSerializer):
-        old_slot_start = serializers.DateTimeField(
+    oldSlotStart = serializers.DateTimeField(
         source='old_slot_id.start_datetime',
         read_only=True
     )
-        new_slot_start = serializers.DateTimeField(
+    newSlotStart = serializers.DateTimeField(
         source='new_slot_id.start_datetime',
         read_only=True
     )
-        changed_by_name = serializers.SerializerMethodField()
+    changedByName = serializers.SerializerMethodField()
 
-        class Meta:
-            model = RescheduleHistory
-            fields = (
-                'id',
-                'old_slot_id',
-                'new_slot_id',
-                'old_slot_start',
-                'new_slot_start',
-                'changed_by',
-                'changed_by_name',
-            )
-            read_only_fields = fields
+    class Meta:
+        model = RescheduleHistory
+        fields = (
+            'id',
+            'old_slot_id',
+            'new_slot_id',
+            'oldSlotStart',
+            'newSlotStart',
+            'changed_by',
+            'changedByName',
+        )
+        read_only_fields = fields
 
-        def get_changed_by_name(self, obj):
-            user = obj.changed_by
+    def get_changed_by_name(self, obj):
+        user = obj.changed_by
+        fullName = (user.first_name + " " + user.last_name).strip()
+        if fullName:
+            return fullName
+        return user.email
 
-            full_name = (user.first_name + " " + user.last_name).strip()
 
-            if full_name:
-                return full_name
+class RescheduleSerializer(serializers.Serializer):
+    new_slot = serializers.IntegerField()
+    reason = serializers.CharField(required=False, allow_blank=True)
 
-            return user.email
+
+class QueueSerializer(serializers.ModelSerializer):
+    patient_name = serializers.SerializerMethodField()
+    doctor_name = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Appointment
+        fields = ('id', 'patient_id', 'patient_name', 'doctor_id', 'doctor_name', 'checked_in_at')
+        read_only_fields = fields
+    
+    def get_patient_name(self, obj):
+        user = obj.patient_id.user
+        fullName = (user.first_name + " " + user.last_name).strip()
+        return fullName if fullName else user.email
+    
+    def get_doctor_name(self, obj):
+        user = obj.doctor_id.user
+        fullName = (user.first_name + " " + user.last_name).strip()
+        return fullName if fullName else user.email

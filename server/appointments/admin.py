@@ -1,6 +1,5 @@
 from django.contrib import admin
 from appointments.models import Appointment, RescheduleHistory, WaitingList, Payment
-# Register your models here.
 
 admin.site.register(Appointment)
 class AppointmentAdmin(admin.ModelAdmin):

@@ -31,6 +31,7 @@ class Appointment(models.Model):
     confirmed_at = models.DateTimeField(null=True, blank=True)
     checked_in_at = models.DateTimeField(null=True, blank=True)
     completed_at = models.DateTimeField(null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 class RescheduleHistory(models.Model):
     appointment_id = models.ForeignKey(Appointment, on_delete=models.CASCADE)
