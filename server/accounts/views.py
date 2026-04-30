@@ -135,7 +135,7 @@ class DoctorProfileView(APIView):
             return Response({"detail": "Doctor profile not found."}, status=status.HTTP_404_NOT_FOUND)
 
 class UserListView(ModelViewSet):
-    queryset = User.objects.all()
+    queryset = User.objects.select_related('patient_profile', 'doctor_profile').prefetch_related('groups')
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, IsAdmin]
 

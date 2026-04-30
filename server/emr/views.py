@@ -21,6 +21,8 @@ class IsReceptionistUser(BasePermission):
         
         if request.user.isReceptionist:
             raise PermissionDenied("Receptionists cannot access medical records.")
+        
+        return True
 
 class CanViewConsultationRecord(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
@@ -51,11 +53,12 @@ class CanUpdateConsultationRecord(BasePermission):
      
 class CanCreateViewOfConsultationRecord(APIView):
     def post(self, request):
+        if not IsAuthenticated().has_permission(request, self):
+            raise NotAuthenticated("Authentication is required.")
+        
         if not IsDoctorUser().has_permission(request, self):
             raise PermissionDenied("You aren't allowed to create a consultation")
 
-        if not IsAuthenticated().has_permission(request, self):
-            raise NotAuthenticated("Authentication is required.")
         
         serializer = ConsultationRecordSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -80,17 +83,26 @@ class DoctorPatientViewConsultationRecord(APIView):
         if request.user.isReceptionist:
             raise PermissionDenied("Receptionists cannot access medical records.")
 
-        consultationRecord = get_object_or_404(ConsultationRecord, appointment_id=appointment_id)
-        
-        canView = CanViewConsultationRecord().has_object_permission(request,self,consultationRecord)
-        
-        if not canView:
+        if request.user.isDoctor:
+            consultationRecord = get_object_or_404(
+                ConsultationRecord,
+                appointment_id=appointment_id,
+                appointment_id__doctor_id__user=request.user
+            )
+
+        elif request.user.isPatient:
+            consultationRecord = get_object_or_404(
+                ConsultationRecord,
+                appointment_id=appointment_id,
+                appointment_id__patient_id__user=request.user
+            )
+
+        else:
             raise PermissionDenied("You do not have permission to view this consultation.")
 
         serializer = ConsultationRecordSerializer(consultationRecord)
         
-        return Response(serializer.data, status=status.HTTP_200_OK)
-        
+        return Response(serializer.data, status=status.HTTP_200_OK)     
         
 class ConsultationRecordUpdateView(APIView):
     def get(self, request, pk):

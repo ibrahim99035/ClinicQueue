@@ -38,7 +38,18 @@ class ConsultationRecordSerializer(serializers.ModelSerializer):
     def validate(self, data):
         appointmentRecord = data.get("appointment_id")
         diagnosis = data.get("diagnosis")
-        
+        if self.instance is not None:
+            if "appointment_id" in data:
+                raise serializers.validationError({
+                    "appointment_id": "Appointment cannot be changed after consultation creation."
+                })
+                
+        if "diagnosis" in data:
+            if not diagnosis or diagnosis.strip() == "":
+                raise serializers.ValidationError({
+                    "diagnosis": "Diagnosis cannot be empty."
+                })
+ 
         if self.instance is None:
             if not appointmentRecord:
                 raise serializers.ValidationError({"appointment_id": "Appointment is required."})

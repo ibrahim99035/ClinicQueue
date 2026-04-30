@@ -6,14 +6,17 @@ class AppointmentWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model  = Appointment
         fields = ('slot_id', 'doctor_id', 'reason')
-    def validate_slot(self, slot):
+
+    def validate_slot_id(self, slot):
         if hasattr(slot, 'appointment'):
             raise serializers.ValidationError(
                 "This slot is already booked."
             )
         return slot
+
     def create(self, validatedData):
-        validatedData['patient_id'] = self.context['request'].user.patientprofile
+        validatedData['patient_id'] = self.context['request'].user.patient_profile
+        validatedData['status'] = 'REQUESTED'
         return super().create(validatedData)
     
 class AppointmentReadSerializer(serializers.ModelSerializer):
