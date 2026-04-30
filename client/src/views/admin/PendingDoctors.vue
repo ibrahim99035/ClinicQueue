@@ -106,17 +106,19 @@ function getDoctorUser(doctorProfile) {
         return null;
     }
     
-    if (typeof user === 'object' && user.id) {
+    // If user is already an object with user data
+    if (typeof user === 'object' && (user.id || user.first_name || user.email)) {
         return user;
     }
     
+    // If user is just an ID number, try to look it up
     if (typeof user === 'number') {
         return getUserById(user);
     }
-
+    
     if (typeof user === "string") {
-    return getUserById(Number(user));
-  }
+        return getUserById(Number(user));
+    }
     
     return null;
 }
@@ -132,7 +134,15 @@ function getDoctorName(doctorProfile) {
     const lastName = user.last_name || "";
     const fullName = (firstName + " " + lastName).trim();
     
-    return fullName || "No name";
+    if (fullName) {
+        return fullName;
+    }
+    
+    if (user.email) {
+        return user.email;
+    }
+    
+    return "Unknown doctor";
 }
 
 function getDoctorEmail(doctorProfile) {
@@ -145,6 +155,15 @@ function getDoctorPhone(doctorProfile) {
     const user = getDoctorUser(doctorProfile);
     
     return user && user.phone ? user.phone : "-";
+}
+
+function getDoctorSpecialization(doctorProfile) {
+    if (!doctorProfile || !doctorProfile.specialization) {
+        return "—";
+    }
+    
+    const spec = String(doctorProfile.specialization).trim();
+    return spec || "—";
 }
 
 async function loadPendingDoctors() {
@@ -256,24 +275,6 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- Messages -->
-    <transition name="fade">
-      <div
-        v-if="errorMessage"
-        class="rounded-2xl border border-red-200 bg-red-50/80 px-6 py-4 text-sm font-semibold text-red-700 shadow-sm backdrop-blur"
-      >
-        ⚠️ {{ errorMessage }}
-      </div>
-    </transition>
-
-    <transition name="fade">
-      <div
-        v-if="successMessage"
-        class="rounded-2xl border border-green-200 bg-green-50/80 px-6 py-4 text-sm font-semibold text-green-700 shadow-sm backdrop-blur"
-      >
-        ✅ {{ successMessage }}
-      </div>
-    </transition>
 
     <!-- Summary Cards -->
     <div class="grid gap-6 md:grid-cols-3">
@@ -333,7 +334,7 @@ onMounted(() => {
 
       <!-- Loading -->
       <div v-if="loading" class="p-6">
-        <SkeletonCard type="row" count="3" />
+        <SkeletonCard type="row" :count="3" />
       </div>
 
       <!-- Empty State -->
@@ -398,7 +399,7 @@ onMounted(() => {
 
               <td class="px-6 py-5">
                 <span class="font-medium text-gray-800">
-                  {{ doctor.specialization || "—" }}
+                  {{ getDoctorSpecialization(doctor) }}
                 </span>
               </td>
 
