@@ -7,6 +7,7 @@ import AdminUsers from "./views/admin/AdminUsers.vue";
 import PendingDoctors from "./views/admin/PendingDoctors.vue";
 import AdminScheduling from "./views/admin/AdminScheduling.vue";
 import AdminAppointments from "./views/admin/AdminAppointments.vue";
+import AdminAnalytics from "./views/admin/AdminAnalytics.vue";
 
 import ConsultationCreate from "./views/emr/ConsultationCreate.vue";
 import ConsultationDetails from "./views/emr/ConsultationDetails.vue";
@@ -56,6 +57,11 @@ const routes = [
         path: "appointments",
         name: "AdminAppointments",
         component: AdminAppointments,
+      },
+      {
+        path: "analytics",
+        name: "AdminAnalytics",
+        component: AdminAnalytics,
       },
     ],
   },

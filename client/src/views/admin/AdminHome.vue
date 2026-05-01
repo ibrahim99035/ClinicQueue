@@ -183,8 +183,8 @@ function logout() {
 
     <!-- Loading Skeleton -->
     <div v-if="loading" class="space-y-6">
-      <SkeletonCard type="card" count="2" />
-      <SkeletonCard type="card" count="3" />
+      <SkeletonCard type="card" :count="2" />
+      <SkeletonCard type="card" :count="3" />
     </div>
 
     <!-- Stats Grid -->
@@ -221,7 +221,7 @@ function logout() {
         Quick Access
       </h3>
       
-      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <RouterLink
           to="/admin/users"
           class="group flex items-center gap-4 overflow-hidden rounded-2xl border border-white/50 bg-white/80 p-6 shadow-sm backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:bg-white"
@@ -230,8 +230,8 @@ function logout() {
             👥
           </div>
           <div>
-            <h4 class="font-bold text-gray-900">Users Management</h4>
-            <p class="text-sm text-gray-600">Manage all system users</p>
+            <h4 class="font-bold text-gray-900">Users</h4>
+            <p class="text-sm text-gray-600">Manage users</p>
           </div>
           <span class="ml-auto text-2xl transition-transform duration-300 group-hover:translate-x-2">→</span>
         </RouterLink>
@@ -245,7 +245,35 @@ function logout() {
           </div>
           <div>
             <h4 class="font-bold text-gray-900">Doctor Approval</h4>
-            <p class="text-sm text-gray-600">Review pending requests</p>
+            <p class="text-sm text-gray-600">Pending requests</p>
+          </div>
+          <span class="ml-auto text-2xl transition-transform duration-300 group-hover:translate-x-2">→</span>
+        </RouterLink>
+
+        <RouterLink
+          to="/admin/scheduling"
+          class="group flex items-center gap-4 overflow-hidden rounded-2xl border border-white/50 bg-white/80 p-6 shadow-sm backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:bg-white"
+        >
+          <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 text-xl transition-transform duration-300 group-hover:scale-110">
+            📅
+          </div>
+          <div>
+            <h4 class="font-bold text-gray-900">Scheduling</h4>
+            <p class="text-sm text-gray-600">Manage schedules</p>
+          </div>
+          <span class="ml-auto text-2xl transition-transform duration-300 group-hover:translate-x-2">→</span>
+        </RouterLink>
+
+        <RouterLink
+          to="/admin/appointments"
+          class="group flex items-center gap-4 overflow-hidden rounded-2xl border border-white/50 bg-white/80 p-6 shadow-sm backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:shadow-md hover:bg-white"
+        >
+          <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-cyan-100 text-xl transition-transform duration-300 group-hover:scale-110">
+            📋
+          </div>
+          <div>
+            <h4 class="font-bold text-gray-900">Appointments</h4>
+            <p class="text-sm text-gray-600">View & manage</p>
           </div>
           <span class="ml-auto text-2xl transition-transform duration-300 group-hover:translate-x-2">→</span>
         </RouterLink>

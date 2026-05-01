@@ -89,6 +89,17 @@ function logout() {
           <span>Appointments</span>
         </RouterLink>
 
+        <RouterLink
+        to="/admin/analytics"
+        class="group relative overflow-hidden rounded-lg px-4 py-3 font-medium text-slate-300 transition-all duration-200 hover:bg-slate-700/50 hover:text-white"
+        exact-active-class="bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/20"
+      >
+        <span class="flex items-center gap-3">
+          <span class="text-lg">📈</span>
+          <span>Analytics</span>
+        </span>
+      </RouterLink>
+
       </nav>
     </aside>
 
