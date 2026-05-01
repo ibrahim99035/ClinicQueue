@@ -30,15 +30,22 @@ const response = await loginUser({
 });
 
 const data = response.data;
-const roles = data.roles || [];
-if (!roles.includes("Admins")) {
-  clearAuthData();
-  errorMessage.value = "Access denied. This dashboard is for admins only.";
-  return;
-}
 
+const roles = data.roles || [];
 saveAuthData(data);
-router.push("/admin");
+
+if (roles.includes("Admins")) {
+  router.push("/admin");
+} else if (roles.includes("Doctors")) {
+  router.push("/doctor");
+} else if (roles.includes("Receptionists")) {
+  router.push("/receptionist");
+} else if (roles.includes("Patients")) {
+  router.push("/patient");
+} else {
+  clearAuthData();
+  errorMessage.value = "No valid role assigned to this account.";
+}
 } catch(error) {
     clearAuthData();
     errorMessage.value = "Login failed. Please check your email and password.";
@@ -55,7 +62,7 @@ router.push("/admin");
   <div class="min-h-screen flex items-center justify-center bg-gray-100 p-5">
     <div class="w-full max-w-[420px] bg-white rounded-2xl p-8 shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
       <h1 class="m-0 text-3xl font-bold text-gray-800">
-        Admin Login
+        Clinic Login
       </h1>
 
       <p class="mt-2 mb-6 text-gray-500">

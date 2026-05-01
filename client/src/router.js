@@ -13,7 +13,12 @@ import ConsultationCreate from "./views/emr/ConsultationCreate.vue";
 import ConsultationDetails from "./views/emr/ConsultationDetails.vue";
 import ConsultationEdit from "./views/emr/ConsultationEdit.vue";
 
-import { isAdminUser, clearAuthData } from "./api/auth";
+import {
+  getAccessToken,
+  clearAuthData,
+  hasAnyRole,
+  getDefaultRouteByRole,
+} from "./api/auth";
 
 const routes = [
   {
@@ -24,14 +29,20 @@ const routes = [
     path: "/login",
     name: "Login",
     component: Login,
+    meta: {
+      guestOnly: true,
+    },
   },
+
+  //Admin routes
   {
     path: "/admin",
     name: "AdminLayout",
     component: AdminLayout,
     meta: {
-      requireAdmin: true,
-    },
+    requiresAuth: true,
+    roles: ["Admins"],
+  },
     children: [
       {
         path: "",
@@ -65,22 +76,40 @@ const routes = [
       },
     ],
   },
+
+  //EMR routes
   {
     path: "/emr/appointments/:appointmentId/consultation/create",
     name: "ConsultationCreate",
     component: ConsultationCreate,
+    meta: {
+      requiresAuth: true,
+      roles: ["Doctors"],
+    },
   },
   {
-    path: '/emr/appointments/:appointmentId/consultation',
-    name: 'ConsultationDetails',
-    component: ConsultationDetails
+    path: "/emr/appointments/:appointmentId/consultation",
+    name: "ConsultationDetails",
+    component: ConsultationDetails,
+    meta: {
+      requiresAuth: true,
+      roles: ["Doctors", "Patients"],
+    },
   },
   {
-    path: '/emr/consultations/:consultationId/edit',
-    name: 'ConsultationEdit',
-    component: ConsultationEdit
-  }
-]
+    path: "/emr/consultations/:consultationId/edit",
+    name: "ConsultationEdit",
+    component: ConsultationEdit,
+    meta: {
+      requiresAuth: true,
+      roles: ["Doctors"],
+    },
+  },
+  {
+    path: "/:pathMatch(.*)*",
+    redirect: "/login",
+  },
+];
 
 const router = createRouter({
   history: createWebHistory(),
@@ -88,20 +117,48 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  const accessToken =localStorage.getItem("access");
-  const isAdminRoute = to.path.startsWith("/admin");
+  const accessToken = getAccessToken();
 
-    if (isAdminRoute && (!accessToken || !isAdminUser())) {
+  const isGuestOnlyRoute = to.meta.guestOnly === true;
+  const requiresAuth = to.meta.requiresAuth === true;
+
+  let allowedRoles = [];
+
+  if (to.meta.roles) {
+    allowedRoles = to.meta.roles;
+  }
+
+  if (isGuestOnlyRoute && accessToken) {
+    const defaultRoute = getDefaultRouteByRole();
+
+    next(defaultRoute);
+    return;
+  }
+
+  if (requiresAuth && !accessToken) {
     clearAuthData();
+
     next("/login");
     return;
   }
 
-  if (to.path === "/login" && accessToken && isAdminUser()) {
-    next("/admin");
-    return;
-  }
+  if (requiresAuth && allowedRoles.length > 0) {
+    const userCanEnterThisRoute = hasAnyRole(allowedRoles);
 
+    if (!userCanEnterThisRoute) {
+      const defaultRoute = getDefaultRouteByRole();
+
+      if (defaultRoute === "/login") {
+        clearAuthData();
+
+        next("/login");
+        return;
+      }
+
+      next(defaultRoute);
+      return;
+    }
+  }
 
   next();
 });
