@@ -1,4 +1,4 @@
-import api from "./http";
+import api from "./client";
 
 function normalizeListResponse(response) {
     const data = response.data;
@@ -24,6 +24,11 @@ export async function createWeeklySchedule(payload) {
     return response.data;
 }
 
+export async function updateWeeklySchedule(scheduleId, payload) {
+  const response = await api.put(`/scheduling/weekly-schedule/${scheduleId}/`, payload);
+  return response.data;
+}
+
 
 export async function deleteWeeklySchedule(scheduleId) {
   const response = await api.delete(`/scheduling/weekly-schedule/${scheduleId}/`);
@@ -37,6 +42,11 @@ export async function getScheduleExceptions() {
 
 export async function createScheduleException(payload) {
   const response = await api.post("/scheduling/exceptions/", payload);
+  return response.data;
+}
+
+export async function updateScheduleException(exceptionId, payload) {
+  const response = await api.put(`/scheduling/exceptions/${exceptionId}/`, payload);
   return response.data;
 }
 

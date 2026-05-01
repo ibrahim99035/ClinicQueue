@@ -1,20 +1,40 @@
-import api from "./http";
+import api from "./client";
 
-export function createConsultation(payload){
-    return api.post("/emr/consultations/", payload);
+function normalizeListResponse(response) {
+  const data = response.data;
+
+  if (Array.isArray(data)) {
+    return data;
+  }
+
+  if (Array.isArray(data.results)) {
+    return data.results;
+  }
+
+  return [];
 }
 
-export function updateConsultation(consultationId, payload) {
-  return api.put(`/emr/consultations/${consultationId}/`, payload);
+export async function listConsultations(params) {
+  const response = await api.get("/emr/consultations/", { params });
+  return normalizeListResponse(response);
 }
 
-export function getConsultationByAppointment(appointmentId){
-    return api.get(`/emr/consultations/by-appointment/${appointmentId}`)
+export async function createConsultation(payload) {
+  const response = await api.post("/emr/consultations/", payload);
+  return response.data;
 }
 
-export function getConsultationById(consultationId) {
-  // TODO: Backend needs to support GET /emr/consultations/{id}/ endpoint
-  // Currently only PUT is supported on this route. Add a GET method
-  // to retrieve a single consultation by its ID for editing purposes.
-  return api.get(`/emr/consultations/${consultationId}/`);
+export async function updateConsultation(consultationId, payload) {
+  const response = await api.put(`/emr/consultations/${consultationId}/`, payload);
+  return response.data;
+}
+
+export async function getConsultationByAppointment(appointmentId) {
+  const response = await api.get(`/emr/consultations/by-appointment/${appointmentId}/`);
+  return response.data;
+}
+
+export async function getConsultationById(consultationId) {
+  const response = await api.get(`/emr/consultations/${consultationId}/`);
+  return response.data;
 }

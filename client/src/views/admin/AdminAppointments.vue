@@ -1,6 +1,8 @@
 <script setup>
 import { computed, onMounted, ref } from "vue";
 import { getAdminUsers } from "../../api/admin";
+import BaseTable from "../../components/ui/BaseTable.vue";
+import BaseButton from "../../components/ui/BaseButton.vue";
 import {
   getAppointments,
   getAppointmentDetails,
@@ -48,76 +50,22 @@ function formatApiError(error) {
 }
 
 function getUserGroups(user) {
-  return user.groups || [];
+  return user && user.groups ? user.groups : [];
 }
-
-function formatUserName(user) {
-  const firstName = user.first_name || "";
-  const lastName = user.last_name || "";
-
-  const fullName = (firstName + " " + lastName).trim();
-
-  if (fullName) {
-    return fullName;
-  }
-
-  if (user.email) {
-    return user.email;
-  }
-
-  return "Unknown user";
-}
-
-function getDoctorProfile(user) {
-  return user.doctor_profile || null;
-}
-
-function getPatientProfile(user) {
-  return user.patient_profile || null;
-}
-
-const doctors = computed(() => {
-  const doctorsList = [];
-
-  users.value.forEach((user) => {
-    const groups = getUserGroups(user);
-
-    if (!groups.includes("Doctors")) {
-      return;
-    }
-
-    const profile = getDoctorProfile(user);
-
-    if (!profile) {
-      return;
-    }
-
-    doctorsList.push({
-      id: profile.id,
-      name: formatUserName(user),
-    });
-  });
-
-  return doctorsList;
-});
 
 const patients = computed(() => {
-  const patientsList = [];
-  users.value.forEach((user) => {
-    const groups = getUserGroups(user);
-    if (!groups.includes("Patients")) {
-      return;
+  const map = new Map();
+  appointments.value.forEach((a) => {
+    const id = a.patient_id || (a.patient && a.patient.id);
+    const name = a.patient_name || (a.patient && (a.patient.full_name || a.patient.name));
+    if (id) {
+      if (!map.has(id)) {
+        map.set(id, { id, name: name || `Patient #${id}` });
+      }
     }
-    const profile = getPatientProfile(user);
-    if (!profile) {
-      return;
-    }
-    patientsList.push({
-      id: profile.id,
-      name: formatUserName(user),
-    });
   });
-  return patientsList;
+
+  return Array.from(map.values());
 });
 
 const totalAppointments = computed(() => appointments.value.length);
@@ -552,126 +500,45 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- Appointment Table -->
-      <div class="overflow-hidden rounded-3xl border border-white/70 bg-white/90 shadow-sm backdrop-blur">
-        <div class="flex flex-col gap-2 border-b border-slate-200 px-6 py-5 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h3 class="text-xl font-bold text-slate-900">
-              Appointment List
-            </h3>
-
-            <p class="mt-1 text-sm text-slate-500">
-              Filtered clinic appointment records.
-            </p>
+      <BaseTable :items="appointments" :loading="loading" title="Appointment List" table-class="min-w-[1000px]">
+        <template #toolbar>
+          <div class="flex items-center gap-4">
+            <div>
+              <h3 class="text-xl font-bold text-slate-900">Appointment List</h3>
+              <p class="mt-1 text-sm text-slate-500">Filtered clinic appointment records.</p>
+            </div>
+            <div class="ml-auto">
+              <span class="w-fit rounded-full bg-blue-100 px-4 py-2 text-sm font-bold text-blue-700">{{ appointments.length }} result(s)</span>
+            </div>
           </div>
+        </template>
 
-          <span class="w-fit rounded-full bg-blue-100 px-4 py-2 text-sm font-bold text-blue-700">
-            {{ appointments.length }} result(s)
-          </span>
-        </div>
+        <template #thead>
+          <th class="border-b border-slate-200 px-6 py-4 font-bold">ID</th>
+          <th class="border-b border-slate-200 px-6 py-4 font-bold">Patient</th>
+          <th class="border-b border-slate-200 px-6 py-4 font-bold">Doctor</th>
+          <th class="border-b border-slate-200 px-6 py-4 font-bold">Date / Time</th>
+          <th class="border-b border-slate-200 px-6 py-4 font-bold">Status</th>
+          <th class="border-b border-slate-200 px-6 py-4 font-bold">Reason</th>
+          <th class="w-32 border-b border-slate-200 px-6 py-4 font-bold">Action</th>
+        </template>
 
-        <div
-          v-if="loading"
-          class="p-6 text-sm text-slate-500"
-        >
-          Loading appointments...
-        </div>
+        <template #tbody="{ items }">
+          <tr v-for="appointment in items" :key="appointment.id" class="text-sm text-slate-900 transition hover:bg-blue-50/60">
+            <td class="border-b border-slate-100 px-6 py-4 font-bold text-slate-700">#{{ appointment.id }}</td>
+            <td class="border-b border-slate-100 px-6 py-4">{{ getPatientName(appointment) }}</td>
+            <td class="border-b border-slate-100 px-6 py-4">{{ getDoctorName(appointment) }}</td>
+            <td class="border-b border-slate-100 px-6 py-4">{{ formatDateTime(getAppointmentStart(appointment)) }}</td>
+            <td class="border-b border-slate-100 px-6 py-4"><span class="inline-flex rounded-full px-3 py-1 text-xs font-bold" :class="getStatusBadgeClass(appointment.status)">{{ formatStatus(appointment.status) }}</span></td>
+            <td class="border-b border-slate-100 px-6 py-4"><span class="inline-block max-w-[220px] truncate text-slate-600">{{ appointment.reason || '-' }}</span></td>
+            <td class="border-b border-slate-100 px-6 py-4"><BaseButton size="sm" @click="openAppointmentDetails(appointment)">Details</BaseButton></td>
+          </tr>
+        </template>
 
-        <div
-          v-else-if="appointments.length === 0"
-          class="p-6 text-sm text-slate-500"
-        >
-          No appointments found.
-        </div>
-
-        <div
-          v-else
-          class="overflow-x-auto"
-        >
-          <table class="w-full min-w-[1000px] border-collapse text-left">
-            <thead>
-              <tr class="bg-slate-50 text-sm text-slate-600">
-                <th class="border-b border-slate-200 px-6 py-4 font-bold">
-                  ID
-                </th>
-
-                <th class="border-b border-slate-200 px-6 py-4 font-bold">
-                  Patient
-                </th>
-
-                <th class="border-b border-slate-200 px-6 py-4 font-bold">
-                  Doctor
-                </th>
-
-                <th class="border-b border-slate-200 px-6 py-4 font-bold">
-                  Date / Time
-                </th>
-
-                <th class="border-b border-slate-200 px-6 py-4 font-bold">
-                  Status
-                </th>
-
-                <th class="border-b border-slate-200 px-6 py-4 font-bold">
-                  Reason
-                </th>
-
-                <th class="w-32 border-b border-slate-200 px-6 py-4 font-bold">
-                  Action
-                </th>
-              </tr>
-            </thead>
-
-            <tbody>
-              <tr
-                v-for="appointment in appointments"
-                :key="appointment.id"
-                class="text-sm text-slate-900 transition hover:bg-blue-50/60"
-              >
-                <td class="border-b border-slate-100 px-6 py-4 font-bold text-slate-700">
-                  #{{ appointment.id }}
-                </td>
-
-                <td class="border-b border-slate-100 px-6 py-4">
-                  {{ getPatientName(appointment) }}
-                </td>
-
-                <td class="border-b border-slate-100 px-6 py-4">
-                  {{ getDoctorName(appointment) }}
-                </td>
-
-                <td class="border-b border-slate-100 px-6 py-4">
-                  {{ formatDateTime(getAppointmentStart(appointment)) }}
-                </td>
-
-                <td class="border-b border-slate-100 px-6 py-4">
-                  <span
-                    class="inline-flex rounded-full px-3 py-1 text-xs font-bold"
-                    :class="getStatusBadgeClass(appointment.status)"
-                  >
-                    {{ formatStatus(appointment.status) }}
-                  </span>
-                </td>
-
-                <td class="border-b border-slate-100 px-6 py-4">
-                  <span class="inline-block max-w-[220px] truncate text-slate-600">
-                    {{ appointment.reason || "-" }}
-                  </span>
-                </td>
-
-                <td class="border-b border-slate-100 px-6 py-4">
-                  <button
-                    type="button"
-                    @click="openAppointmentDetails(appointment)"
-                    class="rounded-xl bg-blue-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-blue-700"
-                  >
-                    Details
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+        <template #pagination>
+          <div class="text-sm font-semibold text-gray-700">Showing {{ appointments.length }} appointment(s)</div>
+        </template>
+      </BaseTable>
 
       <!-- Loading Details -->
       <div

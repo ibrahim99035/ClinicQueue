@@ -5,6 +5,11 @@ import PageHeader from "../../components/PageHeader.vue";
 import StatusBadge from "../../components/StatusBadge.vue";
 import SkeletonCard from "../../components/SkeletonCard.vue";
 import EmptyState from "../../components/EmptyState.vue";
+import BaseButton from "../../components/ui/BaseButton.vue";
+import BaseModal from "../../components/ui/BaseModal.vue";
+import BasePagination from "../../components/ui/BasePagination.vue";
+import BaseTable from "../../components/ui/BaseTable.vue";
+import { normalizeApiError } from "../../composables/useApiError";
 
 const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
 const users = ref([]);
@@ -117,45 +122,6 @@ function getStatusBadgeClass(user) {
   }
 
   return "bg-red-100 text-red-700";
-}
-
-function ApiErrorResponseFromBackend(error) {
-    let data = null;
-    if(error.response) {
-        data = error.response.data;
-    }
-  if (!data) {
-    return "Something went wrong. Please try again.";
-  }
-  if (data.detail) {
-    return data.detail;
-  }
-
-  if (data.email) {
-    return data.email[0];
-  }
-
-  if (data.password) {
-    return data.password[0];
-  }
-
-  if (data.first_name) {
-    return data.first_name[0];
-  }
-
-  if (data.last_name) {
-    return data.last_name[0];
-  }
-
-  if (data.phone) {
-    return data.phone[0];
-  }
-
-  if (data.role) {
-    return data.role[0];
-  }
-
-  return "Please check the form data.";
 }
 
 function formatName(user) {
@@ -272,7 +238,7 @@ await createStaffUser({
     showCreateForm.value = false;
     await loadUsers();
   } catch (error) {
-    errorMessage.value = ApiErrorResponseFromBackend(error);
+    errorMessage.value = normalizeApiError(error);
     showToast(errorMessage.value, "error");
   } finally {
     saving.value = false;
@@ -326,7 +292,7 @@ await updateUser(user.id, {
     cancelEdit();
     await loadUsers();
   } catch (error) {
-    errorMessage.value = ApiErrorResponseFromBackend(error);
+    errorMessage.value = normalizeApiError(error);
     showToast(errorMessage.value, "error");
   } finally {
     saving.value = false;
@@ -359,7 +325,7 @@ async function handleDeleteUser(user) {
     showToast(successMessage.value, "success");
     await loadUsers();
   } catch (error) {
-    errorMessage.value = ApiErrorResponseFromBackend(error);
+    errorMessage.value = normalizeApiError(error);
     showToast(errorMessage.value, "error");
   } finally {
     deletingId.value = null;
@@ -435,23 +401,10 @@ onMounted(() => {
       </div>
     </transition>
 
-    <!-- Create Form -->
-    <div
-      v-if="showCreateForm"
-      class="space-y-4 rounded-2xl border border-white/50 bg-white/80 p-6 shadow-sm backdrop-blur transition-all duration-300"
-    >
-      <h3 class="text-lg font-bold text-gray-900">
-        ➕ Create New Staff User
-      </h3>
-
-      <form
-        class="grid gap-4 md:grid-cols-2 lg:grid-cols-3"
-        @submit.prevent="submitCreateUser"
-      >
+    <BaseModal v-model="showCreateForm" title="Create New Staff User">
+      <form class="grid gap-4 md:grid-cols-2" @submit.prevent="submitCreateUser">
         <div class="flex flex-col gap-2">
-          <label class="text-sm font-semibold text-gray-700">
-            First Name *
-          </label>
+          <label class="text-sm font-semibold text-gray-700">First Name *</label>
           <input
             v-model="createForm.first_name"
             type="text"
@@ -461,9 +414,7 @@ onMounted(() => {
         </div>
 
         <div class="flex flex-col gap-2">
-          <label class="text-sm font-semibold text-gray-700">
-            Last Name *
-          </label>
+          <label class="text-sm font-semibold text-gray-700">Last Name *</label>
           <input
             v-model="createForm.last_name"
             type="text"
@@ -473,9 +424,7 @@ onMounted(() => {
         </div>
 
         <div class="flex flex-col gap-2">
-          <label class="text-sm font-semibold text-gray-700">
-            Email *
-          </label>
+          <label class="text-sm font-semibold text-gray-700">Email *</label>
           <input
             v-model="createForm.email"
             type="email"
@@ -485,9 +434,7 @@ onMounted(() => {
         </div>
 
         <div class="flex flex-col gap-2">
-          <label class="text-sm font-semibold text-gray-700">
-            Phone
-          </label>
+          <label class="text-sm font-semibold text-gray-700">Phone</label>
           <input
             v-model="createForm.phone"
             type="text"
@@ -497,9 +444,7 @@ onMounted(() => {
         </div>
 
         <div class="flex flex-col gap-2">
-          <label class="text-sm font-semibold text-gray-700">
-            Password *
-          </label>
+          <label class="text-sm font-semibold text-gray-700">Password *</label>
           <input
             v-model="createForm.password"
             type="password"
@@ -509,9 +454,7 @@ onMounted(() => {
         </div>
 
         <div class="flex flex-col gap-2">
-          <label class="text-sm font-semibold text-gray-700">
-            Role *
-          </label>
+          <label class="text-sm font-semibold text-gray-700">Role *</label>
           <select
             v-model="createForm.role"
             class="rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
@@ -522,25 +465,12 @@ onMounted(() => {
           </select>
         </div>
 
-        <div class="flex items-end gap-3 md:col-span-2 lg:col-span-3">
-          <button
-            type="submit"
-            :disabled="saving"
-            class="rounded-lg bg-gradient-to-r from-blue-600 to-cyan-500 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:shadow-lg hover:scale-105 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {{ saving ? "⏳ Saving..." : "✅ Create User" }}
-          </button>
-
-          <button
-            type="button"
-            @click="resetCreateForm"
-            class="rounded-lg bg-gray-200 px-5 py-2.5 text-sm font-semibold text-gray-700 transition-all duration-200 hover:bg-gray-300"
-          >
-            Reset
-          </button>
+        <div class="md:col-span-2 flex items-center justify-end gap-3 pt-2">
+          <BaseButton variant="secondary" @click="resetCreateForm">Reset</BaseButton>
+          <BaseButton type="submit" variant="success" :loading="saving">Create User</BaseButton>
         </div>
       </form>
-    </div>
+    </BaseModal>
 
     <!-- Filters -->
     <div class="grid items-end gap-4 rounded-2xl border border-white/50 bg-white/80 p-5 shadow-sm backdrop-blur md:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_auto]">
@@ -587,22 +517,9 @@ onMounted(() => {
       </div>
 
       <div class="flex gap-2">
-        <button
-          type="button"
-          @click="loadUsers"
-          :disabled="loading"
-          class="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
-        >
-          {{ loading ? "⏳" : "🔄" }}
-        </button>
+        <BaseButton variant="primary" :loading="loading" @click="loadUsers">Refresh</BaseButton>
 
-        <button
-          type="button"
-          @click="showCreateForm = !showCreateForm"
-          class="rounded-lg bg-gradient-to-r from-green-600 to-emerald-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:shadow-lg"
-        >
-          {{ showCreateForm ? "✕" : "➕" }}
-        </button>
+        <BaseButton variant="success" @click="showCreateForm = true">Add User</BaseButton>
       </div>
     </div>
 
@@ -634,66 +551,38 @@ onMounted(() => {
       </div>
 
       <!-- Table -->
-      <div v-else class="overflow-x-auto">
-        <table class="w-full min-w-[950px] border-collapse text-left">
-          <thead>
-            <tr class="border-b border-gray-200 bg-gradient-to-r from-slate-50 to-blue-50/50">
-              <th class="px-6 py-4 font-bold text-gray-700">User</th>
-              <th class="px-6 py-4 font-bold text-gray-700">Phone</th>
-              <th class="px-6 py-4 font-bold text-gray-700">Role</th>
-              <th class="px-6 py-4 font-bold text-gray-700">Status</th>
-              <th class="w-52 px-6 py-4 font-bold text-gray-700">Actions</th>
-            </tr>
-          </thead>
+      <div v-else>
+        <BaseTable :items="paginatedUsers" :loading="loading" title="Users List" table-class="min-w-[950px]">
+          <template #thead>
+            <th class="px-6 py-4 font-bold text-gray-700">User</th>
+            <th class="px-6 py-4 font-bold text-gray-700">Phone</th>
+            <th class="px-6 py-4 font-bold text-gray-700">Role</th>
+            <th class="px-6 py-4 font-bold text-gray-700">Status</th>
+            <th class="w-52 px-6 py-4 font-bold text-gray-700">Actions</th>
+          </template>
 
-          <tbody>
+          <template #tbody="{ items }">
             <tr
-              v-for="(user, index) in paginatedUsers"
+              v-for="(user, index) in items"
               :key="user.id"
               class="group border-b border-gray-100 transition-all duration-200 hover:bg-blue-50/50"
               :style="{ animationDelay: `${index * 50}ms` }"
             >
-              <!-- Edit Mode -->
               <template v-if="editUserId === user.id">
                 <td class="px-6 py-4">
                   <div class="space-y-2">
-                    <input
-                      v-model="editForm.first_name"
-                      type="text"
-                      class="w-full rounded-lg border border-blue-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-100"
-                      placeholder="First name"
-                    />
-                    <input
-                      v-model="editForm.last_name"
-                      type="text"
-                      class="w-full rounded-lg border border-blue-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-100"
-                      placeholder="Last name"
-                    />
-                    <input
-                      v-model="editForm.email"
-                      type="email"
-                      class="w-full rounded-lg border border-blue-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-100"
-                      placeholder="Email"
-                    />
+                    <input v-model="editForm.first_name" type="text" class="w-full rounded-lg border border-blue-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-100" placeholder="First name" />
+                    <input v-model="editForm.last_name" type="text" class="w-full rounded-lg border border-blue-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-100" placeholder="Last name" />
+                    <input v-model="editForm.email" type="email" class="w-full rounded-lg border border-blue-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-100" placeholder="Email" />
                   </div>
                 </td>
 
                 <td class="px-6 py-4">
-                  <input
-                    v-model="editForm.phone"
-                    type="text"
-                    class="rounded-lg border border-blue-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-100"
-                    placeholder="Phone"
-                  />
+                  <input v-model="editForm.phone" type="text" class="rounded-lg border border-blue-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-100" placeholder="Phone" />
                 </td>
 
                 <td class="px-6 py-4">
-                  <span
-                    class="inline-flex rounded-full px-3 py-1 text-sm font-semibold"
-                    :class="getRoleBadgeClass(user)"
-                  >
-                    {{ getPrimaryRoleOfUser(user) }}
-                  </span>
+                  <span class="inline-flex rounded-full px-3 py-1 text-sm font-semibold" :class="getRoleBadgeClass(user)">{{ getPrimaryRoleOfUser(user) }}</span>
                 </td>
 
                 <td class="px-6 py-4">
@@ -702,112 +591,46 @@ onMounted(() => {
 
                 <td class="px-6 py-4">
                   <div class="flex gap-2">
-                    <button
-                      type="button"
-                      @click="submitEditUser(user)"
-                      :disabled="saving"
-                      class="rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-700 disabled:opacity-60"
-                    >
-                      {{ saving ? "⏳" : "✅" }} Save
-                    </button>
-                    <button
-                      type="button"
-                      @click="cancelEdit"
-                      class="rounded-lg bg-gray-300 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-400"
-                    >
-                      ✕ Cancel
-                    </button>
+                    <BaseButton size="sm" variant="primary" :loading="saving" @click="submitEditUser(user)">Save</BaseButton>
+                    <BaseButton size="sm" variant="secondary" @click="cancelEdit">Cancel</BaseButton>
                   </div>
                 </td>
               </template>
 
-              <!-- Display Mode -->
               <template v-else>
                 <td class="px-6 py-4">
                   <div class="flex flex-col gap-1">
-                    <strong class="font-bold text-gray-900">
-                      {{ formatName(user) }}
-                    </strong>
-                    <span class="text-sm text-gray-600">
-                      {{ user.email }}
-                    </span>
+                    <strong class="font-bold text-gray-900">{{ formatName(user) }}</strong>
+                    <span class="text-sm text-gray-600">{{ user.email }}</span>
                   </div>
                 </td>
 
-                <td class="px-6 py-4 text-gray-700">
-                  {{ user.phone || "—" }}
+                <td class="px-6 py-4 text-gray-700">{{ user.phone || "—" }}</td>
+
+                <td class="px-6 py-4">
+                  <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold" :class="getRoleBadgeClass(user)">{{ getPrimaryRoleOfUser(user) }}</span>
                 </td>
 
                 <td class="px-6 py-4">
-                  <span
-                    class="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold"
-                    :class="getRoleBadgeClass(user)"
-                  >
-                    {{ getPrimaryRoleOfUser(user) }}
-                  </span>
-                </td>
-
-                <td class="px-6 py-4">
-                  <span
-                    class="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold"
-                    :class="getStatusBadgeClass(user)"
-                  >
-                    {{ user.is_active ? "Active" : "Inactive" }}
-                  </span>
+                  <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold" :class="getStatusBadgeClass(user)">{{ user.is_active ? "Active" : "Inactive" }}</span>
                 </td>
 
                 <td class="px-6 py-4">
                   <div class="flex gap-2">
-                    <button
-                      type="button"
-                      @click="startEdit(user)"
-                      class="rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-700 transition-all duration-200 hover:shadow-md active:scale-95"
-                    >
-                      ✏️ Edit
-                    </button>
-
-                    <button
-                      type="button"
-                      @click="handleDeleteUser(user)"
-                      :disabled="deletingId === user.id || user.id === currentUser.id"
-                      class="rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white hover:bg-red-700 transition-all duration-200 hover:shadow-md active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-                      {{ deletingId === user.id ? "⏳" : "🗑️" }} Delete
-                    </button>
+                    <BaseButton size="sm" variant="primary" @click="startEdit(user)">Edit</BaseButton>
+                    <BaseButton size="sm" variant="danger" :loading="deletingId === user.id" :disabled="user.id === currentUser.id" @click="handleDeleteUser(user)">Delete</BaseButton>
                   </div>
                 </td>
               </template>
             </tr>
-          </tbody>
-        </table>
+          </template>
+
+          <template #pagination>
+            <BasePagination v-if="filteredUsers.length > 0" v-model:currentPage="currentPage" :items-per-page="itemsPerPage" :total-items="filteredUsers.length" />
+          </template>
+        </BaseTable>
       </div>
 
-      <!-- Pagination -->
-      <div v-if="filteredUsers.length > 0" class="flex items-center justify-between border-t border-gray-200 bg-gray-50/50 px-6 py-4">
-        <div class="text-sm font-semibold text-gray-700">
-          Page {{ currentPage }} of {{ totalPages }}
-        </div>
-
-        <div class="flex gap-2">
-          <button
-            type="button"
-            @click="currentPage--"
-            :disabled="currentPage === 1"
-            class="rounded-lg bg-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200"
-          >
-            ← Previous
-          </button>
-
-          <button
-            type="button"
-            @click="currentPage++"
-            :disabled="currentPage === totalPages"
-            class="rounded-lg bg-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200"
-          >
-            Next →
-          </button>
-        </div>
-      </div>
     </div>
   </div>
 </template>

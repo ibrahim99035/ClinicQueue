@@ -6,6 +6,7 @@ import { getAdminUsers, getPendingDoctors } from "../../api/admin";
 import StatCard from "../../components/StatCard.vue";
 import SkeletonCard from "../../components/SkeletonCard.vue";
 import EmptyState from "../../components/EmptyState.vue";
+import BaseButton from "../../components/ui/BaseButton.vue";
 
 const router = useRouter();
 const user = JSON.parse(localStorage.getItem("user")|| "{}");
@@ -158,16 +159,10 @@ function logout() {
           </p>
         </div>
 
-        <button
-          @click="loadDataOfAdminDashboard"
-          :disabled="loading"
-          class="group/btn relative h-fit w-fit overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 px-6 py-3 font-semibold text-white shadow-lg transition-all duration-200 hover:shadow-xl hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 whitespace-nowrap"
-        >
-          <span class="flex items-center gap-2">
-            <span v-if="!loading">🔄 Refresh</span>
-            <span v-else>⏳ Loading...</span>
-          </span>
-        </button>
+        <BaseButton variant="primary" :loading="loading" @click="loadDataOfAdminDashboard">
+          <span v-if="!loading">🔄 Refresh</span>
+          <span v-else>Loading...</span>
+        </BaseButton>
       </div>
     </div>
 

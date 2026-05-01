@@ -1,4 +1,4 @@
-import api from "./http";
+import api from "./client";
 
 function getListFromResponse(response) {
   const data = response.data;
@@ -34,5 +34,61 @@ export async function getAppointmentHistory(appointmentId) {
     "/appointments/appointments/" + appointmentId + "/history/"
   );
 
+  return getListFromResponse(response);
+}
+
+export async function createAppointment(data) {
+  const response = await api.post("/appointments/appointments/", data);
+  return response.data;
+}
+
+export async function cancelAppointment(appointmentId) {
+  const response = await api.post(
+    `/appointments/appointments/${appointmentId}/cancel/`
+  );
+  return response.data;
+}
+
+export async function rescheduleAppointment(appointmentId, data) {
+  const response = await api.post(
+    `/appointments/appointments/${appointmentId}/reschedule/`,
+    data
+  );
+  return response.data;
+}
+
+export async function checkInAppointment(appointmentId) {
+  const response = await api.post(
+    `/appointments/appointments/${appointmentId}/check_in/`
+  );
+  return response.data;
+}
+
+export async function markNoShowAppointment(appointmentId) {
+  const response = await api.post(
+    `/appointments/appointments/${appointmentId}/no_show/`
+  );
+  return response.data;
+}
+
+export async function completeAppointment(appointmentId) {
+  const response = await api.post(
+    `/appointments/appointments/${appointmentId}/complete/`
+  );
+  return response.data;
+}
+
+export async function getDoctorQueue() {
+  const response = await api.get("/appointments/appointments/queue/");
+  return response.data;
+}
+
+export async function joinWaitingList(data) {
+  const response = await api.post("/appointments/waiting-list/", data);
+  return response.data;
+}
+
+export async function getDoctorsList() {
+  const response = await api.get("/accounts/users/?role=Doctors");
   return getListFromResponse(response);
 }

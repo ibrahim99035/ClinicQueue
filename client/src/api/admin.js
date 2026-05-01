@@ -1,13 +1,13 @@
-import api from "./http";
+import api from "./client";
 
 function normalizeListResponseFromBackend(response) {
     const data = response.data;
- 
+
     if (Array.isArray(data)) {
         return data;
     }
 
-    if(Array.isArray(data.results)) {
+    if (Array.isArray(data?.results)) {
         return data.results;
     }
 
@@ -16,7 +16,6 @@ function normalizeListResponseFromBackend(response) {
 
 export async function getAdminUsers() {
     const response = await api.get("/accounts/users/");
-    console.log(response.data);
     return normalizeListResponseFromBackend(response);
 }
 
@@ -26,7 +25,9 @@ export async function getPendingDoctors() {
 }
 
 export async function approveDoctor(doctorProfileId) {
-    const response = await api.post(`/accounts/admin/approve-doctor/${doctorProfileId}/`);
+    const response = await api.post(
+        `/accounts/admin/approve-doctor/${doctorProfileId}/`
+    );
     return response.data;
 }
 

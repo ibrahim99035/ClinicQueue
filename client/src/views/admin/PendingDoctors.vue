@@ -4,6 +4,8 @@ import { getAdminUsers, getPendingDoctors, approveDoctor } from "../../api/admin
 import StatusBadge from "../../components/StatusBadge.vue";
 import SkeletonCard from "../../components/SkeletonCard.vue";
 import EmptyState from "../../components/EmptyState.vue";
+import BaseTable from "../../components/ui/BaseTable.vue";
+import BaseButton from "../../components/ui/BaseButton.vue";
 
 const pendingDoctors = ref([]);
 const users = ref([]);
@@ -346,87 +348,48 @@ onMounted(() => {
         />
       </div>
 
-      <!-- Table -->
-      <div v-else class="overflow-x-auto">
-        <table class="w-full min-w-[1000px] border-collapse text-left">
-          <thead>
-            <tr class="border-b border-gray-200 bg-gradient-to-r from-slate-50 to-blue-50/50">
-              <th class="px-6 py-4 font-bold text-gray-700">Doctor</th>
-              <th class="px-6 py-4 font-bold text-gray-700">Contact</th>
-              <th class="px-6 py-4 font-bold text-gray-700">Specialization</th>
-              <th class="px-6 py-4 font-bold text-gray-700">Duration</th>
-              <th class="px-6 py-4 font-bold text-gray-700">Status</th>
-              <th class="w-48 px-6 py-4 font-bold text-gray-700">Action</th>
-            </tr>
-          </thead>
+        <BaseTable :items="pendingDoctors" :loading="loading" title="Doctor Requests" table-class="min-w-[1000px]">
+          <template #toolbar>
+            <span class="w-fit rounded-full bg-amber-100 px-4 py-2 text-sm font-bold text-amber-800">{{ pendingCount }} pending doctor(s)</span>
+          </template>
 
-          <tbody>
-            <tr
-              v-for="(doctor, index) in pendingDoctors"
-              :key="doctor.id"
-              class="group border-b border-gray-100 transition-all duration-200 hover:bg-blue-50/50"
-              :style="{ animationDelay: `${index * 50}ms` }"
-            >
+          <template #thead>
+            <th class="px-6 py-4 font-bold text-gray-700">Doctor</th>
+            <th class="px-6 py-4 font-bold text-gray-700">Contact</th>
+            <th class="px-6 py-4 font-bold text-gray-700">Specialization</th>
+            <th class="px-6 py-4 font-bold text-gray-700">Duration</th>
+            <th class="px-6 py-4 font-bold text-gray-700">Status</th>
+            <th class="w-48 px-6 py-4 font-bold text-gray-700">Action</th>
+          </template>
+
+          <template #tbody="{ items }">
+            <tr v-for="(doctor, index) in items" :key="doctor.id" class="group border-b border-gray-100 transition-all duration-200 hover:bg-blue-50/50" :style="{ animationDelay: `${index * 50}ms` }">
               <td class="px-6 py-5">
                 <div class="flex items-center gap-4">
-                  <div class="flex h-11 w-11 items-center justify-center rounded-lg bg-gradient-to-br from-blue-400 to-cyan-500 font-bold text-white text-sm">
-                    {{ (getDoctorName(doctor).split(' ')[0]?.[0] || 'D') + (getDoctorName(doctor).split(' ')[1]?.[0] || '') }}
-                  </div>
-
+                  <div class="flex h-11 w-11 items-center justify-center rounded-lg bg-gradient-to-br from-blue-400 to-cyan-500 font-bold text-white text-sm">{{ (getDoctorName(doctor).split(' ')[0]?.[0] || 'D') + (getDoctorName(doctor).split(' ')[1]?.[0] || '') }}</div>
                   <div class="flex flex-col gap-1">
-                    <strong class="font-bold text-gray-900">
-                      {{ getDoctorName(doctor) }}
-                    </strong>
-
-                    <span class="text-xs font-medium text-gray-500">
-                      ID: {{ doctor.id }}
-                    </span>
+                    <strong class="font-bold text-gray-900">{{ getDoctorName(doctor) }}</strong>
+                    <span class="text-xs font-medium text-gray-500">ID: {{ doctor.id }}</span>
                   </div>
                 </div>
               </td>
 
               <td class="px-6 py-5">
                 <div class="flex flex-col gap-1">
-                  <span class="font-semibold text-gray-800">
-                    {{ getDoctorEmail(doctor) }}
-                  </span>
-
-                  <small class="text-sm text-gray-600">
-                    {{ getDoctorPhone(doctor) }}
-                  </small>
+                  <span class="font-semibold text-gray-800">{{ getDoctorEmail(doctor) }}</span>
+                  <small class="text-sm text-gray-600">{{ getDoctorPhone(doctor) }}</small>
                 </div>
               </td>
 
+              <td class="px-6 py-5"><span class="font-medium text-gray-800">{{ getDoctorSpecialization(doctor) }}</span></td>
+              <td class="px-6 py-5"><span class="inline-flex rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700">⏱️ {{ doctor.consultationDuration }} min</span></td>
+              <td class="px-6 py-5"><StatusBadge status="pending" size="sm" /></td>
               <td class="px-6 py-5">
-                <span class="font-medium text-gray-800">
-                  {{ getDoctorSpecialization(doctor) }}
-                </span>
-              </td>
-
-              <td class="px-6 py-5">
-                <span class="inline-flex rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700">
-                  ⏱️ {{ doctor.consultationDuration }} min
-                </span>
-              </td>
-
-              <td class="px-6 py-5">
-                <StatusBadge status="pending" size="sm" />
-              </td>
-
-              <td class="px-6 py-5">
-                <button
-                  type="button"
-                  @click="handleApproveDoctor(doctor)"
-                  :disabled="approvingId === doctor.id"
-                  class="rounded-lg bg-gradient-to-r from-green-600 to-emerald-500 px-4 py-2.5 text-xs font-bold text-white shadow-md transition-all duration-200 hover:shadow-lg hover:scale-105 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap"
-                >
-                  {{ approvingId === doctor.id ? "⏳ Approving..." : "✅ Approve" }}
-                </button>
+                <BaseButton size="sm" variant="success" :loading="approvingId === doctor.id" @click="handleApproveDoctor(doctor)">{{ approvingId === doctor.id ? '⏳ Approving...' : '✅ Approve' }}</BaseButton>
               </td>
             </tr>
-          </tbody>
-        </table>
-      </div>
+          </template>
+        </BaseTable>
     </div>
   </div>
 </template>

@@ -1,12 +1,16 @@
 <script setup>
 import { computed, onMounted, onBeforeUnmount, ref } from "vue";
 import { getAdminUsers } from "../../api/admin";
+import BaseTable from "../../components/ui/BaseTable.vue";
+import BaseButton from "../../components/ui/BaseButton.vue";
 import {
   getWeeklySchedules,
   createWeeklySchedule,
+  updateWeeklySchedule,
   deleteWeeklySchedule,
   getScheduleExceptions,
   createScheduleException,
+  updateScheduleException,
   deleteScheduleException,
   generateSlots,
   getAvailableSlots,
@@ -42,69 +46,16 @@ function showToast(message, type) {
 
   if (toastTimer) {
     clearTimeout(toastTimer);
+    toastTimer = null;
   }
 
+  // Auto-hide after 4.5 seconds
   toastTimer = setTimeout(() => {
-    toast.value.show = false;
-  }, 30000);
+    toast.value = { show: false, type: 'success', message: '' };
+    toastTimer = null;
+  }, 4500);
+
 }
-
-function closeToast() {
-  toast.value.show = false;
-
-  if (toastTimer) {
-    clearTimeout(toastTimer);
-  }
-}
-
-onBeforeUnmount(() => {
-  if (toastTimer) {
-    clearTimeout(toastTimer);
-  }
-});
-const scheduleForm = ref({
-    doctor: "",
-    day_of_week: 0,
-    start_time: "",
-    end_time: "",
-    is_active: true,
-})
-
-const exceptionForm = ref({
-  doctor: "",
-  exception_date: "",
-  type: "DAY_OFF",
-  start_time: "",
-  end_time: "",
-  note: "",
-});
-
-const generateForm = ref({
-  doctor_id: "",
-  from_date: "",
-  to_date: "",
-});
-
-const slotsForm = ref({
-  doctor: "",
-  date: "",
-});
-
-const dayOptions = [
-  { value: 0, label: "Monday" },
-  { value: 1, label: "Tuesday" },
-  { value: 2, label: "Wednesday" },
-  { value: 3, label: "Thursday" },
-  { value: 4, label: "Friday" },
-  { value: 5, label: "Saturday" },
-  { value: 6, label: "Sunday" },
-];
-
-const exceptionTypes = [
-  { value: "DAY_OFF", label: "Day Off" },
-  { value: "VACATION", label: "Vacation" },
-  { value: "EXTRA_WORKING", label: "Extra Working Day" },
-];
 
 function getUserGroups(user) {
   return user.groups || [];
@@ -250,6 +201,7 @@ function formatDateTime(value) {
 
 
 function resetScheduleForm() {
+  editingScheduleId.value = null;
   scheduleForm.value = {
     doctor: "",
     day_of_week: 0,
@@ -260,6 +212,7 @@ function resetScheduleForm() {
 }
 
 function resetExceptionForm() {
+  editingExceptionId.value = null;
   exceptionForm.value = {
     doctor: "",
     exception_date: "",
@@ -267,6 +220,29 @@ function resetExceptionForm() {
     start_time: "",
     end_time: "",
     note: "",
+  };
+}
+
+function startEditSchedule(schedule) {
+  editingScheduleId.value = schedule.id;
+  scheduleForm.value = {
+    doctor: String(schedule.doctor?.id || schedule.doctor || ""),
+    day_of_week: Number(schedule.day_of_week),
+    start_time: schedule.start_time || "",
+    end_time: schedule.end_time || "",
+    is_active: Boolean(schedule.is_active),
+  };
+}
+
+function startEditException(exceptionItem) {
+  editingExceptionId.value = exceptionItem.id;
+  exceptionForm.value = {
+    doctor: String(exceptionItem.doctor?.id || exceptionItem.doctor || ""),
+    exception_date: exceptionItem.exception_date || "",
+    type: exceptionItem.type || "DAY_OFF",
+    start_time: exceptionItem.start_time || "",
+    end_time: exceptionItem.end_time || "",
+    note: exceptionItem.note || "",
   };
 }
 
@@ -312,9 +288,14 @@ async function submitWeeklySchedule() {
       is_active: scheduleForm.value.is_active,
     };
 
-    await createWeeklySchedule(payload);
+    if (editingScheduleId.value) {
+      await updateWeeklySchedule(editingScheduleId.value, payload);
+      successMessage.value = "Weekly schedule updated successfully.";
+    } else {
+      await createWeeklySchedule(payload);
+      successMessage.value = "Weekly schedule created successfully.";
+    }
 
-    successMessage.value = "Weekly schedule created successfully.";
     showToast(successMessage.value, "success");
     resetScheduleForm();
 
@@ -387,9 +368,14 @@ async function submitScheduleException() {
       payload.end_time = null;
     }
 
-    await createScheduleException(payload);
+    if (editingExceptionId.value) {
+      await updateScheduleException(editingExceptionId.value, payload);
+      successMessage.value = "Schedule exception updated successfully.";
+    } else {
+      await createScheduleException(payload);
+      successMessage.value = "Schedule exception created successfully.";
+    }
 
-    successMessage.value = "Schedule exception created successfully.";
     showToast(successMessage.value, "success");
     resetExceptionForm();
     exceptions.value = await getScheduleExceptions();
@@ -738,7 +724,7 @@ onMounted(() => {
                 :disabled="savingSchedule"
                 class="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-400"
               >
-                {{ savingSchedule ? "Saving..." : "Create Schedule" }}
+                {{ savingSchedule ? "Saving..." : editingScheduleId ? "Update Schedule" : "Create Schedule" }}
               </button>
 
               <button
@@ -857,7 +843,7 @@ onMounted(() => {
                 :disabled="savingException"
                 class="rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-400"
               >
-                {{ savingException ? "Saving..." : "Create Exception" }}
+                {{ savingException ? "Saving..." : editingExceptionId ? "Update Exception" : "Create Exception" }}
               </button>
 
               <button
@@ -1024,98 +1010,40 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- Weekly Schedules Table -->
-      <div class="overflow-hidden rounded-3xl border border-white/70 bg-white/90 shadow-sm backdrop-blur">
-        <div class="flex items-center justify-between border-b border-slate-200 px-6 py-5">
-          <div>
-            <h3 class="text-xl font-bold text-slate-900">
-              Weekly Schedules
-            </h3>
-            <p class="mt-1 text-sm text-slate-500">
-              Doctor recurring weekly working times.
-            </p>
-          </div>
+      <BaseTable :items="weeklySchedules" :loading="loading" title="Weekly Schedules" table-class="min-w-[850px]">
+        <template #toolbar>
+          <span class="rounded-full bg-blue-100 px-4 py-2 text-sm font-bold text-blue-700">{{ weeklySchedules.length }} schedule(s)</span>
+        </template>
 
-          <span class="rounded-full bg-blue-100 px-4 py-2 text-sm font-bold text-blue-700">
-            {{ weeklySchedules.length }} schedule(s)
-          </span>
-        </div>
+        <template #thead>
+          <th class="border-b border-slate-200 px-6 py-4 font-bold">Doctor</th>
+          <th class="border-b border-slate-200 px-6 py-4 font-bold">Day</th>
+          <th class="border-b border-slate-200 px-6 py-4 font-bold">Start</th>
+          <th class="border-b border-slate-200 px-6 py-4 font-bold">End</th>
+          <th class="border-b border-slate-200 px-6 py-4 font-bold">Status</th>
+          <th class="w-32 border-b border-slate-200 px-6 py-4 font-bold">Action</th>
+        </template>
 
-        <div
-          v-if="loading"
-          class="p-6 text-sm text-slate-500"
-        >
-          Loading schedules...
-        </div>
+        <template #tbody="{ items }">
+          <tr v-for="schedule in items" :key="schedule.id" class="text-sm text-slate-900 transition hover:bg-blue-50/60">
+            <td class="border-b border-slate-100 px-6 py-4">{{ getDoctorName(schedule.doctor) }}</td>
+            <td class="border-b border-slate-100 px-6 py-4">{{ getDayLabel(schedule.day_of_week) }}</td>
+            <td class="border-b border-slate-100 px-6 py-4">{{ schedule.start_time }}</td>
+            <td class="border-b border-slate-100 px-6 py-4">{{ schedule.end_time }}</td>
+            <td class="border-b border-slate-100 px-6 py-4"><span class="inline-flex rounded-full px-3 py-1 text-xs font-bold" :class="schedule.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'">{{ schedule.is_active ? 'Active' : 'Inactive' }}</span></td>
+            <td class="border-b border-slate-100 px-6 py-4">
+              <div class="flex gap-2">
+                <BaseButton size="sm" variant="secondary" @click="startEditSchedule(schedule)">Edit</BaseButton>
+                <BaseButton size="sm" variant="danger" @click="handleDeleteWeeklySchedule(schedule)">Delete</BaseButton>
+              </div>
+            </td>
+          </tr>
+        </template>
 
-        <div
-          v-else-if="weeklySchedules.length === 0"
-          class="p-6 text-sm text-slate-500"
-        >
-          No weekly schedules found.
-        </div>
-
-        <div
-          v-else
-          class="overflow-x-auto"
-        >
-          <table class="w-full min-w-[850px] border-collapse text-left">
-            <thead>
-              <tr class="bg-slate-50 text-sm text-slate-600">
-                <th class="border-b border-slate-200 px-6 py-4 font-bold">Doctor</th>
-                <th class="border-b border-slate-200 px-6 py-4 font-bold">Day</th>
-                <th class="border-b border-slate-200 px-6 py-4 font-bold">Start</th>
-                <th class="border-b border-slate-200 px-6 py-4 font-bold">End</th>
-                <th class="border-b border-slate-200 px-6 py-4 font-bold">Status</th>
-                <th class="w-32 border-b border-slate-200 px-6 py-4 font-bold">Action</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              <tr
-                v-for="schedule in weeklySchedules"
-                :key="schedule.id"
-                class="text-sm text-slate-900 transition hover:bg-blue-50/60"
-              >
-                <td class="border-b border-slate-100 px-6 py-4">
-                  {{ getDoctorName(schedule.doctor) }}
-                </td>
-
-                <td class="border-b border-slate-100 px-6 py-4">
-                  {{ getDayLabel(schedule.day_of_week) }}
-                </td>
-
-                <td class="border-b border-slate-100 px-6 py-4">
-                  {{ schedule.start_time }}
-                </td>
-
-                <td class="border-b border-slate-100 px-6 py-4">
-                  {{ schedule.end_time }}
-                </td>
-
-                <td class="border-b border-slate-100 px-6 py-4">
-                  <span
-                    class="inline-flex rounded-full px-3 py-1 text-xs font-bold"
-                    :class="schedule.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
-                  >
-                    {{ schedule.is_active ? "Active" : "Inactive" }}
-                  </span>
-                </td>
-
-                <td class="border-b border-slate-100 px-6 py-4">
-                  <button
-                    type="button"
-                    @click="handleDeleteWeeklySchedule(schedule)"
-                    class="rounded-xl bg-red-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-red-700"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+        <template #pagination>
+          <div class="text-sm font-semibold text-gray-700">Showing {{ weeklySchedules.length }} schedule(s)</div>
+        </template>
+      </BaseTable>
 
       <!-- Exceptions Table -->
       <div class="overflow-hidden rounded-3xl border border-white/70 bg-white/90 shadow-sm backdrop-blur">
@@ -1148,66 +1076,42 @@ onMounted(() => {
           No schedule exceptions found.
         </div>
 
-        <div
-          v-else
-          class="overflow-x-auto"
-        >
-          <table class="w-full min-w-[950px] border-collapse text-left">
-            <thead>
-              <tr class="bg-slate-50 text-sm text-slate-600">
-                <th class="border-b border-slate-200 px-6 py-4 font-bold">Doctor</th>
-                <th class="border-b border-slate-200 px-6 py-4 font-bold">Date</th>
-                <th class="border-b border-slate-200 px-6 py-4 font-bold">Type</th>
-                <th class="border-b border-slate-200 px-6 py-4 font-bold">Start</th>
-                <th class="border-b border-slate-200 px-6 py-4 font-bold">End</th>
-                <th class="border-b border-slate-200 px-6 py-4 font-bold">Note</th>
-                <th class="w-32 border-b border-slate-200 px-6 py-4 font-bold">Action</th>
-              </tr>
-            </thead>
+        <BaseTable :items="exceptions" :loading="loading" title="Schedule Exceptions" table-class="min-w-[950px]">
+          <template #toolbar>
+            <span class="rounded-full bg-amber-100 px-4 py-2 text-sm font-bold text-amber-700">{{ exceptions.length }} exception(s)</span>
+          </template>
 
-            <tbody>
-              <tr
-                v-for="exceptionItem in exceptions"
-                :key="exceptionItem.id"
-                class="text-sm text-slate-900 transition hover:bg-blue-50/60"
-              >
-                <td class="border-b border-slate-100 px-6 py-4">
-                  {{ getDoctorName(exceptionItem.doctor) }}
-                </td>
+          <template #thead>
+            <th class="border-b border-slate-200 px-6 py-4 font-bold">Doctor</th>
+            <th class="border-b border-slate-200 px-6 py-4 font-bold">Date</th>
+            <th class="border-b border-slate-200 px-6 py-4 font-bold">Type</th>
+            <th class="border-b border-slate-200 px-6 py-4 font-bold">Start</th>
+            <th class="border-b border-slate-200 px-6 py-4 font-bold">End</th>
+            <th class="border-b border-slate-200 px-6 py-4 font-bold">Note</th>
+            <th class="w-32 border-b border-slate-200 px-6 py-4 font-bold">Action</th>
+          </template>
 
-                <td class="border-b border-slate-100 px-6 py-4">
-                  {{ exceptionItem.exception_date }}
-                </td>
+          <template #tbody="{ items }">
+            <tr v-for="exceptionItem in items" :key="exceptionItem.id" class="text-sm text-slate-900 transition hover:bg-blue-50/60">
+              <td class="border-b border-slate-100 px-6 py-4">{{ getDoctorName(exceptionItem.doctor) }}</td>
+              <td class="border-b border-slate-100 px-6 py-4">{{ exceptionItem.exception_date }}</td>
+              <td class="border-b border-slate-100 px-6 py-4">{{ getExceptionTypeLabel(exceptionItem.type) }}</td>
+              <td class="border-b border-slate-100 px-6 py-4">{{ exceptionItem.start_time || '-' }}</td>
+              <td class="border-b border-slate-100 px-6 py-4">{{ exceptionItem.end_time || '-' }}</td>
+              <td class="border-b border-slate-100 px-6 py-4">{{ exceptionItem.note || '-' }}</td>
+              <td class="border-b border-slate-100 px-6 py-4">
+                <div class="flex gap-2">
+                  <BaseButton size="sm" variant="secondary" @click="startEditException(exceptionItem)">Edit</BaseButton>
+                  <BaseButton size="sm" variant="danger" @click="handleDeleteException(exceptionItem)">Delete</BaseButton>
+                </div>
+              </td>
+            </tr>
+          </template>
 
-                <td class="border-b border-slate-100 px-6 py-4">
-                  {{ getExceptionTypeLabel(exceptionItem.type) }}
-                </td>
-
-                <td class="border-b border-slate-100 px-6 py-4">
-                  {{ exceptionItem.start_time || "-" }}
-                </td>
-
-                <td class="border-b border-slate-100 px-6 py-4">
-                  {{ exceptionItem.end_time || "-" }}
-                </td>
-
-                <td class="border-b border-slate-100 px-6 py-4">
-                  {{ exceptionItem.note || "-" }}
-                </td>
-
-                <td class="border-b border-slate-100 px-6 py-4">
-                  <button
-                    type="button"
-                    @click="handleDeleteException(exceptionItem)"
-                    class="rounded-xl bg-red-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-red-700"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+          <template #pagination>
+            <div class="text-sm font-semibold text-gray-700">Showing {{ exceptions.length }} exception(s)</div>
+          </template>
+        </BaseTable>
       </div>
 
     </div>

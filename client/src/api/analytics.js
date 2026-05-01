@@ -1,4 +1,4 @@
-import api from "./http"
+import api from "./client"
 
 export async function getAdminOverview() {
   const response = await api.get("/analytics/admin-overview/");

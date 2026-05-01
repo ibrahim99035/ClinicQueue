@@ -1,51 +1,47 @@
 <script setup>
-import { ref } from "vue"
-import { useRouter } from "vue-router"
-import { loginUser, saveAuthData, clearAuthData } from "../../api/auth";
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import useAuth from "../../composables/useAuth";
 
 const router = useRouter();
+const { login, roles } = useAuth();
 const email = ref("");
 const password = ref("");
 const loading = ref(false);
-const errorMessage = ref("")
+const errorMessage = ref("");
 
 async function handleLoginOfUser() {
-    errorMessage.value = "";
-    
-if (!email.value) {
-  errorMessage.value = "Please enter your email.";
-  return;
+  errorMessage.value = "";
+
+  if (!email.value) {
+    errorMessage.value = "Please enter your email.";
+    return;
+  }
+
+  if (!password.value) {
+    errorMessage.value = "Please enter your password.";
+    return;
+  }
+
+  loading.value = true;
+  try {
+    await login(email.value, password.value);
+
+    const userRoles = (roles && roles.value) || [];
+
+    if (userRoles.includes("Admins")) {
+      router.push("/admin");
+      return;
     }
 
-if (!password.value) {
-  errorMessage.value = "Please enter your password.";
-  return;
-}
-
-loading.value = true;
-try{
-const response = await loginUser({
-    email: email.value,
-    password: password.value,
-});
-
-const data = response.data;
-const roles = data.roles || [];
-if (!roles.includes("Admins")) {
-  clearAuthData();
-  errorMessage.value = "Access denied. This dashboard is for admins only.";
-  return;
-}
-
-saveAuthData(data);
-router.push("/admin");
-} catch(error) {
-    clearAuthData();
+    // default redirect for non-admins
+    router.push("/");
+  } catch (error) {
     errorMessage.value = "Login failed. Please check your email and password.";
     if (error.response && error.response.data && error.response.data.detail) {
-        errorMessage.value = error.response.data.detail;
+      errorMessage.value = error.response.data.detail;
     }
-} finally {
+  } finally {
     loading.value = false;
   }
 }

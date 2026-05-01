@@ -1,5 +1,7 @@
 <script setup>
-defineProps({
+import { computed } from "vue";
+
+const props = defineProps({
   status: {
     type: String,
     required: true
@@ -70,15 +72,20 @@ const sizeClasses = {
   lg: 'px-4 py-2 text-base'
 };
 
-const config = statusConfig[status.toLowerCase()] || statusConfig.pending;
+const config = computed(() =>
+  statusConfig[String(props.status || "").toLowerCase()] || statusConfig.pending
+);
 
-const displayStatus = status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ');
+const displayStatus = computed(() => {
+  const status = String(props.status || "pending");
+  return status.charAt(0).toUpperCase() + status.slice(1).replaceAll('_', ' ');
+});
 </script>
 
 <template>
   <div
     class="inline-flex items-center gap-2 rounded-full font-semibold transition-all duration-200 hover:shadow-sm"
-    :class="[config.bg, config.text, sizeClasses[size]]"
+    :class="[config.bg, config.text, sizeClasses[props.size]]"
   >
     <span class="inline-block h-2 w-2 rounded-full" :class="config.dot"></span>
     <span>{{ displayStatus }}</span>

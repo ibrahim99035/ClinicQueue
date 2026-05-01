@@ -1,450 +1,284 @@
 <template>
-  <div class="page">
-    <h2>Edit Consultation</h2>
+  <div class="mx-auto max-w-5xl space-y-6 p-6">
+    <PageHeader
+      title="Edit Consultation"
+      subtitle="Update diagnosis, notes, prescriptions, and requested tests."
+      :badge="consultation ? `#${consultation.id}` : null"
+      badgeColor="blue"
+    />
 
-    <!-- Loading State -->
-    <div v-if="loading" class="loading-state">
-      <p>Loading consultation...</p>
+    <div v-if="loading" class="rounded-2xl border border-slate-200 bg-white p-6 text-center text-sm text-slate-600 shadow-sm">
+      Loading consultation...
     </div>
 
-    <!-- Error State -->
-    <div v-if="error && !loading" class="message error">
+    <div v-else-if="error" class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
       {{ error }}
     </div>
 
-    <!-- Success Message -->
-    <div v-if="successMessage" class="message success">
-      {{ successMessage }}
-    </div>
-
-    <!-- Form -->
-    <form v-if="consultation && !loading" @submit.prevent="submitUpdate">
-      <!-- Diagnosis and Notes Section -->
-      <div class="form-section">
-        <h3>Medical Information</h3>
-        
-        <div class="form-group">
-          <label for="diagnosis">Diagnosis *</label>
-          <input 
-            id="diagnosis"
-            v-model="form.diagnosis" 
-            type="text"
-            placeholder="Enter diagnosis"
-            required
-          />
-        </div>
-
-        <div class="form-group">
-          <label for="notes">Notes</label>
-          <textarea 
-            id="notes"
-            v-model="form.notes"
-            placeholder="Additional clinical notes"
-            rows="4"
-          ></textarea>
-        </div>
+    <template v-else-if="consultation">
+      <div v-if="successMessage" class="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+        {{ successMessage }}
       </div>
 
-      <!-- Prescription Items Section -->
-      <div class="form-section">
-        <h3>Prescriptions</h3>
-        
-        <div v-if="form.prescription_items.length === 0" class="empty-state">
-          No prescriptions added yet
+      <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="mb-6 grid gap-3 text-sm text-slate-600 md:grid-cols-2">
+          <div><span class="font-semibold text-slate-900">Appointment:</span> #{{ consultation.appointment_id }}</div>
+          <div><span class="font-semibold text-slate-900">Created:</span> {{ formatDate(consultation.created_at) }}</div>
         </div>
 
-        <div
-          v-for="(item, index) in form.prescription_items"
-          :key="`prescription-${index}`"
-          class="item-card"
-        >
-          <div class="item-fields">
-            <div class="form-group">
-              <label :for="`drug-${index}`">Drug Name</label>
-              <input 
-                :id="`drug-${index}`"
-                v-model="item.drug_name" 
-                type="text"
-                placeholder="e.g., Paracetamol"
-              />
+        <form class="space-y-6" @submit.prevent="submitUpdate">
+          <section class="space-y-4">
+            <div>
+              <h3 class="text-lg font-bold text-slate-900">Medical Information</h3>
             </div>
 
-            <div class="form-group">
-              <label :for="`dose-${index}`">Dose</label>
-              <input 
-                :id="`dose-${index}`"
-                v-model="item.dose" 
-                type="text"
-                placeholder="e.g., 500 mg"
-              />
+            <div class="grid gap-4">
+              <div>
+                <label class="mb-1.5 block text-sm font-semibold text-slate-700">Diagnosis *</label>
+                <input
+                  v-model.trim="form.diagnosis"
+                  type="text"
+                  required
+                  class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+              </div>
+
+              <div>
+                <label class="mb-1.5 block text-sm font-semibold text-slate-700">Notes</label>
+                <textarea
+                  v-model="form.notes"
+                  rows="4"
+                  class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                />
+              </div>
+            </div>
+          </section>
+
+          <section class="space-y-4">
+            <div class="flex items-center justify-between gap-4">
+              <div>
+                <h3 class="text-lg font-bold text-slate-900">Prescriptions</h3>
+              </div>
+
+              <button type="button" class="rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-200" @click="addPrescription">
+                + Add Prescription
+              </button>
             </div>
 
-            <div class="form-group">
-              <label :for="`duration-${index}`">Duration</label>
-              <input 
-                :id="`duration-${index}`"
-                v-model="item.duration" 
-                type="text"
-                placeholder="e.g., 5 days"
-              />
+            <div v-if="form.prescription_items.length === 0" class="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-5 text-sm text-slate-500">
+              No prescriptions added yet.
             </div>
+
+            <div v-for="(item, index) in form.prescription_items" :key="item.id ?? `prescription-${index}`" class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div class="grid gap-4 md:grid-cols-3">
+                <div>
+                  <label class="mb-1.5 block text-sm font-semibold text-slate-700">Drug Name</label>
+                  <input v-model.trim="item.drug_name" type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                </div>
+
+                <div>
+                  <label class="mb-1.5 block text-sm font-semibold text-slate-700">Dose</label>
+                  <input v-model.trim="item.dose" type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                </div>
+
+                <div>
+                  <label class="mb-1.5 block text-sm font-semibold text-slate-700">Duration</label>
+                  <input v-model.trim="item.duration" type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                </div>
+              </div>
+
+              <div class="mt-3 flex justify-end">
+                <button type="button" class="rounded-xl bg-red-100 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-200" @click="removePrescription(index)">
+                  Remove
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section class="space-y-4">
+            <div class="flex items-center justify-between gap-4">
+              <div>
+                <h3 class="text-lg font-bold text-slate-900">Requested Tests</h3>
+              </div>
+
+              <button type="button" class="rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-200" @click="addTest">
+                + Add Test
+              </button>
+            </div>
+
+            <div v-if="form.requested_tests.length === 0" class="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-5 text-sm text-slate-500">
+              No tests requested yet.
+            </div>
+
+            <div v-for="(test, index) in form.requested_tests" :key="test.id ?? `test-${index}`" class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <div class="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label class="mb-1.5 block text-sm font-semibold text-slate-700">Test Name</label>
+                  <input v-model.trim="test.test_name" type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                </div>
+
+                <div>
+                  <label class="mb-1.5 block text-sm font-semibold text-slate-700">Notes</label>
+                  <input v-model.trim="test.notes" type="text" class="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100" />
+                </div>
+              </div>
+
+              <div class="mt-3 flex justify-end">
+                <button type="button" class="rounded-xl bg-red-100 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-200" @click="removeTest(index)">
+                  Remove
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <div v-if="error && !loading" class="whitespace-pre-wrap rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {{ error }}
           </div>
 
-          <button type="button" @click="removePrescription(index)" class="btn btn-danger">
-            Remove
-          </button>
-        </div>
-
-        <button type="button" @click="addPrescription" class="btn btn-secondary">
-          + Add Prescription
-        </button>
-      </div>
-
-      <!-- Requested Tests Section -->
-      <div class="form-section">
-        <h3>Requested Tests</h3>
-
-        <div v-if="form.requested_tests.length === 0" class="empty-state">
-          No tests requested yet
-        </div>
-
-        <div
-          v-for="(test, index) in form.requested_tests"
-          :key="`test-${index}`"
-          class="item-card"
-        >
-          <div class="item-fields">
-            <div class="form-group">
-              <label :for="`test-name-${index}`">Test Name</label>
-              <input 
-                :id="`test-name-${index}`"
-                v-model="test.test_name" 
-                type="text"
-                placeholder="e.g., CBC"
-              />
-            </div>
-
-            <div class="form-group">
-              <label :for="`test-notes-${index}`">Notes</label>
-              <input 
-                :id="`test-notes-${index}`"
-                v-model="test.notes" 
-                type="text"
-                placeholder="e.g., Check infection markers"
-              />
-            </div>
+          <div class="flex justify-end gap-3">
+            <button type="button" class="rounded-xl bg-slate-100 px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-200" @click="resetToLoaded">
+              Reset
+            </button>
+            <button type="submit" class="rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-400" :disabled="updating">
+              {{ updating ? "Saving..." : "Save Changes" }}
+            </button>
           </div>
-
-          <button type="button" @click="removeTest(index)" class="btn btn-danger">
-            Remove
-          </button>
-        </div>
-
-        <button type="button" @click="addTest" class="btn btn-secondary">
-          + Add Test
-        </button>
+        </form>
       </div>
-
-      <!-- Form Actions -->
-      <div class="form-actions">
-        <button 
-          type="submit" 
-          :disabled="updating"
-          class="btn btn-primary"
-        >
-          {{ updating ? "Saving..." : "Save Changes" }}
-        </button>
-      </div>
-    </form>
+    </template>
   </div>
 </template>
 
-<script>
+<script setup>
+import { reactive, ref, onMounted } from "vue";
+import { useRoute } from "vue-router";
+import PageHeader from "../../components/PageHeader.vue";
 import { getConsultationById, updateConsultation } from "../../api/emr";
 
-export default {
-  name: "ConsultationEdit",
-  data() {
-    return {
-      consultation: null,
-      loading: true,
-      updating: false,
-      error: "",
-      successMessage: "",
-      form: {
-        diagnosis: "",
-        notes: "",
-        prescription_items: [],
-        requested_tests: []
-      }
-    }
-  },
-  mounted() {
-    this.loadConsultation();
-  },
-  methods: {
-    async loadConsultation() {
-      this.loading = true;
-      this.error = "";
+const route = useRoute();
 
-      try {
-        const consultationId = this.$route.params.consultationId;
-        const response = await getConsultationById(consultationId);
-        this.consultation = response.data;
-        
-        // Populate form with loaded data
-        this.form.diagnosis = this.consultation.diagnosis || "";
-        this.form.notes = this.consultation.notes || "";
-        this.form.prescription_items = this.consultation.prescription_items || [];
-        this.form.requested_tests = this.consultation.requested_tests || [];
-      } catch (error) {
-        if (error.response?.status === 403) {
-          this.error = "You don't have permission to edit this consultation.";
-        } else if (error.response?.status === 404) {
-          this.error = "Consultation not found.";
-        } else if (error.response?.data?.detail) {
-          this.error = error.response.data.detail;
-        } else {
-          this.error = error.message || "Failed to load consultation. Make sure the backend supports GET /emr/consultations/{id}/";
-        }
-      } finally {
-        this.loading = false;
-      }
-    },
-    addPrescription() {
-      this.form.prescription_items.push({
-        drug_name: "",
-        dose: "",
-        duration: ""
-      });
-    },
-    removePrescription(index) {
-      this.form.prescription_items.splice(index, 1);
-    },
-    addTest() {
-      this.form.requested_tests.push({
-        test_name: "",
-        notes: ""
-      });
-    },
-    removeTest(index) {
-      this.form.requested_tests.splice(index, 1);
-    },
-    async submitUpdate() {
-      this.error = "";
-      this.successMessage = "";
-      this.updating = true;
+const loading = ref(true);
+const updating = ref(false);
+const error = ref("");
+const successMessage = ref("");
+const consultation = ref(null);
 
-      try {
-        const consultationId = this.$route.params.consultationId;
-        await updateConsultation(consultationId, this.form);
-        
-        this.successMessage = "Consultation updated successfully.";
-        
-        // Clear success message after 3 seconds
-        setTimeout(() => {
-          this.successMessage = "";
-        }, 3000);
-      } catch (error) {
-        if (error.response?.data) {
-          const data = error.response.data;
-          if (typeof data === 'object') {
-            const messages = [];
-            for (const [key, value] of Object.entries(data)) {
-              if (Array.isArray(value)) {
-                messages.push(`${key}: ${value.join(', ')}`);
-              } else {
-                messages.push(`${key}: ${value}`);
-              }
-            }
-            this.error = messages.join('\n');
-          } else {
-            this.error = data.detail || data || "Failed to update consultation";
-          }
-        } else {
-          this.error = error.message || "An unexpected error occurred";
-        }
-      } finally {
-        this.updating = false;
-      }
-    }
+const form = reactive({
+  diagnosis: "",
+  notes: "",
+  prescription_items: [],
+  requested_tests: [],
+});
+
+function cloneArray(items) {
+  return Array.isArray(items) ? items.map((item) => ({ ...item })) : [];
+}
+
+function applyConsultationToForm(record) {
+  consultation.value = record;
+  form.diagnosis = record?.diagnosis || "";
+  form.notes = record?.notes || "";
+  form.prescription_items = cloneArray(record?.prescription_items);
+  form.requested_tests = cloneArray(record?.requested_tests);
+}
+
+function resetToLoaded() {
+  if (consultation.value) {
+    applyConsultationToForm(consultation.value);
   }
 }
+
+function addPrescription() {
+  form.prescription_items.push({ drug_name: "", dose: "", duration: "" });
+}
+
+function removePrescription(index) {
+  form.prescription_items.splice(index, 1);
+}
+
+function addTest() {
+  form.requested_tests.push({ test_name: "", notes: "" });
+}
+
+function removeTest(index) {
+  form.requested_tests.splice(index, 1);
+}
+
+function formatDate(value) {
+  if (!value) return "-";
+  return new Date(value).toLocaleString();
+}
+
+function normalizeApiError(err) {
+  const data = err?.response?.data;
+
+  if (!data) {
+    return err?.message || "An unexpected error occurred";
+  }
+
+  if (typeof data === "string") {
+    return data;
+  }
+
+  if (data.detail) {
+    return data.detail;
+  }
+
+  const messages = [];
+
+  for (const [key, value] of Object.entries(data)) {
+    if (Array.isArray(value)) {
+      messages.push(`${key}: ${value.join(", ")}`);
+    } else if (value) {
+      messages.push(`${key}: ${value}`);
+    }
+  }
+
+  return messages.length ? messages.join("\n") : "Failed to update consultation";
+}
+
+async function loadConsultation() {
+  loading.value = true;
+  error.value = "";
+
+  try {
+    const consultationId = route.params.consultationId;
+    const record = await getConsultationById(consultationId);
+    applyConsultationToForm(record);
+  } catch (err) {
+    error.value = normalizeApiError(err);
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function submitUpdate() {
+  updating.value = true;
+  error.value = "";
+  successMessage.value = "";
+
+  try {
+    const payload = {
+      diagnosis: form.diagnosis,
+      notes: form.notes,
+      prescription_items: form.prescription_items.filter(
+        (item) => item.drug_name || item.dose || item.duration,
+      ),
+      requested_tests: form.requested_tests.filter(
+        (item) => item.test_name || item.notes,
+      ),
+    };
+
+    const consultationId = route.params.consultationId;
+    const record = await updateConsultation(consultationId, payload);
+    applyConsultationToForm(record);
+    successMessage.value = "Consultation updated successfully.";
+  } catch (err) {
+    error.value = normalizeApiError(err);
+  } finally {
+    updating.value = false;
+  }
+}
+
+onMounted(loadConsultation);
 </script>
-
-<style scoped>
-.page {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-h2 {
-  margin-bottom: 30px;
-}
-
-h3 {
-  font-size: 18px;
-  margin: 20px 0 15px 0;
-}
-
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.loading-state {
-  padding: 40px 20px;
-  text-align: center;
-  color: var(--text);
-}
-
-.message {
-  padding: 15px;
-  border-radius: 4px;
-  border-left: 4px solid;
-  margin-bottom: 20px;
-}
-
-.message.error {
-  background: rgba(220, 38, 38, 0.1);
-  border-color: #dc2626;
-  color: #991b1b;
-  white-space: pre-wrap;
-}
-
-.message.success {
-  background: rgba(34, 197, 94, 0.1);
-  border-color: #22c55e;
-  color: #166534;
-}
-
-.form-section {
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 20px;
-  background: var(--bg);
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-bottom: 15px;
-}
-
-.form-group:last-child {
-  margin-bottom: 0;
-}
-
-label {
-  font-weight: 500;
-  color: var(--text-h);
-  font-size: 14px;
-}
-
-input[type="text"],
-input[type="email"],
-textarea {
-  padding: 10px;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  font-family: var(--sans);
-  font-size: 16px;
-  background: var(--bg);
-  color: var(--text-h);
-}
-
-input[type="text"]:focus,
-textarea:focus {
-  outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-bg);
-}
-
-textarea {
-  resize: vertical;
-  min-height: 100px;
-}
-
-.item-card {
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 15px;
-  margin-bottom: 10px;
-  background: var(--code-bg);
-}
-
-.item-fields {
-  display: grid;
-  gap: 15px;
-  margin-bottom: 10px;
-}
-
-@media (min-width: 600px) {
-  .item-fields {
-    grid-template-columns: 1fr 1fr 1fr;
-  }
-}
-
-.empty-state {
-  color: var(--text);
-  font-style: italic;
-  padding: 15px;
-  text-align: center;
-  background: var(--code-bg);
-  border-radius: 4px;
-}
-
-.form-actions {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-  margin-top: 10px;
-}
-
-.btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 4px;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn-primary {
-  background: var(--accent);
-  color: white;
-}
-
-.btn-primary:hover:not(:disabled) {
-  opacity: 0.9;
-}
-
-.btn-secondary {
-  background: var(--border);
-  color: var(--text-h);
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background: var(--accent-border);
-}
-
-.btn-danger {
-  background: #ef4444;
-  color: white;
-  padding: 8px 12px;
-  font-size: 14px;
-}
-
-.btn-danger:hover:not(:disabled) {
-  background: #dc2626;
-}
-</style>

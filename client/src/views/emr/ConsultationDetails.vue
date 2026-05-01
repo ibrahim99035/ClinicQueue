@@ -113,8 +113,8 @@ export default {
     return {
       consultation: null,
       loading: true,
-      error: ""
-    }
+      error: "",
+    };
   },
   mounted() {
     this.loadConsultation();
@@ -126,8 +126,7 @@ export default {
 
       try {
         const appointmentId = this.$route.params.appointmentId;
-        const response = await getConsultationByAppointment(appointmentId);
-        this.consultation = response.data;
+        this.consultation = await getConsultationByAppointment(appointmentId);
       } catch (error) {
         if (error.response?.status === 403) {
           this.error = "You don't have permission to view this consultation.";
@@ -150,9 +149,9 @@ export default {
     formatDate(dateString) {
       const date = new Date(dateString);
       return date.toLocaleString();
-    }
-  }
-}
+    },
+  },
+};
 </script>
 
 <style scoped>
