@@ -18,7 +18,7 @@ AUTH_USER_MODEL = 'accounts.User'
 
 # Application definition
 INSTALLED_APPS = [
-    'django_api_admin',
+   # 'django_api_admin',
     'accounts.apps.AccountsConfig',
     'django.contrib.admin',
     'django.contrib.auth',

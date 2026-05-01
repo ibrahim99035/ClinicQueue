@@ -4,6 +4,7 @@ import { useAuthStore } from "./stores/auth";
 // Auth
 import Login from "./views/auth/Login.vue";
 import Unauthorized from "./views/Unauthorized.vue";
+import Register from "./views/auth/Register.vue";
 
 // Patient
 import PatientLayout from "./layouts/PatientLayout.vue";
@@ -58,6 +59,14 @@ const routes = [
     component: Login,
     meta: { guest: true },
   },
+  {
+  path: "/register",
+  name: "Register",
+  component: Register,
+  meta: {
+    guest: true,
+  },
+},
 
   //Admin routes
   {

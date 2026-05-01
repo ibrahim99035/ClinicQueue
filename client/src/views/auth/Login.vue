@@ -101,6 +101,12 @@ async function handleLoginOfUser() {
         >
           {{ loading ? "Logging in..." : "Login" }}
         </button>
+        <p class="text-sm text-slate-600 text-center mt-4">
+  Don't have an account?
+  <RouterLink to="/register" class="text-blue-600 font-semibold hover:underline">
+    Create account
+  </RouterLink>
+</p>
       </form>
     </div>
   </div>

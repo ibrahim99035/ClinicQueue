@@ -4,6 +4,10 @@ export function loginUser(credentials) {
     return api.post("/accounts/login/", credentials)
 }
 
+export function registerUser(payload) {
+  return api.post("/accounts/register/", payload);
+}
+
 export function saveAuthData(data) {
     localStorage.setItem("access", data.access);
     localStorage.setItem("refresh", data.refresh);
