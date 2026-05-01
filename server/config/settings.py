@@ -18,6 +18,7 @@ AUTH_USER_MODEL = 'accounts.User'
 
 # Application definition
 INSTALLED_APPS = [
+    'django_api_admin',
     'accounts.apps.AccountsConfig',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -32,6 +33,7 @@ INSTALLED_APPS = [
     'scheduling.apps.SchedulingConfig',
     'rest_framework',
     'rest_framework_simplejwt'
+    , 'drf_spectacular'
 ]
 
 MIDDLEWARE = [

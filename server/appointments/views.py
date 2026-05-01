@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from appointments.models import Appointment, RescheduleHistory, WaitingList
 from scheduling.models import TimeSlot
 from appointments.permissions import IsPatient, IsDoctor, IsReceptionist, IsDoctorOrReceptionist
-from scheduling.serializers import (
+from appointments.serializers import (
     AppointmentReadSerializer,
     AppointmentWriteSerializer,
     RescheduleSerializer,

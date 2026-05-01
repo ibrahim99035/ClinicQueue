@@ -1,6 +1,3 @@
-from django.urls import path
-from dashboard.views import index
+from django_api_admin.sites import site
 
-urlpatterns = [
-    path('', index, name='index'),
-]
+urlpatterns = site.urls
