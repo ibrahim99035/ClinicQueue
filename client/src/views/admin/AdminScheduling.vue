@@ -26,6 +26,52 @@ const savingSchedule = ref(false);
 const savingException = ref(false);
 const generating = ref(false);
 const loadingSlots = ref(false);
+const editingScheduleId = ref(null);
+const editingExceptionId = ref(null);
+
+const dayOptions = [
+  { value: 0, label: "Monday" },
+  { value: 1, label: "Tuesday" },
+  { value: 2, label: "Wednesday" },
+  { value: 3, label: "Thursday" },
+  { value: 4, label: "Friday" },
+  { value: 5, label: "Saturday" },
+  { value: 6, label: "Sunday" },
+];
+
+const exceptionTypes = [
+  { value: "DAY_OFF", label: "Day Off" },
+  { value: "VACATION", label: "Vacation" },
+  { value: "EXTRA_WORKING", label: "Extra Working Day" },
+];
+
+const scheduleForm = ref({
+  doctor: "",
+  day_of_week: 0,
+  start_time: "",
+  end_time: "",
+  is_active: true,
+});
+
+const exceptionForm = ref({
+  doctor: "",
+  exception_date: "",
+  type: "DAY_OFF",
+  start_time: "",
+  end_time: "",
+  note: "",
+});
+
+const generateForm = ref({
+  doctor_id: "",
+  from_date: "",
+  to_date: "",
+});
+
+const slotsForm = ref({
+  doctor: "",
+  date: "",
+});
 
 const errorMessage = ref("");
 const successMessage = ref("");
@@ -43,6 +89,19 @@ function showToast(message, type) {
     type: type,
     message: message,
   };
+
+  function closeToast() {
+  if (toastTimer) {
+    clearTimeout(toastTimer);
+    toastTimer = null;
+  }
+
+  toast.value = {
+    show: false,
+    type: "success",
+    message: "",
+  };
+}
 
   if (toastTimer) {
     clearTimeout(toastTimer);
@@ -224,7 +283,10 @@ function resetExceptionForm() {
 }
 
 function startEditSchedule(schedule) {
+  console.log("Editing schedule:", schedule);
+
   editingScheduleId.value = schedule.id;
+
   scheduleForm.value = {
     doctor: String(schedule.doctor?.id || schedule.doctor || ""),
     day_of_week: Number(schedule.day_of_week),
@@ -232,10 +294,18 @@ function startEditSchedule(schedule) {
     end_time: schedule.end_time || "",
     is_active: Boolean(schedule.is_active),
   };
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
 }
 
 function startEditException(exceptionItem) {
+  console.log("Editing exception:", exceptionItem);
+
   editingExceptionId.value = exceptionItem.id;
+
   exceptionForm.value = {
     doctor: String(exceptionItem.doctor?.id || exceptionItem.doctor || ""),
     exception_date: exceptionItem.exception_date || "",
@@ -244,15 +314,22 @@ function startEditException(exceptionItem) {
     end_time: exceptionItem.end_time || "",
     note: exceptionItem.note || "",
   };
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
 }
 
-async function loadSchedulingData() {
-  loading.value = true;
-  errorMessage.value = "";
-  successMessage.value = "";
+  async function loadSchedulingData() {
+    loading.value = true;
+    errorMessage.value = "";
+    successMessage.value = "";
 
   try {
-    users.value = await getAdminUsers();
+    const usersResponse = await getAdminUsers();
+    const usersData = usersResponse.data || usersResponse;
+    users.value = Array.isArray(usersData) ? usersData : usersData.results || [];
     weeklySchedules.value = await getWeeklySchedules();
     exceptions.value = await getScheduleExceptions();
   } catch (error) {
@@ -506,6 +583,12 @@ async function submitLoadSlots() {
 
 onMounted(() => {
   loadSchedulingData();
+  onBeforeUnmount(() => {
+  if (toastTimer) {
+    clearTimeout(toastTimer);
+    toastTimer = null;
+  }
+});
 });
 </script>
 
@@ -572,21 +655,6 @@ onMounted(() => {
           </button>
         </div>
       </div>
-
-      <!-- Messages -->
-      <p
-        v-if="errorMessage"
-        class="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-semibold text-red-700 shadow-sm"
-      >
-        {{ errorMessage }}
-      </p>
-
-      <p
-        v-if="successMessage"
-        class="rounded-2xl border border-green-200 bg-green-50 px-5 py-4 text-sm font-semibold text-green-700 shadow-sm"
-      >
-        {{ successMessage }}
-      </p>
 
       <!-- Summary Cards -->
       <div class="grid gap-5 md:grid-cols-3">
