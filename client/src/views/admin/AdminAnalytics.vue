@@ -205,7 +205,9 @@ const monthChartOptions = computed(() => ({
 const specializationChartSeries = computed(() => [
   {
     name: "Appointments",
-    data: specializationItems.value.map((item) => item.appointment_count || 0),
+    data: specializationItems.value.map(
+      (item) => item.count ?? item.appointment_count ?? 0
+    ),
   },
 ]);
 

@@ -5,7 +5,7 @@ from rest_framework import status
 # Create your views here.
 from .services import (
     get_admin_overview,
-    get_appointment_status_counts,
+    get_appointments_by_status,
     get_appointments_by_month,
     get_top_specializations,
     get_doctor_performance,
@@ -55,7 +55,7 @@ class AppointmentsByStatusView(APIView):
         if permission_error:
             return permission_error
 
-        data = get_appointment_status_counts()
+        data = get_appointments_by_status()
         return Response(data)
 
 

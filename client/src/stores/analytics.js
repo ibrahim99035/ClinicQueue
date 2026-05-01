@@ -13,6 +13,30 @@ function normalizeListResponse(payload) {
   return [];
 }
 
+/** Maps nested admin-overview JSON to flat fields used by AdminAnalytics.vue */
+function flattenAdminOverview(payload) {
+  if (!payload || typeof payload !== "object") {
+    return {};
+  }
+  const u = payload.users || {};
+  const d = payload.doctors || {};
+  const a = payload.appointments || {};
+  const w = payload.waiting_list || {};
+  const r = payload.rates || {};
+  return {
+    nested: payload,
+    total_users: u.total ?? 0,
+    active_users: u.active ?? 0,
+    inactive_users: u.inactive ?? 0,
+    pending_doctors: d.pending ?? 0,
+    waiting_list: w.total ?? 0,
+    total_appointments: a.total ?? 0,
+    completion_rate: r.completion_rate ?? 0,
+    cancellation_rate: r.cancellation_rate ?? 0,
+    no_show_rate: r.no_show_rate ?? 0,
+  };
+}
+
 export const useAnalyticsStore = defineStore("analytics", {
   state: () => ({
     overview: {},
@@ -48,15 +72,21 @@ export const useAnalyticsStore = defineStore("analytics", {
             analyticsApi.getDoctorPerformance(),
           ]);
 
-        this.overview = overview || {};
+        this.overview = flattenAdminOverview(overview);
         this.appointmentsByStatus = normalizeListResponse(byStatus);
         this.appointmentsByMonth = normalizeListResponse(byMonth);
         this.topSpecializations = normalizeListResponse(topSpecializations);
         this.doctorPerformance = normalizeListResponse(doctorPerformance);
         this.lastLoadedAt = new Date().toISOString();
       } catch (error) {
-        this.error = error?.response?.data?.detail || error?.message || "Failed to load analytics data";
-        throw error;
+        this.overview = {};
+        this.appointmentsByStatus = [];
+        this.appointmentsByMonth = [];
+        this.topSpecializations = [];
+        this.doctorPerformance = [];
+        this.lastLoadedAt = null;
+        this.error =
+          error?.response?.data?.detail || error?.message || "Failed to load analytics data";
       } finally {
         this.loading = false;
       }

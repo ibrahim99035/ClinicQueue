@@ -4,14 +4,7 @@ from operator import itemgetter
 from accounts.models import User, DoctorProfile, PatientProfile, Notification
 from appointments.models import Appointment, WaitingList
 
-APPOINTMENT_STATUSES = [
-    "REQUESTED",
-    "CONFIRMED",
-    "CHECKED_IN",
-    "COMPLETED",
-    "CANCELLED",
-    "NO_SHOW",
-]
+APPOINTMENT_STATUSES = [code for code, _ in Appointment.STATUS_CHOICES]
 
 def calculate_percentage(part, total):
     if (total == 0):
@@ -27,19 +20,19 @@ def get_user_group_count(group_name):
 
 
 def get_appointment_status_counts():
-    status_counts = {}
-    for status in APPOINTMENT_STATUSES:
-        count =  Appointment.objects.filter(status=status).count()
-        status_counts[status] = count
-    return status_counts
+    counts = dict.fromkeys(APPOINTMENT_STATUSES, 0)
+    rows = Appointment.objects.values("status").annotate(count=Count("id"))
+    for row in rows:
+        code = row["status"]
+        if code in counts:
+            counts[code] = row["count"]
+    return counts
     
 
 def get_admin_overview():
     status_counts = get_appointment_status_counts()
-    total_appointments = 0
-    for status in status_counts:
-        total_appointments = total_appointments + status_counts[status]
-        
+    total_appointments = Appointment.objects.count()
+
     return {
         "users": {
             "total": User.objects.count(),
@@ -82,19 +75,13 @@ def get_admin_overview():
     }
  
 
-def get_appointment_by_status():
+def get_appointments_by_status():
     status_counts = get_appointment_status_counts()
-    results = []
-    for status in status_counts:
-        status_data = {
-            "status": status,
-            "count": status_counts[status],
-        }
-        results.append(status_data)
-    
-    return {
-        "results": results
-    }
+    results = [
+        {"status": status, "count": status_counts[status]}
+        for status in APPOINTMENT_STATUSES
+    ]
+    return {"results": results}
 
 
 def get_appointments_by_month():
@@ -114,7 +101,9 @@ def get_appointments_by_month():
             "count" : monthly_counts[month],
         }
         results.append(month_data)
-    
+
+    results.sort(key=lambda row: row["month"])
+
     return {
         "date_field": "created_at",
         "results": results,
@@ -139,23 +128,11 @@ def get_top_specializations():
         specialization_data = {
             "specialization": specialization,
             "appointment_count": specialization_counts[specialization],
+            "count": specialization_counts[specialization],
         }
-        
-    results.append(specialization_data)
+        results.append(specialization_data)
 
-    return {
-        "results": results
-    }
-
-
-def get_doctor_display_name(doctor_data):
-    first_name = doctor_data["doctor_id__user__first_name"] or ""
-    last_name = doctor_data["doctor_id__user__last_name"] or ""
-    email = doctor_data["doctor_id__user__email"] or ""
-
-    full_name = f"{first_name} {last_name}".strip()
-
-    return full_name or email or "Unknown doctor"  
+    return {"results": results}
 
 
 def get_doctor_display_name(doctor):

@@ -59,13 +59,20 @@ class NotificationSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     groups = serializers.StringRelatedField(many=True, read_only=True)
+    roles = serializers.SerializerMethodField(read_only=True)
     patient_profile = PatientProfileSerializer(read_only=True, required=False)
     doctor_profile = DoctorProfileSerializer(read_only=True, required=False)
 
     class Meta:
         model = User
-        fields = ['id', 'email', 'first_name', 'last_name', 'phone', 'is_active', 'groups', 'patient_profile', 'doctor_profile']
+        fields = [
+            'id', 'email', 'first_name', 'last_name', 'phone', 'is_active',
+            'groups', 'roles', 'patient_profile', 'doctor_profile',
+        ]
         read_only_fields = ['id', 'is_active']
+
+    def get_roles(self, obj):
+        return [g.name for g in obj.groups.all()]
 
 
 class UserProfileSerializer(serializers.ModelSerializer):

@@ -2,7 +2,7 @@
 import { useRouter } from "vue-router";
 import { clearAuthData } from "../../api/auth";
 import { computed, onMounted, onBeforeUnmount, ref } from "vue";
-import { getAdminUsers, getPendingDoctors } from "../../api/admin";
+import { getAdminOverview } from "../../api/analytics";
 import StatCard from "../../components/StatCard.vue";
 import SkeletonCard from "../../components/SkeletonCard.vue";
 import EmptyState from "../../components/EmptyState.vue";
@@ -10,8 +10,7 @@ import BaseButton from "../../components/ui/BaseButton.vue";
 
 const router = useRouter();
 const user = JSON.parse(localStorage.getItem("user")|| "{}");
-const users = ref([]);
-const pendingDoctors= ref([]);
+const adminOverview = ref(null);
 const loading = ref(false);
 const errorMessage = ref("");
 
@@ -53,36 +52,23 @@ onBeforeUnmount(() => {
   }
 });
 
-function getUserGroup(user) {
-    return user.groups || [];
-}
-function hasGroup(user, group) {
-    return getUserGroup(user).includes(group);
-}
+const totalUsers = computed(() => adminOverview.value?.users?.total ?? 0);
+const totalPatients = computed(() => adminOverview.value?.users?.patients ?? 0);
+const totalDoctors = computed(() => adminOverview.value?.users?.doctors ?? 0);
+const totalReceptionists = computed(() => adminOverview.value?.users?.receptionists ?? 0);
+const totalAdmins = computed(() => adminOverview.value?.users?.admins ?? 0);
+const activeUsers = computed(() => adminOverview.value?.users?.active ?? 0);
+const inactiveUsers = computed(() => adminOverview.value?.users?.inactive ?? 0);
+const pendingDoctorCount = computed(() => adminOverview.value?.doctors?.pending ?? 0);
 
-const totalUsers = computed(() => users.value.length);
-const totalPatients = computed(() => users.value.filter((user)=> hasGroup(user, "Patients")).length);
-const totalDoctors = computed(() => users.value.filter((user)=> hasGroup(user, "Doctors")).length);
-const totalReceptionists = computed(() => users.value.filter((user)=> hasGroup(user, "Receptionists")).length);
-const totalAdmins = computed(() => users.value.filter((user)=> hasGroup(user, "Admins")).length);
-const activeUsers = computed(() => users.value.filter((user) => user.is_active).length);
-const inactiveUsers = computed(() => users.value.filter((user) => !user.is_active).length);
-
-async function loadDataOfAdminDashboard() {
-    loading.value = true;
-    errorMessage.value = "";
-    try{
-        const userData = await getAdminUsers();
-        users.value = userData;
-
-        const pendingDoctorsData = await getPendingDoctors();
-        pendingDoctors.value = pendingDoctorsData;
-    } catch(error){
-  console.log("Dashboard error:", error);
-  console.log("Status:", error.response && error.response.status);
-  console.log("Data:", error.response && error.response.data);
-  console.log("URL:", error.config && error.config.url);
-        if (error.response?.status === 401) {
+async function fetchDashboardData() {
+  loading.value = true;
+  errorMessage.value = "";
+  try {
+    adminOverview.value = await getAdminOverview();
+  } catch (error) {
+    adminOverview.value = null;
+    if (error.response?.status === 401) {
       errorMessage.value = "You are not authenticated. Please login again.";
       showToast(errorMessage.value, "error");
     } else if (error.response?.status === 403) {
@@ -92,13 +78,13 @@ async function loadDataOfAdminDashboard() {
       errorMessage.value = "Failed to load dashboard data.";
       showToast(errorMessage.value, "error");
     }
-    } finally {
-        loading.value = false;
-    }
+  } finally {
+    loading.value = false;
+  }
 }
 
-onMounted(() => {
-  loadDataOfAdminDashboard();
+onMounted(async () => {
+  await fetchDashboardData();
 });
 
 function logout() {
@@ -159,7 +145,7 @@ function logout() {
           </p>
         </div>
 
-        <BaseButton variant="primary" :loading="loading" @click="loadDataOfAdminDashboard">
+        <BaseButton variant="primary" :loading="loading" @click="fetchDashboardData">
           <span v-if="!loading">🔄 Refresh</span>
           <span v-else>Loading...</span>
         </BaseButton>
@@ -206,7 +192,7 @@ function logout() {
         <StatCard label="Inactive Users" :value="inactiveUsers" icon="⏸️" color="red" />
       </div>
       <div class="animate-fade-in" style="animation-delay: 700ms">
-        <StatCard label="Pending Doctors" :value="pendingDoctors.length" icon="⏳" color="amber" />
+        <StatCard label="Pending Doctors" :value="pendingDoctorCount" icon="⏳" color="amber" />
       </div>
     </div>
 

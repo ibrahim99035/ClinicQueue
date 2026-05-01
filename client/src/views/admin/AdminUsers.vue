@@ -1,6 +1,7 @@
 <script setup>
 import { computed, onMounted, onBeforeUnmount, ref, watch } from "vue";
-import { getAdminUsers, createStaffUser, updateUser, deleteUser } from "../../api/admin";
+import api from "../../api/client";
+import { createStaffUser, updateUser, deleteUser } from "../../api/admin";
 import PageHeader from "../../components/PageHeader.vue";
 import StatusBadge from "../../components/StatusBadge.vue";
 import SkeletonCard from "../../components/SkeletonCard.vue";
@@ -18,6 +19,7 @@ const saving = ref(false);
 const errorMessage = ref("");
 const successMessage = ref("");
 const deletingId = ref(null);
+const totalUsers = ref(0);
 
 const toast = ref({
   show: false,
@@ -81,7 +83,11 @@ const editForm = ref({
 });
 
 function getUserGroup(user) {
-    return user.groups || [];
+  const g = user.groups;
+  const r = user.roles;
+  if (Array.isArray(g) && g.length) return g;
+  if (Array.isArray(r) && r.length) return r;
+  return [];
 }
 
 function getPrimaryRoleOfUser(user) {
@@ -133,16 +139,20 @@ function formatName(user) {
 }
 
 async function loadUsers() {
-    loading.value = true;
-    errorMessage.value = "";  
-    
-    try{
-        users.value = await getAdminUsers();
-    }catch(error){
-        errorMessage.value = ApiErrorResponseFromBackend(error);
-    }finally{
-        loading.value = false;
-    }
+  loading.value = true;
+  errorMessage.value = "";
+
+  try {
+    const response = await api.get("/accounts/users/");
+    const data = response.data;
+    users.value = Array.isArray(data) ? data : data.results || [];
+    totalUsers.value =
+      typeof data.count === "number" ? data.count : users.value.length;
+  } catch (error) {
+    errorMessage.value = normalizeApiError(error);
+  } finally {
+    loading.value = false;
+  }
 }
 
 const filteredUsers = computed(()=>{
@@ -223,20 +233,20 @@ async function submitCreateUser() {
   saving.value = true;
 
   try {
-await createStaffUser({
-  email: createForm.value.email,
-  password: createForm.value.password,
-  first_name: createForm.value.first_name,
-  last_name: createForm.value.last_name,
-  phone: createForm.value.phone,
-  role: createForm.value.role,
-});
+    await createStaffUser({
+      email: createForm.value.email,
+      password: createForm.value.password,
+      first_name: createForm.value.first_name,
+      last_name: createForm.value.last_name,
+      phone: createForm.value.phone,
+      role: createForm.value.role,
+    });
 
-    successMessage.value = "Staff user created successfully.";
-    showToast(successMessage.value, "success");
+    await loadUsers();
     resetCreateForm();
     showCreateForm.value = false;
-    await loadUsers();
+    successMessage.value = "Staff user created successfully.";
+    showToast(successMessage.value, "success");
   } catch (error) {
     errorMessage.value = normalizeApiError(error);
     showToast(errorMessage.value, "error");
@@ -377,7 +387,7 @@ onMounted(() => {
     <PageHeader 
       title="Users Management"
       subtitle="View system users, create staff accounts, and update basic user information."
-      :badge="`${filteredUsers.length} result(s)`"
+      :badge="`${filteredUsers.length} result(s) · ${totalUsers} total loaded`"
       badgeColor="blue"
     />
 
@@ -536,7 +546,7 @@ onMounted(() => {
 
       <!-- Loading State -->
       <div v-if="loading" class="p-6">
-        <SkeletonCard type="row" count="3" />
+        <SkeletonCard type="row" :count="3" />
       </div>
 
       <!-- Empty State -->

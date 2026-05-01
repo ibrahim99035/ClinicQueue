@@ -151,7 +151,7 @@ const routes = [
 
   // Receptionist Routes
   {
-    path: "/reception",
+    path: "/receptionist",
     name: "ReceptionistLayout",
     component: ReceptionistLayout,
     meta: {
@@ -248,11 +248,11 @@ const router = createRouter({
 
 router.beforeEach(async (to, from) => {
   const accessToken = localStorage.getItem("access");
-  const userRoles = getStoredRoles();
   const auth = useAuthStore();
 
   if (!auth.isAuthenticated && accessToken) {
     auth.access = accessToken;
+
     try {
       await auth.getMe();
     } catch (e) {
@@ -260,13 +260,18 @@ router.beforeEach(async (to, from) => {
     }
   }
 
+  const userRoles = getStoredRoles();
+
   if (to.meta && to.meta.requiresAuth && !accessToken) {
     return { path: "/login", query: { redirect: to.fullPath } };
   }
 
   if (to.meta && to.meta.roles) {
     const allowedRoles = to.meta.roles;
-    const hasAllowedRole = allowedRoles.some((role) => userRoles.includes(role));
+    const hasAllowedRole = allowedRoles.some((role) =>
+      userRoles.includes(role)
+    );
+
     if (!hasAllowedRole) {
       return { path: "/unauthorized" };
     }

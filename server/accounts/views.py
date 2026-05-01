@@ -155,9 +155,16 @@ class DoctorsListView(APIView):
 
 
 class UserListView(ModelViewSet):
-    queryset = User.objects.select_related('patient_profile', 'doctor_profile').prefetch_related('groups')
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, IsAdmin]
+    pagination_class = None
+
+    def get_queryset(self):
+        return (
+            User.objects.select_related('patient_profile', 'doctor_profile')
+            .prefetch_related('groups')
+            .order_by('-id')
+        )
 
 
 class AdminUserCreateView(APIView):
