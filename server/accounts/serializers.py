@@ -1,10 +1,11 @@
 from django.contrib.auth.models import Group
 from accounts.models.patient import PatientProfile
 from accounts.models.doctor import DoctorProfile
+from accounts.models.notification import Notification
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from accounts.models.user import User
-from accounts.models.notification import Notification
+
 
 class PatientProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -12,15 +13,16 @@ class PatientProfileSerializer(serializers.ModelSerializer):
         fields = ['user', 'dateOfBirth', 'gender']
         read_only_fields = ['user']
 
+
 class DoctorProfileSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
-    approved_by_name = serializers.SerializerMethodField(read_only=True) 
-    
+    approved_by_name = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = DoctorProfile
         fields = ['id', 'user', 'specialization', 'consultationDuration', 'bio', 'is_approved', 'approved_by_name', 'approved_at']
         read_only_fields = ['id', 'is_approved', 'approved_by_name', 'approved_at']
-    
+
     def get_user(self, obj):
         return {
             'id': obj.user.id,
@@ -29,9 +31,10 @@ class DoctorProfileSerializer(serializers.ModelSerializer):
             'last_name': obj.user.last_name,
             'phone': obj.user.phone,
         }
-    
-    def get_approved_by_name(self, obj): 
+
+    def get_approved_by_name(self, obj):
         return obj.approved_by.first_name if obj.approved_by else None
+
 
 class NotificationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -39,9 +42,9 @@ class NotificationSerializer(serializers.ModelSerializer):
         fields = ['id', 'user', 'message', 'status', 'is_read', 'created_at']
         read_only_fields = ['id', 'created_at']
 
+
 class UserSerializer(serializers.ModelSerializer):
     groups = serializers.StringRelatedField(many=True, read_only=True)
-
     patient_profile = PatientProfileSerializer(read_only=True, required=False)
     doctor_profile = DoctorProfileSerializer(read_only=True, required=False)
 
@@ -49,6 +52,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'email', 'first_name', 'last_name', 'phone', 'is_active', 'groups', 'patient_profile', 'doctor_profile']
         read_only_fields = ['id', 'is_active']
+
 
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -58,6 +62,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         return super().update(instance, validated_data)
+
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
@@ -73,6 +78,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Passwords do not match.")
         if data['user_role'] not in ['patient', 'doctor']:
             raise serializers.ValidationError("user_role must be 'patient' or 'doctor'.")
+        # FIX: catch duplicate email early with a clean 400 instead of raw IntegrityError
+        if User.objects.filter(email=data['email']).exists():
+            raise serializers.ValidationError({"email": "A user with this email already exists."})
         return data
 
     def create(self, validated_data):
@@ -94,7 +102,22 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             user.is_active = False
             user.save(update_fields=['is_active'])
 
+            admin_users = User.objects.filter(groups__name='Admins')
+
+            Notification.objects.bulk_create([
+                Notification(
+                    user=admin,
+                    message=(
+                        f"New doctor registration pending approval: "
+                        f"{user.get_full_name() or user.email}"
+                    ),
+                    status='confirmation',
+                )
+                for admin in admin_users
+            ])
+
         return user
+
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     username_field = 'email'
