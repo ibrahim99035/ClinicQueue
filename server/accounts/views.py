@@ -140,6 +140,20 @@ class DoctorProfileView(APIView):
             return Response({"detail": "Doctor profile not found."}, status=status.HTTP_404_NOT_FOUND)
 
 
+class DoctorsListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        doctors = (
+            DoctorProfile.objects
+            .filter(is_approved=True, user__is_active=True, user__groups__name='Doctors')
+            .select_related('user')
+            .distinct()
+        )
+        serializer = DoctorProfileSerializer(doctors, many=True)
+        return Response(serializer.data)
+
+
 class UserListView(ModelViewSet):
     queryset = User.objects.select_related('patient_profile', 'doctor_profile').prefetch_related('groups')
     serializer_class = UserSerializer

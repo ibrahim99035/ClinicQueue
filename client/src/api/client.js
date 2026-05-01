@@ -36,6 +36,17 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    const requestUrl = config?.url || "";
+
+    const isAuthRequest =
+      requestUrl.includes("/accounts/login/") ||
+      requestUrl.includes("/accounts/register/") ||
+      requestUrl.includes("/accounts/token/refresh/");
+
+    if (isAuthRequest) {
+      return Promise.reject(error);
+    }
+
     if (response.status !== 401) {
       return Promise.reject(error);
     }
@@ -92,5 +103,4 @@ api.interceptors.response.use(
       });
   }
 );
-
 export default api;

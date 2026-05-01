@@ -56,7 +56,6 @@ export const useAuthStore = defineStore("auth", {
 
     logout() {
       this.clearAuth();
-      window.location = "/login";
     },
 
     async refreshAccessToken() {

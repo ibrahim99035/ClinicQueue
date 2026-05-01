@@ -40,16 +40,24 @@ import ConsultationCreate from "./views/emr/ConsultationCreate.vue";
 import ConsultationDetails from "./views/emr/ConsultationDetails.vue";
 import ConsultationEdit from "./views/emr/ConsultationEdit.vue";
 
+function getStoredRoles() {
+  try {
+    return JSON.parse(localStorage.getItem("roles")) || [];
+  } catch {
+    return [];
+  }
+}
+
 const routes = [
   {
     path: "/",
     redirect: (to) => {
-      const auth = useAuthStore();
+      const roles = getStoredRoles();
 
-      if (auth.isAdmin) return "/admin";
-      if (auth.isDoctor) return "/doctor";
-      if (auth.isReceptionist) return "/reception";
-      if (auth.isPatient) return "/patient";
+      if (roles.includes("Admins")) return "/admin";
+      if (roles.includes("Doctors")) return "/doctor";
+      if (roles.includes("Receptionists")) return "/reception";
+      if (roles.includes("Patients")) return "/patient";
       return "/login";
     },
   },
@@ -239,10 +247,12 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from) => {
+  const accessToken = localStorage.getItem("access");
+  const userRoles = getStoredRoles();
   const auth = useAuthStore();
 
-  if (!auth.isAuthenticated && localStorage.getItem("access")) {
-    auth.access = localStorage.getItem("access");
+  if (!auth.isAuthenticated && accessToken) {
+    auth.access = accessToken;
     try {
       await auth.getMe();
     } catch (e) {
@@ -250,19 +260,23 @@ router.beforeEach(async (to, from) => {
     }
   }
 
-  if (to.meta && to.meta.requiresAuth && !auth.isAuthenticated) {
+  if (to.meta && to.meta.requiresAuth && !accessToken) {
     return { path: "/login", query: { redirect: to.fullPath } };
   }
 
-  if (to.meta && to.meta.roles && !to.meta.roles.some((r) => auth.roles.includes(r))) {
-    return { path: "/unauthorized" };
+  if (to.meta && to.meta.roles) {
+    const allowedRoles = to.meta.roles;
+    const hasAllowedRole = allowedRoles.some((role) => userRoles.includes(role));
+    if (!hasAllowedRole) {
+      return { path: "/unauthorized" };
+    }
   }
 
-  if (to.meta && to.meta.guest && auth.isAuthenticated) {
-    if (auth.isAdmin) return { path: "/admin" };
-    if (auth.isDoctor) return { path: "/doctor" };
-    if (auth.isReceptionist) return { path: "/reception" };
-    return { path: "/patient" };
+  if (to.meta && to.meta.guest && accessToken) {
+    if (userRoles.includes("Admins")) return { path: "/admin" };
+    if (userRoles.includes("Doctors")) return { path: "/doctor" };
+    if (userRoles.includes("Receptionists")) return { path: "/reception" };
+    if (userRoles.includes("Patients")) return { path: "/patient" };
   }
 
   return true;

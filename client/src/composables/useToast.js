@@ -1,47 +1,52 @@
 import { ref } from "vue";
 
-const toasts = ref([]);
-let toastId = 0;
+const toastMessage = ref("");
+const toastType = ref("error");
+let toastTimer = null;
 
 export default function useToast() {
-  function add(message, type = "info", duration = 3000) {
-    const id = toastId++;
-    const toast = { id, message, type };
-    toasts.value.push(toast);
+  function showToast(message, type = "error") {
+    toastMessage.value = message;
+    toastType.value = type;
 
-    if (duration > 0) {
-      setTimeout(() => {
-        remove(id);
-      }, duration);
+    if (toastTimer) {
+      clearTimeout(toastTimer);
     }
 
-    return id;
+    toastTimer = setTimeout(() => {
+      toastMessage.value = "";
+    }, 30000);
   }
 
-  function remove(id) {
-    toasts.value = toasts.value.filter((t) => t.id !== id);
+  function closeToast() {
+    if (toastTimer) {
+      clearTimeout(toastTimer);
+    }
+
+    toastMessage.value = "";
   }
 
-  function success(message, duration = 3000) {
-    return add(message, "success", duration);
+  function success(message) {
+    showToast(message, "success");
   }
 
-  function error(message, duration = 4000) {
-    return add(message, "error", duration);
+  function error(message) {
+    showToast(message, "error");
   }
 
-  function info(message, duration = 3000) {
-    return add(message, "info", duration);
+  function info(message) {
+    showToast(message, "info");
   }
 
-  function warning(message, duration = 3000) {
-    return add(message, "warning", duration);
+  function warning(message) {
+    showToast(message, "warning");
   }
 
   return {
-    toasts,
-    add,
-    remove,
+    toastMessage,
+    toastType,
+    showToast,
+    closeToast,
     success,
     error,
     info,

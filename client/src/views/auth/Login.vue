@@ -1,46 +1,81 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import useAuth from "../../composables/useAuth";
+import { loginUser, saveAuthData, clearAuthData } from "../../api/auth";
+import useToast from "../../composables/useToast";
 
 const router = useRouter();
-const { login, roles } = useAuth();
+const { showToast } = useToast();
 const email = ref("");
 const password = ref("");
 const loading = ref(false);
-const errorMessage = ref("");
 
-async function handleLoginOfUser() {
-  errorMessage.value = "";
+async function handleLoginOfUser(event) {
+  event?.preventDefault?.();
+  event?.stopPropagation?.();
 
   if (!email.value) {
-    errorMessage.value = "Please enter your email.";
+    showToast("Please enter your email.", "error");
     return;
   }
 
   if (!password.value) {
-    errorMessage.value = "Please enter your password.";
+    showToast("Please enter your password.", "error");
     return;
   }
 
   loading.value = true;
-  try {
-    await login(email.value, password.value);
 
-    const userRoles = (roles && roles.value) || [];
+  try {
+    const response = await loginUser({
+      email: email.value,
+      password: password.value,
+    });
+
+    const data = response.data;
+
+    saveAuthData(data);
+
+    const userRoles = data.roles || [];
 
     if (userRoles.includes("Admins")) {
       router.push("/admin");
       return;
     }
 
-    // default redirect for non-admins
-    router.push("/");
-  } catch (error) {
-    errorMessage.value = "Login failed. Please check your email and password.";
-    if (error.response && error.response.data && error.response.data.detail) {
-      errorMessage.value = error.response.data.detail;
+    if (userRoles.includes("Doctors")) {
+      router.push("/doctor");
+      return;
     }
+
+    if (userRoles.includes("Patients")) {
+      router.push("/patient");
+      return;
+    }
+
+    if (userRoles.includes("Receptionists")) {
+      router.push("/receptionist");
+      return;
+    }
+
+    clearAuthData();
+    showToast("No valid role assigned to this account.", "error");
+  } catch (error) {
+    clearAuthData();
+
+    let message = "Login failed. Please check your email and password.";
+
+    const detail = error.response?.data?.detail;
+
+    if (detail) {
+      message = detail;
+    }
+
+    if (detail?.includes("No active account")) {
+      message = "Your doctor account is pending admin approval.";
+    }
+
+    showToast(message, "error");
   } finally {
     loading.value = false;
   }
@@ -58,7 +93,7 @@ async function handleLoginOfUser() {
         Clinic Appointment System Dashboard
       </p>
 
-      <form @submit.prevent="handleLoginOfUser">
+      <form @submit.prevent.stop novalidate>
         <div class="mb-5">
           <label class="mb-1.5 block font-semibold text-gray-700">
             Email
@@ -87,16 +122,10 @@ async function handleLoginOfUser() {
           />
         </div>
 
-        <p
-          v-if="errorMessage"
-          class="mb-4 rounded-lg bg-red-100 p-2.5 text-sm text-red-600"
-        >
-          {{ errorMessage }}
-        </p>
-
-        <button
-          type="submit"
+         <button
+          type="button"
           :disabled="loading"
+          @click="handleLoginOfUser"
           class="w-full cursor-pointer rounded-xl border-none bg-blue-600 px-3.5 py-3 text-base font-semibold text-white disabled:cursor-not-allowed disabled:bg-blue-300"
         >
           {{ loading ? "Logging in..." : "Login" }}

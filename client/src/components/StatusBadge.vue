@@ -4,7 +4,7 @@ import { computed } from "vue";
 const props = defineProps({
   status: {
     type: String,
-    required: true
+    default: 'UNKNOWN'
   },
   size: {
     type: String,
@@ -29,6 +29,11 @@ const statusConfig = {
     text: 'text-amber-700',
     dot: 'bg-amber-500'
   },
+  requested: {
+    bg: 'bg-yellow-100',
+    text: 'text-yellow-700',
+    dot: 'bg-yellow-500'
+  },
   approved: {
     bg: 'bg-green-100',
     text: 'text-green-700',
@@ -49,6 +54,11 @@ const statusConfig = {
     text: 'text-cyan-700',
     dot: 'bg-cyan-500'
   },
+  completed: {
+    bg: 'bg-green-100',
+    text: 'text-green-700',
+    dot: 'bg-green-500'
+  },
   done: {
     bg: 'bg-green-100',
     text: 'text-green-700',
@@ -63,6 +73,11 @@ const statusConfig = {
     bg: 'bg-gray-100',
     text: 'text-gray-700',
     dot: 'bg-gray-500'
+  },
+  unknown: {
+    bg: 'bg-slate-100',
+    text: 'text-slate-600',
+    dot: 'bg-slate-400'
   }
 };
 
@@ -72,13 +87,18 @@ const sizeClasses = {
   lg: 'px-4 py-2 text-base'
 };
 
-const config = computed(() =>
-  statusConfig[String(props.status || "").toLowerCase()] || statusConfig.pending
-);
+const config = computed(() => {
+  const statusKey = String(props.status || "UNKNOWN").toLowerCase();
+  return statusConfig[statusKey] || statusConfig.unknown;
+});
 
 const displayStatus = computed(() => {
-  const status = String(props.status || "pending");
-  return status.charAt(0).toUpperCase() + status.slice(1).replaceAll('_', ' ');
+  const status = String(props.status || "UNKNOWN");
+  return status
+    .toLowerCase()
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
 });
 </script>
 

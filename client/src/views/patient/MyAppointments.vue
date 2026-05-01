@@ -9,7 +9,7 @@
       Loading appointments...
     </div>
     <div
-      v-else-if="appointments.items.length === 0"
+      v-else-if="filteredAppointments.length === 0"
       class="bg-white rounded-lg shadow-md p-8 text-center text-gray-500"
     >
       <p>No appointments found</p>
@@ -18,62 +18,70 @@
       </router-link>
     </div>
 
+    <div
+      v-else-if="errorMessage"
+      class="bg-white rounded-lg shadow-md p-8 text-center text-red-600"
+    >
+      <p>{{ errorMessage }}</p>
+    </div>
+
     <div v-else class="space-y-4">
       <div
-        v-for="apt in appointments.items"
-        :key="apt.id"
+        v-for="appointment in filteredAppointments"
+        :key="appointment.id"
         class="bg-white rounded-lg shadow-md p-6 border-l-4"
-        :class="getStatusBorderColor(apt.status)"
+        :class="getStatusBorderColor(appointment.status)"
       >
         <div class="flex justify-between items-start mb-4">
           <div>
-            <h3 class="text-lg font-semibold">
-              Dr. {{ apt.doctor?.name || "Unknown" }}
+            <h3 class="text-lg font-bold text-slate-900">
+              {{
+                appointment.doctorName && appointment.doctorName !== "Unknown"
+                  ? `Dr. ${appointment.doctorName}`
+                  : "Dr. Unknown"
+              }}
             </h3>
-            <p class="text-sm text-gray-600">
-              {{ apt.doctor?.specialization }}
-            </p>
           </div>
-          <StatusBadge :status="apt.status" />
+          <StatusBadge :status="appointment.status || 'UNKNOWN'" />
         </div>
 
         <div class="grid md:grid-cols-2 gap-4 mb-4 text-sm">
           <div>
             <p class="text-gray-600">Date & Time</p>
-            <p class="font-semibold">{{ formatDateTime(apt.slot?.start) }}</p>
+            <p class="font-semibold text-slate-900">{{ formatDateTime(appointment.appointmentDateTime) }}</p>
           </div>
           <div>
             <p class="text-gray-600">Reason</p>
-            <p class="font-semibold">{{ apt.reason || "Not specified" }}</p>
+            <p class="font-semibold text-slate-900">{{ appointment.reason || "Not specified" }}</p>
           </div>
-          <div v-if="apt.status === 'checked_in'">
+          <div v-if="appointment.status === 'CHECKED_IN'">
             <p class="text-gray-600">Checked In</p>
-            <p class="font-semibold">{{ formatDateTime(apt.checked_in_at) }}</p>
+            <p class="font-semibold">{{ formatDateTime(appointment.checked_in_at) }}</p>
           </div>
-          <div v-if="apt.status === 'completed'">
+          <div v-if="appointment.status === 'COMPLETED'">
             <p class="text-gray-600">Completed</p>
-            <p class="font-semibold">{{ formatDateTime(apt.completed_at) }}</p>
+            <p class="font-semibold">{{ formatDateTime(appointment.completed_at) }}</p>
           </div>
         </div>
 
         <div class="flex gap-2 flex-wrap">
           <button
-            v-if="['requested', 'confirmed'].includes(apt.status)"
-            @click="openRescheduleModal(apt)"
+            v-if="['REQUESTED', 'CONFIRMED'].includes(appointment.status)"
+            @click="openRescheduleModal(appointment)"
             class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm"
           >
             Reschedule
           </button>
           <button
-            v-if="['requested', 'confirmed'].includes(apt.status)"
-            @click="cancelAppointment(apt.id)"
+            v-if="['REQUESTED', 'CONFIRMED'].includes(appointment.status)"
+            @click="cancelAppointment(appointment.id)"
             class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm"
           >
             Cancel
           </button>
           <router-link
-            v-if="apt.status === 'completed'"
-            :to="`/emr/appointments/${apt.id}/consultation`"
+            v-if="appointment.status === 'COMPLETED'"
+            :to="`/emr/appointments/${appointment.id}/consultation`"
             class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 text-sm inline-block"
           >
             View Consultation
@@ -81,27 +89,6 @@
         </div>
       </div>
 
-      <!-- Pagination -->
-      <div class="flex justify-center gap-2 mt-6">
-        <button
-          @click="appointments.prev()"
-          :disabled="!appointments.hasPrevPage.value"
-          class="px-4 py-2 border rounded-lg hover:bg-gray-100 disabled:opacity-50"
-        >
-          Previous
-        </button>
-        <span class="px-4 py-2">
-          Page {{ appointments.page.value }} of
-          {{ appointments.totalPages.value }}
-        </span>
-        <button
-          @click="appointments.next()"
-          :disabled="!appointments.hasNextPage.value"
-          class="px-4 py-2 border rounded-lg hover:bg-gray-100 disabled:opacity-50"
-        >
-          Next
-        </button>
-      </div>
     </div>
 
     <!-- Reschedule Modal -->
@@ -137,7 +124,7 @@
                   : 'border-gray-300 hover:border-blue-300',
               ]"
             >
-              {{ formatTime(slot.start_time) }}
+              {{ formatTime(slot.start_datetime) }}
             </button>
           </div>
         </div>
@@ -163,23 +150,21 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import PageHeader from "../../components/PageHeader.vue";
 import StatusBadge from "../../components/StatusBadge.vue";
-import usePagination from "../../composables/usePagination.js";
 import useToast from "../../composables/useToast.js";
-import { useAppointmentsStore } from "../../stores/appointments.js";
 import * as appointmentApi from "../../api/appointments.js";
 import * as schedulingApi from "../../api/scheduling.js";
 
 const toast = useToast();
-const appointmentsStore = useAppointmentsStore();
 
 const loading = ref(false);
-const appointments = usePagination(
-  (params) => appointmentApi.getAppointments(params),
-  10
-);
+const errorMessage = ref("");
+const appointments = ref([]);
+const filteredAppointments = computed(() => {
+  return appointments.value;
+});
 
 const showRescheduleModal = ref(false);
 const currentAppointment = ref(null);
@@ -189,36 +174,83 @@ const rescheduleSlots = ref([]);
 const rescheduling = ref(false);
 
 onMounted(async () => {
-  loading.value = true;
-  await appointments.fetch();
-  loading.value = false;
+  await fetchAppointments();
 });
+
+async function fetchAppointments() {
+  loading.value = true;
+  errorMessage.value = "";
+
+  try {
+    const response = await appointmentApi.getMyAppointments();
+    const data = response?.data ?? response;
+
+    console.log("Patient appointments raw response:", data);
+
+    const rawAppointments = Array.isArray(data)
+      ? data
+      : data.results || [];
+
+    appointments.value = rawAppointments.map(normalizeAppointment);
+
+    console.log("Normalized appointments:", appointments.value);
+  } catch (error) {
+    console.error("Failed to load appointments:", error);
+    errorMessage.value = "Failed to load appointments.";
+  } finally {
+    loading.value = false;
+  }
+}
+
+function normalizeAppointment(appointment) {
+  return {
+    ...appointment,
+    doctorName:
+      appointment.doctor_name ||
+      appointment.doctorName ||
+      "Unknown",
+    appointmentDateTime:
+      appointment.appointment_datetime ||
+      appointment.slot_time ||
+      appointment.slotTime ||
+      appointment.start_datetime ||
+      "",
+    reason:
+      appointment.reason ||
+      "Not specified",
+    status:
+      appointment.status ||
+      "UNKNOWN",
+    doctorId: appointment.doctor_id || null,
+  };
+}
 
 function getStatusBorderColor(status) {
   const colors = {
-    requested: "border-yellow-500",
-    confirmed: "border-blue-500",
-    checked_in: "border-purple-500",
-    completed: "border-green-500",
-    cancelled: "border-red-500",
-    no_show: "border-gray-500",
+    REQUESTED: "border-yellow-500",
+    CONFIRMED: "border-blue-500",
+    CHECKED_IN: "border-purple-500",
+    COMPLETED: "border-green-500",
+    CANCELLED: "border-red-500",
+    NO_SHOW: "border-gray-500",
   };
   return colors[status] || "border-gray-300";
 }
 
 function formatDateTime(dateTime) {
-  if (!dateTime) return "";
-  return new Date(dateTime).toLocaleString("en-US", {
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  if (!dateTime) return "Not scheduled";
+
+  const date = new Date(dateTime);
+  if (Number.isNaN(date.getTime())) {
+    return dateTime;
+  }
+
+  return date.toLocaleString();
 }
 
 function formatTime(timeString) {
   if (!timeString) return "";
-  return new Date(`2000-01-01T${timeString}`).toLocaleTimeString("en-US", {
+  return new Date(timeString).toLocaleTimeString("en-US", {
     hour: "2-digit",
     minute: "2-digit",
   });
@@ -229,7 +261,7 @@ async function cancelAppointment(appointmentId) {
   try {
     await appointmentApi.cancelAppointment(appointmentId);
     toast.success("Appointment cancelled");
-    await appointments.fetch();
+    await fetchAppointments();
   } catch (err) {
     toast.error("Failed to cancel appointment");
   }
@@ -252,7 +284,7 @@ async function fetchRescheduleSlots() {
   if (!rescheduleDate.value || !currentAppointment.value) return;
   try {
     rescheduleSlots.value = await schedulingApi.getAvailableSlots({
-      doctor: currentAppointment.value.doctor.id,
+      doctor: currentAppointment.value.doctorId,
       date: rescheduleDate.value,
     });
     rescheduleSlot.value = null;
@@ -266,10 +298,10 @@ async function submitReschedule() {
   rescheduling.value = true;
   try {
     await appointmentApi.rescheduleAppointment(currentAppointment.value.id, {
-      slot: rescheduleSlot.value.id,
+      new_slot: rescheduleSlot.value.id,
     });
     toast.success("Appointment rescheduled");
-    await appointments.fetch();
+    await fetchAppointments();
     closeRescheduleModal();
   } catch (err) {
     toast.error("Failed to reschedule appointment");

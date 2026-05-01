@@ -12,7 +12,7 @@ export function saveAuthData(data) {
     localStorage.setItem("access", data.access);
     localStorage.setItem("refresh", data.refresh);
     localStorage.setItem("user", JSON.stringify(data.user));
-    localStorage.setItem("roles", JSON.stringify(data.roles));
+    localStorage.setItem("roles", JSON.stringify(data.roles || []));
 }
 
 export function clearAuthData(){

@@ -109,7 +109,7 @@
                   : 'border-gray-300 hover:border-blue-300',
               ]"
             >
-              {{ formatTime(slot.start_time) }}
+              {{ formatTime(slot.start_datetime) }}
             </button>
           </div>
         </div>
@@ -254,13 +254,29 @@ const filteredDoctors = computed(() => {
 onMounted(async () => {
   loadingDoctors.value = true;
   try {
-    doctors.value = await appointmentApi.getDoctorsList();
+    const rawDoctors = await appointmentApi.getDoctorsList();
+    doctors.value = rawDoctors.map(normalizeDoctor);
   } catch (err) {
     toast.error("Failed to load doctors");
   } finally {
     loadingDoctors.value = false;
   }
 });
+
+function normalizeDoctor(doctor) {
+  const user = doctor.user || {};
+  const name =
+    [user.first_name, user.last_name].filter(Boolean).join(" ") ||
+    user.email ||
+    "Unknown";
+
+  return {
+    ...doctor,
+    name,
+    specialization: doctor.specialization || "",
+    consultation_duration: doctor.consultationDuration || doctor.consultation_duration || 15,
+  };
+}
 
 async function fetchSlots() {
   if (!selectedDoctor.value || !selectedDate.value) return;
@@ -280,7 +296,7 @@ async function fetchSlots() {
 
 function formatTime(timeString) {
   if (!timeString) return "";
-  return new Date(`2000-01-01T${timeString}`).toLocaleTimeString("en-US", {
+  return new Date(timeString).toLocaleTimeString("en-US", {
     hour: "2-digit",
     minute: "2-digit",
   });
@@ -289,7 +305,7 @@ function formatTime(timeString) {
 function formatBookingDateTime() {
   if (!selectedSlot.value || !selectedDate.value) return "";
   const date = new Date(selectedDate.value);
-  const time = formatTime(selectedSlot.value.start_time);
+  const time = formatTime(selectedSlot.value.start_datetime);
   return `${date.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
@@ -302,8 +318,8 @@ async function bookAppointment() {
   submitting.value = true;
   try {
     await appointmentApi.createAppointment({
-      doctor: selectedDoctor.value.id,
-      slot: selectedSlot.value.id,
+      doctor_id: selectedDoctor.value.id,
+      slot_id: selectedSlot.value.id,
       reason: appointmentReason.value,
     });
     toast.success("Appointment booked successfully!");
@@ -321,7 +337,7 @@ async function submitWaitingList() {
   waitingListSubmitting.value = true;
   try {
     await appointmentApi.joinWaitingList({
-      doctor: selectedDoctor.value.id,
+      doctor_id: selectedDoctor.value.id,
       preferred_date: selectedDate.value,
     });
     toast.success("Added to waiting list!");

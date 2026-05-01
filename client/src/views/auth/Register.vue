@@ -16,6 +16,7 @@ const form = reactive({
   email: "",
   phone: "",
   user_role: "patient",
+  specialization: "",
   password: "",
   password_confirm: "",
 });
@@ -49,6 +50,10 @@ function validateForm() {
     return "Passwords do not match.";
   }
 
+  if (form.user_role === "doctor" && !form.specialization) {
+    return "Please select a doctor specialization.";
+  }
+
   return "";
 }
 
@@ -66,7 +71,7 @@ async function handleRegister() {
   loading.value = true;
 
   try {
-    await registerUser({
+    const payload = {
       first_name: form.first_name,
       last_name: form.last_name,
       email: form.email,
@@ -74,7 +79,13 @@ async function handleRegister() {
       user_role: form.user_role,
       password: form.password,
       password_confirm: form.password_confirm,
-    });
+    };
+
+    if (form.user_role === "doctor") {
+      payload.specialization = form.specialization;
+    }
+
+    await registerUser(payload);
 
     successMessage.value = "Account created successfully. Please login.";
 
@@ -180,6 +191,27 @@ async function handleRegister() {
           >
             <option value="patient">Patient</option>
             <option value="doctor">Doctor</option>
+          </select>
+        </div>
+
+        <div v-if="form.user_role === 'doctor'">
+          <label class="block text-sm font-medium text-slate-700 mb-1">
+            Specialization
+          </label>
+          <select
+            v-model="form.specialization"
+            class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+          >
+            <option value="">Select specialization</option>
+            <option value="General Medicine">General Medicine</option>
+            <option value="Cardiology">Cardiology</option>
+            <option value="Dermatology">Dermatology</option>
+            <option value="ENT">ENT</option>
+            <option value="Pediatrics">Pediatrics</option>
+            <option value="Orthopedics">Orthopedics</option>
+            <option value="Neurology">Neurology</option>
+            <option value="Ophthalmology">Ophthalmology</option>
+            <option value="Dentistry">Dentistry</option>
           </select>
         </div>
 

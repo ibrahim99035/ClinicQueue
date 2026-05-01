@@ -21,6 +21,14 @@ export async function getAppointments(params) {
 
   return getListFromResponse(response);
 }
+
+export async function getMyAppointments(params = {}) {
+  const response = await api.get("/appointments/appointments/", {
+    params,
+  });
+  return response.data;
+}
+
 export async function getAppointmentDetails(appointmentId) {
   const response = await api.get(
     "/appointments/appointments/" + appointmentId + "/"
@@ -89,6 +97,6 @@ export async function joinWaitingList(data) {
 }
 
 export async function getDoctorsList() {
-  const response = await api.get("/accounts/users/?role=Doctors");
+  const response = await api.get("/accounts/doctors/");
   return getListFromResponse(response);
 }
