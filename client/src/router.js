@@ -58,6 +58,8 @@ const routes = [
     component: Login,
     meta: { guest: true },
   },
+
+  //Admin routes
   {
     path: "/unauthorized",
     name: "Unauthorized",

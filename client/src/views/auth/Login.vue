@@ -51,7 +51,7 @@ async function handleLoginOfUser() {
   <div class="min-h-screen flex items-center justify-center bg-gray-100 p-5">
     <div class="w-full max-w-[420px] bg-white rounded-2xl p-8 shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
       <h1 class="m-0 text-3xl font-bold text-gray-800">
-        Admin Login
+        Clinic Login
       </h1>
 
       <p class="mt-2 mb-6 text-gray-500">
