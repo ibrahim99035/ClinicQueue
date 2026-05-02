@@ -114,20 +114,20 @@ function getRoleValue(user) {
 function getRoleBadgeClass(user) {
   const role = getPrimaryRoleOfUser(user);
 
-  if (role === "Admin") return "bg-blue-100 text-blue-700";
-  if (role === "Receptionist") return "bg-amber-100 text-amber-800";
-  if (role === "Doctor") return "bg-green-100 text-green-700";
-  if (role === "Patient") return "bg-purple-100 text-purple-700";
+  if (role === "Admin") return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300";
+  if (role === "Receptionist") return "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300";
+  if (role === "Doctor") return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300";
+  if (role === "Patient") return "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300";
 
-  return "bg-gray-100 text-gray-700";
+  return "bg-gray-100 text-gray-700 dark:bg-slate-800 dark:text-slate-300";
 }
 
 function getStatusBadgeClass(user) {
   if (user.is_active) {
-    return "bg-green-100 text-green-700";
+    return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300";
   }
 
-  return "bg-red-100 text-red-700";
+  return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300";
 }
 
 function formatName(user) {
@@ -357,8 +357,8 @@ onMounted(() => {
         class="fixed right-6 top-6 z-50 w-full max-w-sm rounded-2xl border p-4 shadow-2xl"
         :class="
           toast.type === 'success'
-            ? 'border-green-200 bg-green-50 text-green-800'
-            : 'border-red-200 bg-red-50 text-red-800'
+            ? 'border-green-200 bg-green-50 text-green-800 dark:border-green-800 dark:bg-green-950/50 dark:text-green-300'
+            : 'border-red-200 bg-red-50 text-red-800 dark:border-red-800 dark:bg-red-950/50 dark:text-red-300'
         "
       >
         <div class="flex items-start justify-between gap-4">
@@ -395,9 +395,9 @@ onMounted(() => {
     <transition name="fade">
       <div
         v-if="errorMessage"
-        class="rounded-2xl border border-red-200 bg-red-50/80 px-6 py-4 text-sm font-semibold text-red-700 shadow-sm backdrop-blur"
+        class="rounded-2xl border border-red-200 bg-red-50/80 px-6 py-4 text-sm font-semibold text-red-700 shadow-sm backdrop-blur dark:border-red-800 dark:bg-red-950/50 dark:text-red-300"
       >
-        ⚠️ {{ errorMessage }}
+        {{ errorMessage }}
       </div>
     </transition>
 
@@ -405,26 +405,26 @@ onMounted(() => {
     <transition name="fade">
       <div
         v-if="successMessage"
-        class="rounded-2xl border border-green-200 bg-green-50/80 px-6 py-4 text-sm font-semibold text-green-700 shadow-sm backdrop-blur"
+        class="rounded-2xl border border-green-200 bg-green-50/80 px-6 py-4 text-sm font-semibold text-green-700 shadow-sm backdrop-blur dark:border-green-800 dark:bg-green-950/50 dark:text-green-300"
       >
-        ✅ {{ successMessage }}
+        {{ successMessage }}
       </div>
     </transition>
 
     <BaseModal v-model="showCreateForm" title="Create New Staff User">
       <form class="grid gap-4 md:grid-cols-2" @submit.prevent="submitCreateUser">
         <div class="flex flex-col gap-2">
-          <label class="text-sm font-semibold text-gray-700">First Name *</label>
+          <label class="text-sm font-semibold text-slate-700 dark:text-slate-300">First Name *</label>
           <input
             v-model="createForm.first_name"
             type="text"
-            class="rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            class="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             placeholder="First name"
           />
         </div>
 
         <div class="flex flex-col gap-2">
-          <label class="text-sm font-semibold text-gray-700">Last Name *</label>
+          <label class="text-sm font-semibold text-slate-700 dark:text-slate-300">Last Name *</label>
           <input
             v-model="createForm.last_name"
             type="text"
@@ -483,26 +483,26 @@ onMounted(() => {
     </BaseModal>
 
     <!-- Filters -->
-    <div class="grid items-end gap-4 rounded-2xl border border-white/50 bg-white/80 p-5 shadow-sm backdrop-blur md:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_auto]">
+    <div class="grid items-end gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_auto] dark:border-slate-800 dark:bg-slate-900">
       <div class="flex flex-col gap-2">
-        <label class="text-sm font-semibold text-gray-700">
+        <label class="text-sm font-semibold text-slate-700 dark:text-slate-300">
           Search
         </label>
         <input
           v-model="searchFilter"
           type="text"
-          class="rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+          class="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
           placeholder="Search by name, email, or phone"
         />
       </div>
 
       <div class="flex flex-col gap-2">
-        <label class="text-sm font-semibold text-gray-700">
+        <label class="text-sm font-semibold text-slate-700 dark:text-slate-300">
           Role
         </label>
         <select
           v-model="roleFilter"
-          class="rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+          class="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
         >
           <option value="all">All Roles</option>
           <option value="Admins">Admins</option>
@@ -513,12 +513,12 @@ onMounted(() => {
       </div>
 
       <div class="flex flex-col gap-2">
-        <label class="text-sm font-semibold text-gray-700">
+        <label class="text-sm font-semibold text-slate-700 dark:text-slate-300">
           Status
         </label>
         <select
           v-model="statusFilter"
-          class="rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+          class="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
         >
           <option value="all">All Statuses</option>
           <option value="active">Active</option>
@@ -534,12 +534,12 @@ onMounted(() => {
     </div>
 
     <!-- Table -->
-    <div class="overflow-hidden rounded-2xl border border-white/50 bg-white/80 shadow-sm backdrop-blur">
-      <div class="flex items-center justify-between border-b border-gray-200 px-6 py-5">
-        <h3 class="text-lg font-bold text-gray-900">
+    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div class="flex items-center justify-between border-b border-slate-200 px-6 py-5 dark:border-slate-800">
+        <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">
           Users List
         </h3>
-        <span class="rounded-full bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-700">
+        <span class="rounded-full bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
           {{ filteredUsers.length }} user(s)
         </span>
       </div>
@@ -564,18 +564,18 @@ onMounted(() => {
       <div v-else>
         <BaseTable :items="paginatedUsers" :loading="loading" title="Users List" table-class="min-w-[950px]">
           <template #thead>
-            <th class="px-6 py-4 font-bold text-gray-700">User</th>
-            <th class="px-6 py-4 font-bold text-gray-700">Phone</th>
-            <th class="px-6 py-4 font-bold text-gray-700">Role</th>
-            <th class="px-6 py-4 font-bold text-gray-700">Status</th>
-            <th class="w-52 px-6 py-4 font-bold text-gray-700">Actions</th>
+            <th class="px-6 py-4 font-bold text-slate-700 dark:text-slate-300">User</th>
+            <th class="px-6 py-4 font-bold text-slate-700 dark:text-slate-300">Phone</th>
+            <th class="px-6 py-4 font-bold text-slate-700 dark:text-slate-300">Role</th>
+            <th class="px-6 py-4 font-bold text-slate-700 dark:text-slate-300">Status</th>
+            <th class="w-52 px-6 py-4 font-bold text-slate-700 dark:text-slate-300">Actions</th>
           </template>
 
           <template #tbody="{ items }">
             <tr
               v-for="(user, index) in items"
               :key="user.id"
-              class="group border-b border-gray-100 transition-all duration-200 hover:bg-blue-50/50"
+              class="group border-b border-slate-100 transition-all duration-200 hover:bg-blue-50/50 dark:border-slate-800 dark:hover:bg-slate-800/50"
               :style="{ animationDelay: `${index * 50}ms` }"
             >
               <template v-if="editUserId === user.id">
@@ -610,12 +610,12 @@ onMounted(() => {
               <template v-else>
                 <td class="px-6 py-4">
                   <div class="flex flex-col gap-1">
-                    <strong class="font-bold text-gray-900">{{ formatName(user) }}</strong>
-                    <span class="text-sm text-gray-600">{{ user.email }}</span>
+                    <strong class="font-bold text-slate-900 dark:text-slate-100">{{ formatName(user) }}</strong>
+                    <span class="text-sm text-slate-600 dark:text-slate-400">{{ user.email }}</span>
                   </div>
                 </td>
 
-                <td class="px-6 py-4 text-gray-700">{{ user.phone || "—" }}</td>
+                <td class="px-6 py-4 text-slate-700 dark:text-slate-300">{{ user.phone || "—" }}</td>
 
                 <td class="px-6 py-4">
                   <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold" :class="getRoleBadgeClass(user)">{{ getPrimaryRoleOfUser(user) }}</span>

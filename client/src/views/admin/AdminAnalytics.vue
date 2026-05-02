@@ -2,8 +2,8 @@
   <div class="space-y-8">
     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
       <div>
-        <h1 class="text-3xl font-bold text-slate-900">Analytics</h1>
-        <p class="mt-1 text-sm text-slate-600">
+        <h1 class="text-3xl font-bold text-slate-900 dark:text-slate-100">Analytics</h1>
+        <p class="mt-1 text-sm text-slate-600 dark:text-slate-400">
           Monitor clinic performance, appointment trends, and doctor activity.
         </p>
       </div>
@@ -20,14 +20,14 @@
 
     <div
       v-if="analytics.error"
-      class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700"
+      class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 dark:border-red-800 dark:bg-red-950/50 dark:text-red-300"
     >
       {{ analytics.error }}
     </div>
 
     <div
       v-if="analytics.loading && !analytics.hasData"
-      class="rounded-xl border border-slate-200 bg-white px-4 py-6 text-center text-sm font-medium text-slate-600 shadow-sm"
+      class="rounded-xl border border-slate-200 bg-white px-4 py-6 text-center text-sm font-medium text-slate-600 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400"
     >
       Loading analytics data...
     </div>
@@ -45,10 +45,10 @@
       </section>
 
       <section class="grid grid-cols-1 gap-6 xl:grid-cols-2">
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div class="mb-4">
-            <h2 class="text-lg font-bold text-slate-900">Appointments by Status</h2>
-            <p class="text-sm text-slate-500">Distribution of appointments by lifecycle status.</p>
+            <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100">Appointments by Status</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Distribution of appointments by lifecycle status.</p>
           </div>
 
           <apexchart
@@ -62,10 +62,10 @@
           <p v-else class="py-12 text-center text-sm text-slate-500">No appointment status data available.</p>
         </div>
 
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div class="mb-4">
-            <h2 class="text-lg font-bold text-slate-900">Appointments by Month</h2>
-            <p class="text-sm text-slate-500">Booking trend based on appointment creation date.</p>
+            <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100">Appointments by Month</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Booking trend based on appointment creation date.</p>
           </div>
 
           <apexchart
@@ -80,10 +80,10 @@
         </div>
       </section>
 
-      <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div class="mb-4">
-          <h2 class="text-lg font-bold text-slate-900">Top Specializations</h2>
-          <p class="text-sm text-slate-500">Most requested specializations based on appointment count.</p>
+          <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100">Top Specializations</h2>
+          <p class="text-sm text-slate-500 dark:text-slate-400">Most requested specializations based on appointment count.</p>
         </div>
 
         <apexchart
@@ -97,11 +97,11 @@
         <p v-else class="py-12 text-center text-sm text-slate-500">No specialization data available.</p>
       </section>
 
-      <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div class="mb-4 flex items-end justify-between gap-4">
           <div>
-            <h2 class="text-lg font-bold text-slate-900">Doctor Performance</h2>
-            <p class="text-sm text-slate-500">Sortable summary of appointments per doctor.</p>
+            <h2 class="text-lg font-bold text-slate-900 dark:text-slate-100">Doctor Performance</h2>
+            <p class="text-sm text-slate-500 dark:text-slate-400">Sortable summary of appointments per doctor.</p>
           </div>
 
           <div class="text-xs text-slate-500">
@@ -126,8 +126,8 @@
               <td colspan="8" class="px-4 py-8 text-center text-slate-500">No doctor performance data available.</td>
             </tr>
 
-            <tr v-for="doctor in items" :key="doctor.doctor_id" class="border-b border-slate-100 text-slate-700">
-              <td class="px-4 py-3 font-semibold text-slate-900">{{ doctor.doctor_name }}</td>
+            <tr v-for="doctor in items" :key="doctor.doctor_id" class="border-b border-slate-100 text-slate-700 dark:border-slate-800 dark:text-slate-300">
+              <td class="px-4 py-3 font-semibold text-slate-900 dark:text-slate-100">{{ doctor.doctor_name }}</td>
               <td class="px-4 py-3">{{ doctor.specialization }}</td>
               <td class="px-4 py-3">{{ doctor.total_appointments }}</td>
               <td class="px-4 py-3">{{ doctor.confirmed_count }}</td>

@@ -45,3 +45,8 @@ export async function deleteUser(userId) {
   const response = await api.delete(`/accounts/users/${userId}/`);
   return response.data;
 }
+
+export async function getDashboardStats() {
+  const response = await api.get("/analytics/admin-overview/");
+  return response.data;
+}

@@ -8,6 +8,19 @@ export function registerUser(payload) {
   return api.post("/accounts/register/", payload);
 }
 
+export function getAuthUser() {
+  const user = localStorage.getItem("user");
+
+  if (!user) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(user);
+  } catch {
+    return null;
+  }
+}
 export function saveAuthData(data) {
     localStorage.setItem("access", data.access);
     localStorage.setItem("refresh", data.refresh);
@@ -74,7 +87,7 @@ export function getDefaultRouteByRole() {
   }
 
   if (roles.includes("Receptionists")) {
-    return "/receptionist";
+    return "/reception";
   }
 
   if (roles.includes("Patients")) {

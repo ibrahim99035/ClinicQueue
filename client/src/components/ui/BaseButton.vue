@@ -1,66 +1,52 @@
-<template>
-  <button
-    :type="type"
-    :disabled="disabled || loading"
-    :class="[
-      'inline-flex items-center justify-center gap-2 rounded px-4 py-2.5 font-mono text-[11px] uppercase tracking-mono-wide transition-all duration-150 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none',
-      variantClasses,
-      sizeClasses,
-    ]"
-    @click="$emit('click')"
-  >
-    <span v-if="loading" class="inline mr-2 font-mono text-[11px] uppercase tracking-mono-wide">⏳</span>
-    <slot />
-  </button>
-</template>
-
 <script setup>
-import { computed } from "vue";
+import { Loader2 } from "lucide-vue-next";
 
-const props = defineProps({
+defineProps({
   variant: {
     type: String,
-    default: "primary",
-    validator: (val) => ["primary", "secondary", "danger", "success", "ghost"].includes(val),
+    default: 'primary',
+    validator: (value) => ['primary', 'secondary', 'danger', 'success', 'ghost'].includes(value)
   },
   size: {
     type: String,
-    default: "md",
-    validator: (val) => ["sm", "md", "lg"].includes(val),
-  },
-  type: {
-    type: String,
-    default: "button",
-  },
-  disabled: {
-    type: Boolean,
-    default: false,
+    default: 'md',
+    validator: (value) => ['sm', 'md', 'lg'].includes(value)
   },
   loading: {
     type: Boolean,
     default: false,
   },
+  disabled: {
+    type: Boolean,
+    default: false,
+  }
 });
 
 defineEmits(["click"]);
 
-const variantClasses = computed(() => {
-  const variants = {
-    primary: "bg-gradient-to-r from-blue-600 to-cyan-500 text-white shadow-md hover:shadow-lg focus:ring-blue-300",
-    secondary: "bg-gray-200 text-gray-700 hover:bg-gray-300 focus:ring-gray-300",
-    danger: "bg-red-600 text-white shadow-md hover:bg-red-700 hover:shadow-lg focus:ring-red-300",
-    success: "bg-gradient-to-r from-green-600 to-emerald-500 text-white shadow-md hover:shadow-lg focus:ring-green-300",
-    ghost: "bg-transparent text-gray-700 hover:bg-gray-100 focus:ring-gray-300",
-  };
-  return variants[props.variant] || variants.primary;
-});
+const variantClasses = {
+  primary: 'bg-blue-600 text-white hover:bg-blue-700 disabled:bg-slate-300 disabled:text-slate-500 dark:disabled:bg-slate-700 dark:disabled:text-slate-500',
+  secondary: 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 disabled:opacity-50',
+  danger: 'bg-red-600 text-white hover:bg-red-700 disabled:bg-slate-300 disabled:text-slate-500 dark:disabled:bg-slate-700',
+  success: 'bg-green-600 text-white hover:bg-green-700 disabled:bg-slate-300 disabled:text-slate-500 dark:disabled:bg-slate-700',
+  ghost: 'bg-transparent text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 disabled:opacity-50'
+};
 
-const sizeClasses = computed(() => {
-  const sizes = {
-    sm: "px-3 py-1.5 text-xs",
-    md: "px-4 py-2.5 text-sm",
-    lg: "px-6 py-3 text-base",
-  };
-  return sizes[props.size] || sizes.md;
-});
+const sizeClasses = {
+  sm: 'px-3 py-1.5 text-xs rounded-lg',
+  md: 'px-4 py-2.5 text-sm rounded-xl',
+  lg: 'px-6 py-3 text-base rounded-xl'
+};
 </script>
+
+<template>
+  <button
+    :disabled="disabled || loading"
+    @click="$emit('click')"
+    class="inline-flex items-center justify-center gap-2 font-semibold transition-all duration-150 cursor-pointer disabled:cursor-not-allowed"
+    :class="[variantClasses[variant], sizeClasses[size]]"
+  >
+    <Loader2 v-if="loading" class="h-4 w-4 animate-spin" />
+    <slot />
+  </button>
+</template>

@@ -1,81 +1,77 @@
-<template>
-  <div v-if="totalItems > 0" class="flex items-center justify-between border-t border-border px-4 py-4">
-    <div class="font-sans text-sm text-text1">
-      Page {{ currentPage }} of {{ totalPages }} ({{ totalItems }} item{{ totalItems !== 1 ? "s" : "" }})
-    </div>
-
-    <div class="flex gap-2">
-      <button
-        type="button"
-        @click="previousPage"
-        :disabled="currentPage === 1"
-        class="rounded bg-transparent border border-border px-4 py-2 font-mono text-[11px] uppercase tracking-mono text-text2 hover:border-accent hover:text-text1 transition-all duration-150 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-      >
-        ← Previous
-      </button>
-
-      <div class="flex items-center gap-2 px-3 py-2">
-        <input
-          type="number"
-          :value="currentPage"
-          :min="1"
-          :max="totalPages"
-          @change="goToPage"
-          class="w-12 rounded border border-border bg-surface px-2 py-1 text-center font-mono text-sm text-text1 outline-none transition-all duration-150 focus:border-accent focus:ring-2 focus:ring-accent/10"
-        />
-        <span class="font-sans text-sm text-text2">/ {{ totalPages }}</span>
-      </div>
-
-      <button
-        type="button"
-        @click="nextPage"
-        :disabled="currentPage === totalPages"
-        class="rounded bg-transparent border border-border px-4 py-2 font-mono text-[11px] uppercase tracking-mono text-text2 hover:border-accent hover:text-text1 transition-all duration-150 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-      >
-        Next →
-      </button>
-    </div>
-  </div>
-</template>
-
 <script setup>
 import { computed } from "vue";
+import { ChevronLeft, ChevronRight } from "lucide-vue-next";
 
 const props = defineProps({
   currentPage: {
     type: Number,
-    required: true,
+    default: 1,
   },
-  itemsPerPage: {
+  totalPages: {
     type: Number,
-    required: true,
-  },
-  totalItems: {
-    type: Number,
-    required: true,
+    default: 1,
   },
 });
 
-const emit = defineEmits(["update:currentPage"]);
+const emit = defineEmits(["page-change"]);
 
-const totalPages = computed(() => Math.ceil(props.totalItems / props.itemsPerPage) || 1);
+const pages = computed(() => {
+  const pagesArray = [];
+  const currentPage = props.currentPage;
+  const totalPages = props.totalPages;
 
-function previousPage() {
-  if (props.currentPage > 1) {
-    emit("update:currentPage", props.currentPage - 1);
+  let start = Math.max(1, currentPage - 2);
+  let end = Math.min(totalPages, currentPage + 2);
+
+  if (end - start < 4) {
+    if (start === 1) {
+      end = Math.min(totalPages, start + 4);
+    } else {
+      start = Math.max(1, end - 4);
+    }
   }
-}
 
-function nextPage() {
-  if (props.currentPage < totalPages.value) {
-    emit("update:currentPage", props.currentPage + 1);
+  for (let i = start; i <= end; i++) {
+    pagesArray.push(i);
   }
-}
 
-function goToPage(e) {
-  const page = parseInt(e.target.value);
-  if (page >= 1 && page <= totalPages.value) {
-    emit("update:currentPage", page);
-  }
-}
+  return pagesArray;
+});
 </script>
+
+<template>
+  <div class="flex flex-wrap items-center gap-2" v-if="totalPages > 1">
+    <!-- Previous -->
+    <button
+      @click="emit('page-change', currentPage - 1)"
+      :disabled="currentPage === 1"
+      class="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+    >
+      <ChevronLeft class="h-4 w-4" />
+    </button>
+
+    <!-- Page numbers -->
+    <button
+      v-for="page in pages"
+      :key="page"
+      @click="emit('page-change', page)"
+      :class="[
+        'flex h-9 w-9 items-center justify-center rounded-lg text-sm font-semibold transition',
+        page === currentPage
+          ? 'bg-blue-600 text-white'
+          : 'border border-slate-200 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800'
+      ]"
+    >
+      {{ page }}
+    </button>
+
+    <!-- Next -->
+    <button
+      @click="emit('page-change', currentPage + 1)"
+      :disabled="currentPage === totalPages"
+      class="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+    >
+      <ChevronRight class="h-4 w-4" />
+    </button>
+  </div>
+</template>

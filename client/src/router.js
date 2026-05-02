@@ -151,7 +151,7 @@ const routes = [
 
   // Receptionist Routes
   {
-    path: "/receptionist",
+    path: "/reception",
     name: "ReceptionistLayout",
     component: ReceptionistLayout,
     meta: {

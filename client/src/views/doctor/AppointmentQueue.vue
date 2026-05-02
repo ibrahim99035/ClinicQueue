@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-6 bg-bg text-text1 font-sans">
+  <div class="space-y-6 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans">
     <div class="flex items-center justify-between gap-4">
       <div>
         <PageHeader 
@@ -9,16 +9,16 @@
       </div>
       <button
         @click="refreshQueue"
-        class="rounded bg-accent px-4 py-2 font-mono text-[11px] uppercase tracking-mono-wide text-black transition-all duration-150 cursor-pointer hover:bg-accent-dim hover:-translate-y-px"
+        class="rounded bg-blue-600 px-4 py-2 font-mono text-[11px] uppercase tracking-wider text-white transition-all duration-150 cursor-pointer hover:bg-blue-700 hover:-translate-y-px"
       >
         Refresh
       </button>
     </div>
 
-    <div v-if="loading" class="py-8 text-center font-sans text-sm text-text2">
+    <div v-if="loading" class="py-8 text-center font-sans text-sm text-slate-500 dark:text-slate-400">
       Loading queue...
     </div>
-    <div v-else-if="queue.length === 0" class="rounded border border-border bg-surface p-8 text-center font-sans text-sm text-text2">
+    <div v-else-if="queue.length === 0" class="rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 text-center font-sans text-sm text-slate-500 dark:text-slate-400">
       <p>No patients checked in</p>
     </div>
 
@@ -26,30 +26,30 @@
       <div
         v-for="appointment in queue"
         :key="appointment.id"
-        class="rounded border border-border bg-surface p-4"
+        class="rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4"
       >
         <div class="mb-4 flex items-start justify-between gap-4">
           <div>
-            <h3 class="font-sans text-lg font-semibold text-text1">
+            <h3 class="font-sans text-lg font-semibold text-slate-900 dark:text-slate-100">
               {{ appointment.patient?.user?.name || "Patient" }}
             </h3>
-            <p class="font-mono text-[11px] uppercase tracking-mono text-text2">
+            <p class="font-mono text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
               Check-in: {{ formatDateTime(appointment.checked_in_at) }}
             </p>
-            <p class="mt-1 font-mono text-[11px] uppercase tracking-mono text-text2">
+            <p class="mt-1 font-mono text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
               Waiting: {{ getWaitingDuration(appointment.checked_in_at) }} minutes
             </p>
           </div>
         </div>
 
         <div class="mb-4">
-          <p class="font-mono text-[11px] uppercase tracking-mono text-text2">Reason</p>
-          <p class="font-sans text-sm text-text1">{{ appointment.reason || "Not specified" }}</p>
+          <p class="font-mono text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Reason</p>
+          <p class="font-sans text-sm text-slate-900 dark:text-slate-100">{{ appointment.reason || "Not specified" }}</p>
         </div>
 
         <router-link
           :to="`/emr/appointments/${appointment.id}/consultation/create`"
-          class="inline-flex items-center justify-center rounded bg-accent px-4 py-2 font-mono text-[11px] uppercase tracking-mono-wide text-black transition-all duration-150 cursor-pointer hover:bg-accent-dim hover:-translate-y-px"
+          class="inline-flex items-center justify-center rounded bg-blue-600 px-4 py-2 font-mono text-[11px] uppercase tracking-wider text-white transition-all duration-150 cursor-pointer hover:bg-blue-700 hover:-translate-y-px"
         >
           Start Consultation
         </router-link>

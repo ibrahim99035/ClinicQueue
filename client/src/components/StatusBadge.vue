@@ -15,68 +15,68 @@ const props = defineProps({
 
 const statusConfig = {
   active: {
-    bg: 'bg-green-100',
-    text: 'text-green-700',
+    bg: 'bg-green-100 dark:bg-green-900/30',
+    text: 'text-green-700 dark:text-green-300',
     dot: 'bg-green-500'
   },
   inactive: {
-    bg: 'bg-red-100',
-    text: 'text-red-700',
+    bg: 'bg-red-100 dark:bg-red-900/30',
+    text: 'text-red-700 dark:text-red-300',
     dot: 'bg-red-500'
   },
   pending: {
-    bg: 'bg-amber-100',
-    text: 'text-amber-700',
+    bg: 'bg-amber-100 dark:bg-amber-900/30',
+    text: 'text-amber-700 dark:text-amber-300',
     dot: 'bg-amber-500'
   },
   requested: {
-    bg: 'bg-yellow-100',
-    text: 'text-yellow-700',
+    bg: 'bg-yellow-100 dark:bg-yellow-900/30',
+    text: 'text-yellow-700 dark:text-yellow-300',
     dot: 'bg-yellow-500'
   },
   approved: {
-    bg: 'bg-green-100',
-    text: 'text-green-700',
+    bg: 'bg-green-100 dark:bg-green-900/30',
+    text: 'text-green-700 dark:text-green-300',
     dot: 'bg-green-500'
   },
   cancelled: {
-    bg: 'bg-gray-100',
-    text: 'text-gray-700',
-    dot: 'bg-gray-500'
+    bg: 'bg-red-100 dark:bg-red-900/30',
+    text: 'text-red-700 dark:text-red-300',
+    dot: 'bg-red-500'
   },
   confirmed: {
-    bg: 'bg-blue-100',
-    text: 'text-blue-700',
+    bg: 'bg-blue-100 dark:bg-blue-900/30',
+    text: 'text-blue-700 dark:text-blue-300',
     dot: 'bg-blue-500'
   },
   checked_in: {
-    bg: 'bg-cyan-100',
-    text: 'text-cyan-700',
-    dot: 'bg-cyan-500'
+    bg: 'bg-purple-100 dark:bg-purple-900/30',
+    text: 'text-purple-700 dark:text-purple-300',
+    dot: 'bg-purple-500'
   },
   completed: {
-    bg: 'bg-green-100',
-    text: 'text-green-700',
+    bg: 'bg-green-100 dark:bg-green-900/30',
+    text: 'text-green-700 dark:text-green-300',
     dot: 'bg-green-500'
   },
   done: {
-    bg: 'bg-green-100',
-    text: 'text-green-700',
+    bg: 'bg-green-100 dark:bg-green-900/30',
+    text: 'text-green-700 dark:text-green-300',
     dot: 'bg-green-500'
   },
   no_show: {
-    bg: 'bg-red-100',
-    text: 'text-red-700',
-    dot: 'bg-red-500'
+    bg: 'bg-slate-100 dark:bg-slate-800/50',
+    text: 'text-slate-700 dark:text-slate-300',
+    dot: 'bg-slate-500'
   },
   expired: {
-    bg: 'bg-gray-100',
-    text: 'text-gray-700',
-    dot: 'bg-gray-500'
+    bg: 'bg-slate-100 dark:bg-slate-800/50',
+    text: 'text-slate-600 dark:text-slate-400',
+    dot: 'bg-slate-400'
   },
   unknown: {
-    bg: 'bg-slate-100',
-    text: 'text-slate-600',
+    bg: 'bg-slate-100 dark:bg-slate-800/50',
+    text: 'text-slate-600 dark:text-slate-400',
     dot: 'bg-slate-400'
   }
 };
@@ -104,8 +104,8 @@ const displayStatus = computed(() => {
 
 <template>
   <div
-    class="inline-flex items-center gap-2 rounded border px-2 py-0.5 font-mono text-[10px] uppercase tracking-mono-wide transition-all duration-150 cursor-pointer"
-    :class="[config.bg, config.text, sizeClasses[props.size]]"
+    class="inline-flex items-center gap-2 rounded-full border font-medium transition-all duration-150"
+    :class="[config.bg, config.text, sizeClasses[props.size], 'border-transparent']"
   >
     <span class="inline-block h-2 w-2 rounded-full" :class="config.dot"></span>
     <span>{{ displayStatus }}</span>

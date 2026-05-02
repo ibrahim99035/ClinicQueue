@@ -1,26 +1,45 @@
+<script setup>
+defineProps({
+  items: {
+    type: Array,
+    default: () => []
+  },
+  loading: {
+    type: Boolean,
+    default: false,
+  },
+  title: {
+    type: String,
+    default: null,
+  },
+  tableClass: {
+    type: String,
+    default: '',
+  },
+});
+</script>
+
 <template>
-  <div class="overflow-hidden rounded border border-border bg-surface">
-    <div v-if="title" class="flex items-center justify-between border-b border-border px-4 py-4">
-      <h3 class="font-sans font-semibold text-base text-text1">{{ title }}</h3>
-      <slot name="toolbar" />
+  <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <!-- Toolbar -->
+    <div
+      v-if="title || $slots.toolbar"
+      class="flex flex-col gap-3 border-b border-slate-200 px-6 py-4 dark:border-slate-800 md:flex-row md:items-center md:justify-between"
+    >
+      <h3 v-if="title" class="text-lg font-bold text-slate-900 dark:text-slate-100">
+        {{ title }}
+      </h3>
+
+      <div v-if="$slots.toolbar" class="flex items-center gap-3">
+        <slot name="toolbar" />
+      </div>
     </div>
 
-    <div v-if="loading" class="p-4">
-      <slot name="loading">
-        <div class="font-sans text-sm text-text2">Loading...</div>
-      </slot>
-    </div>
-
-    <div v-else-if="items.length === 0" class="p-4">
-      <slot name="empty">
-        <div class="font-sans text-sm text-text2">No items found.</div>
-      </slot>
-    </div>
-
-    <div v-else class="overflow-x-auto">
-      <table :class="['w-full border-collapse text-left', tableClass]">
+    <!-- Table -->
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-sm" :class="tableClass">
         <thead>
-          <tr class="bg-surface2">
+          <tr class="border-b border-slate-200 bg-slate-50 text-xs uppercase tracking-wider text-slate-500 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400">
             <slot name="thead" />
           </tr>
         </thead>
@@ -31,29 +50,12 @@
       </table>
     </div>
 
-    <div v-if="$slots.pagination" class="border-t border-border px-4 py-4">
+    <!-- Pagination Footer -->
+    <div
+      v-if="$slots.pagination"
+      class="border-t border-slate-200 px-6 py-3 dark:border-slate-800"
+    >
       <slot name="pagination" />
     </div>
   </div>
 </template>
-
-<script setup>
-const props = defineProps({
-  items: {
-    type: Array,
-    default: () => [],
-  },
-  loading: {
-    type: Boolean,
-    default: false,
-  },
-  title: {
-    type: String,
-    default: "",
-  },
-  tableClass: {
-    type: String,
-    default: "min-w-[900px]",
-  },
-});
-</script>

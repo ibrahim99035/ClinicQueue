@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-6 bg-bg text-text1 font-sans">
+  <div class="space-y-6 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans">
     <PageHeader
       title="Reception Dashboard"
       subtitle="Overview of appointments today"
@@ -23,18 +23,18 @@
       />
     </div>
 
-    <div class="rounded border border-border bg-surface p-4">
-      <h2 class="mb-4 font-sans text-xl font-bold leading-tight text-text1">Quick Actions</h2>
+    <div class="rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4">
+      <h2 class="mb-4 font-sans text-xl font-bold leading-tight text-slate-900 dark:text-slate-100">Quick Actions</h2>
       <div class="space-y-2">
         <router-link
           to="/reception/check-in"
-          class="block rounded border border-border bg-surface2 px-4 py-3 text-center font-mono text-[11px] uppercase tracking-mono text-text1 transition-all duration-150 cursor-pointer hover:border-accent hover:text-accent"
+          class="block rounded border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 px-4 py-3 text-center font-mono text-[11px] uppercase tracking-wide text-slate-900 dark:text-slate-100 transition-all duration-150 cursor-pointer hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400"
         >
           Go to Check-In Desk
         </router-link>
         <router-link
           to="/reception/slots"
-          class="block rounded border border-border bg-surface2 px-4 py-3 text-center font-mono text-[11px] uppercase tracking-mono text-text1 transition-all duration-150 cursor-pointer hover:border-accent hover:text-accent"
+          class="block rounded border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 px-4 py-3 text-center font-mono text-[11px] uppercase tracking-wide text-slate-900 dark:text-slate-100 transition-all duration-150 cursor-pointer hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400"
         >
           Generate Appointment Slots
         </router-link>

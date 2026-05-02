@@ -1,5 +1,7 @@
 <script setup>
-defineProps({
+import { computed } from "vue";
+
+const props = defineProps({
   label: {
     type: String,
     required: true
@@ -21,82 +23,50 @@ defineProps({
 
 const colorClasses = {
   blue: {
-    bg: 'bg-blue-50',
-    icon: 'bg-blue-100 text-blue-700',
-    text: 'text-blue-600'
+    iconBg: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300',
   },
   green: {
-    bg: 'bg-green-50',
-    icon: 'bg-green-100 text-green-700',
-    text: 'text-green-600'
+    iconBg: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
   },
   red: {
-    bg: 'bg-red-50',
-    icon: 'bg-red-100 text-red-700',
-    text: 'text-red-600'
+    iconBg: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
   },
   amber: {
-    bg: 'bg-amber-50',
-    icon: 'bg-amber-100 text-amber-700',
-    text: 'text-amber-600'
+    iconBg: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300',
   },
   purple: {
-    bg: 'bg-purple-50',
-    icon: 'bg-purple-100 text-purple-700',
-    text: 'text-purple-600'
+    iconBg: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300',
   },
   cyan: {
-    bg: 'bg-cyan-50',
-    icon: 'bg-cyan-100 text-cyan-700',
-    text: 'text-cyan-600'
+    iconBg: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300',
   }
 };
+
+const iconBgClass = computed(() => colorClasses[props.color]?.iconBg || colorClasses.blue.iconBg);
 </script>
 
 <template>
-  <div 
-    class="group relative overflow-hidden rounded border border-border bg-surface p-4 transition-all duration-150 hover:border-accent/30"
-    :class="colorClasses[color].bg"
+  <div
+    class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
   >
-    <!-- Decorative gradient background -->
-    <div class="absolute inset-0 -z-10 opacity-0 transition-opacity duration-150 group-hover:opacity-5"
-      :class="colorClasses[color].text"
-    ></div>
-
     <!-- Icon -->
     <div
-      v-if="icon"
-      class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded font-bold text-lg transition-transform duration-150 group-hover:scale-105"
-      :class="colorClasses[color].icon"
+      v-if="$slots.icon || icon"
+      class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl transition-transform duration-200 group-hover:scale-105"
+      :class="iconBgClass"
     >
-      {{ icon }}
+      <slot name="icon">
+        <span class="text-lg font-bold">{{ icon }}</span>
+      </slot>
     </div>
 
     <!-- Content -->
-    <div class="flex flex-col gap-3">
-      <span class="font-mono text-[11px] uppercase tracking-mono text-text2">
-        {{ label }}
-      </span>
+    <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">
+      {{ label }}
+    </p>
 
-      <strong class="font-mono text-sm tabular-nums text-text1">
-        {{ value }}
-      </strong>
-    </div>
-
-    <!-- Animated border on hover -->
-    <div class="absolute inset-0 -z-10 rounded border border-transparent transition-colors duration-150 group-hover:border-current"
-      :class="colorClasses[color].text"
-    ></div>
+    <p class="mt-2 text-3xl font-bold text-slate-900 dark:text-slate-100">
+      {{ value }}
+    </p>
   </div>
 </template>
-
-<style scoped>
-@keyframes subtle-float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-2px); }
-}
-
-.group:hover {
-  animation: subtle-float 3s ease-in-out infinite;
-}
-</style>

@@ -593,15 +593,15 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6">
+  <div class="min-h-screen p-6">
 <Transition name="toast-slide">
   <div
     v-if="toast.show"
     class="fixed right-6 top-6 z-50 w-full max-w-sm rounded-2xl border p-4 shadow-2xl"
     :class="
       toast.type === 'success'
-        ? 'border-green-200 bg-green-50 text-green-800'
-        : 'border-red-200 bg-red-50 text-red-800'
+        ? 'border-green-200 bg-green-50 text-green-800 dark:border-green-800 dark:bg-green-950/50 dark:text-green-300'
+        : 'border-red-200 bg-red-50 text-red-800 dark:border-red-800 dark:bg-red-950/50 dark:text-red-300'
     "
   >
     <div class="flex items-start justify-between gap-4">
@@ -629,7 +629,7 @@ onMounted(() => {
     <div class="mx-auto flex max-w-7xl flex-col gap-6">
 
       <!-- Header -->
-      <div class="rounded-3xl bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white shadow-lg">
+      <div class="rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white shadow-sm border border-slate-200 dark:border-slate-700">
         <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <p class="mb-2 text-sm font-semibold uppercase tracking-wide text-blue-100">
@@ -658,44 +658,44 @@ onMounted(() => {
 
       <!-- Summary Cards -->
       <div class="grid gap-5 md:grid-cols-3">
-        <div class="rounded-3xl border border-white/70 bg-white/85 p-6 shadow-sm backdrop-blur transition hover:-translate-y-1 hover:shadow-md">
-          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100 text-lg font-bold text-blue-700">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-lg font-bold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
             Dr
           </div>
 
-          <span class="text-sm font-semibold text-slate-500">
+          <span class="text-sm font-semibold text-slate-500 dark:text-slate-400">
             Doctors
           </span>
 
-          <strong class="mt-2 block text-3xl font-bold text-slate-900">
+          <strong class="mt-2 block text-3xl font-bold text-slate-900 dark:text-slate-100">
             {{ doctors.length }}
           </strong>
         </div>
 
-        <div class="rounded-3xl border border-white/70 bg-white/85 p-6 shadow-sm backdrop-blur transition hover:-translate-y-1 hover:shadow-md">
-          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-green-100 text-lg font-bold text-green-700">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 text-lg font-bold text-green-700 dark:bg-green-900/30 dark:text-green-300">
             W
           </div>
 
-          <span class="text-sm font-semibold text-slate-500">
+          <span class="text-sm font-semibold text-slate-500 dark:text-slate-400">
             Weekly Schedules
           </span>
 
-          <strong class="mt-2 block text-3xl font-bold text-slate-900">
+          <strong class="mt-2 block text-3xl font-bold text-slate-900 dark:text-slate-100">
             {{ weeklySchedules.length }}
           </strong>
         </div>
 
-        <div class="rounded-3xl border border-white/70 bg-white/85 p-6 shadow-sm backdrop-blur transition hover:-translate-y-1 hover:shadow-md">
-          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-lg font-bold text-amber-700">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 text-lg font-bold text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
             !
           </div>
 
-          <span class="text-sm font-semibold text-slate-500">
+          <span class="text-sm font-semibold text-slate-500 dark:text-slate-400">
             Exceptions
           </span>
 
-          <strong class="mt-2 block text-3xl font-bold text-slate-900">
+          <strong class="mt-2 block text-3xl font-bold text-slate-900 dark:text-slate-100">
             {{ exceptions.length }}
           </strong>
         </div>
@@ -705,8 +705,8 @@ onMounted(() => {
       <div class="grid gap-6 xl:grid-cols-2">
 
         <!-- Create Weekly Schedule -->
-        <div class="rounded-3xl border border-white/70 bg-white/90 p-6 shadow-sm backdrop-blur">
-          <h3 class="text-xl font-bold text-slate-900">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <h3 class="text-xl font-bold text-slate-900 dark:text-slate-100">
             Create Weekly Schedule
           </h3>
 
@@ -715,13 +715,13 @@ onMounted(() => {
             class="mt-5 grid gap-4 md:grid-cols-2"
           >
             <div class="md:col-span-2">
-              <label class="mb-1.5 block text-sm font-semibold text-slate-700">
+              <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">
                 Doctor *
               </label>
 
               <select
                 v-model="scheduleForm.doctor"
-                class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
               >
                 <option value="">Select doctor</option>
                 <option
@@ -735,13 +735,13 @@ onMounted(() => {
             </div>
 
             <div>
-              <label class="mb-1.5 block text-sm font-semibold text-slate-700">
+              <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">
                 Day *
               </label>
 
               <select
                 v-model="scheduleForm.day_of_week"
-                class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
               >
                 <option
                   v-for="day in dayOptions"
@@ -754,19 +754,19 @@ onMounted(() => {
             </div>
 
             <div>
-              <label class="mb-1.5 block text-sm font-semibold text-slate-700">
+              <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">
                 Start Time *
               </label>
 
               <input
                 v-model="scheduleForm.start_time"
                 type="time"
-                class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
               />
             </div>
 
             <div>
-              <label class="mb-1.5 block text-sm font-semibold text-slate-700">
+              <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">
                 End Time *
               </label>
 
@@ -777,7 +777,7 @@ onMounted(() => {
               />
             </div>
 
-            <label class="flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2.5 text-sm font-semibold text-slate-700">
+            <label class="flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2.5 text-sm font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
               <input
                 v-model="scheduleForm.is_active"
                 type="checkbox"
@@ -798,7 +798,7 @@ onMounted(() => {
               <button
                 type="button"
                 @click="resetScheduleForm"
-                class="rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-200"
+                class="rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
               >
                 Reset
               </button>
@@ -807,8 +807,8 @@ onMounted(() => {
         </div>
 
         <!-- Create Schedule Exception -->
-        <div class="rounded-3xl border border-white/70 bg-white/90 p-6 shadow-sm backdrop-blur">
-          <h3 class="text-xl font-bold text-slate-900">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <h3 class="text-xl font-bold text-slate-900 dark:text-slate-100">
             Create Schedule Exception
           </h3>
 
@@ -817,13 +817,13 @@ onMounted(() => {
             class="mt-5 grid gap-4 md:grid-cols-2"
           >
             <div class="md:col-span-2">
-              <label class="mb-1.5 block text-sm font-semibold text-slate-700">
+              <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">
                 Doctor *
               </label>
 
               <select
                 v-model="exceptionForm.doctor"
-                class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
               >
                 <option value="">Select doctor</option>
                 <option
@@ -837,7 +837,7 @@ onMounted(() => {
             </div>
 
             <div>
-              <label class="mb-1.5 block text-sm font-semibold text-slate-700">
+              <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">
                 Date *
               </label>
 
@@ -849,7 +849,7 @@ onMounted(() => {
             </div>
 
             <div>
-              <label class="mb-1.5 block text-sm font-semibold text-slate-700">
+              <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">
                 Type *
               </label>
 
@@ -868,7 +868,7 @@ onMounted(() => {
             </div>
 
             <div>
-              <label class="mb-1.5 block text-sm font-semibold text-slate-700">
+              <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">
                 Start Time
               </label>
 
@@ -881,7 +881,7 @@ onMounted(() => {
             </div>
 
             <div>
-              <label class="mb-1.5 block text-sm font-semibold text-slate-700">
+              <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">
                 End Time
               </label>
 
@@ -894,7 +894,7 @@ onMounted(() => {
             </div>
 
             <div class="md:col-span-2">
-              <label class="mb-1.5 block text-sm font-semibold text-slate-700">
+              <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">
                 Note
               </label>
 
@@ -917,7 +917,7 @@ onMounted(() => {
               <button
                 type="button"
                 @click="resetExceptionForm"
-                class="rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-200"
+                class="rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
               >
                 Reset
               </button>
@@ -930,8 +930,8 @@ onMounted(() => {
       <div class="grid gap-6 xl:grid-cols-2">
 
         <!-- Generate Slots -->
-        <div class="rounded-3xl border border-white/70 bg-white/90 p-6 shadow-sm backdrop-blur">
-          <h3 class="text-xl font-bold text-slate-900">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <h3 class="text-xl font-bold text-slate-900 dark:text-slate-100">
             Generate Slots
           </h3>
 
@@ -940,7 +940,7 @@ onMounted(() => {
             class="mt-5 grid gap-4 md:grid-cols-2"
           >
             <div class="md:col-span-2">
-              <label class="mb-1.5 block text-sm font-semibold text-slate-700">
+              <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">
                 Doctor *
               </label>
 
@@ -960,7 +960,7 @@ onMounted(() => {
             </div>
 
             <div>
-              <label class="mb-1.5 block text-sm font-semibold text-slate-700">
+              <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">
                 From Date *
               </label>
 
@@ -972,7 +972,7 @@ onMounted(() => {
             </div>
 
             <div>
-              <label class="mb-1.5 block text-sm font-semibold text-slate-700">
+              <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">
                 To Date *
               </label>
 
@@ -996,8 +996,8 @@ onMounted(() => {
         </div>
 
         <!-- View Available Slots -->
-        <div class="rounded-3xl border border-white/70 bg-white/90 p-6 shadow-sm backdrop-blur">
-          <h3 class="text-xl font-bold text-slate-900">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <h3 class="text-xl font-bold text-slate-900 dark:text-slate-100">
             View Available Slots
           </h3>
 
@@ -1051,7 +1051,7 @@ onMounted(() => {
           <div class="mt-5 flex flex-col gap-2">
             <div
               v-if="availableSlots.length === 0"
-              class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-5 text-sm text-slate-500"
+              class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-5 text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400"
             >
               No slots loaded.
             </div>
@@ -1059,9 +1059,9 @@ onMounted(() => {
             <div
               v-for="slot in availableSlots"
               :key="slot.id"
-              class="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3"
+              class="flex items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-700 dark:bg-slate-800"
             >
-              <span class="text-sm text-slate-700">
+              <span class="text-sm text-slate-700 dark:text-slate-300">
                 {{ formatDateTime(slot.start_datetime) }}
                 →
                 {{ formatDateTime(slot.end_datetime) }}
@@ -1093,7 +1093,7 @@ onMounted(() => {
         </template>
 
         <template #tbody="{ items }">
-          <tr v-for="schedule in items" :key="schedule.id" class="text-sm text-slate-900 transition hover:bg-blue-50/60">
+          <tr v-for="schedule in items" :key="schedule.id" class="text-sm text-slate-900 transition hover:bg-blue-50/60 dark:text-slate-200 dark:hover:bg-slate-800/50">
             <td class="border-b border-slate-100 px-6 py-4">{{ getDoctorName(schedule.doctor) }}</td>
             <td class="border-b border-slate-100 px-6 py-4">{{ getDayLabel(schedule.day_of_week) }}</td>
             <td class="border-b border-slate-100 px-6 py-4">{{ schedule.start_time }}</td>
@@ -1114,18 +1114,18 @@ onMounted(() => {
       </BaseTable>
 
       <!-- Exceptions Table -->
-      <div class="overflow-hidden rounded-3xl border border-white/70 bg-white/90 shadow-sm backdrop-blur">
+      <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div class="flex items-center justify-between border-b border-slate-200 px-6 py-5">
           <div>
-            <h3 class="text-xl font-bold text-slate-900">
+            <h3 class="text-xl font-bold text-slate-900 dark:text-slate-100">
               Schedule Exceptions
             </h3>
-            <p class="mt-1 text-sm text-slate-500">
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
               Day offs, vacations, and extra working days.
             </p>
           </div>
 
-          <span class="rounded-full bg-amber-100 px-4 py-2 text-sm font-bold text-amber-700">
+          <span class="rounded-full bg-amber-100 px-4 py-2 text-sm font-bold text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
             {{ exceptions.length }} exception(s)
           </span>
         </div>
@@ -1160,7 +1160,7 @@ onMounted(() => {
           </template>
 
           <template #tbody="{ items }">
-            <tr v-for="exceptionItem in items" :key="exceptionItem.id" class="text-sm text-slate-900 transition hover:bg-blue-50/60">
+            <tr v-for="exceptionItem in items" :key="exceptionItem.id" class="text-sm text-slate-900 transition hover:bg-blue-50/60 dark:text-slate-200 dark:hover:bg-slate-800/50">
               <td class="border-b border-slate-100 px-6 py-4">{{ getDoctorName(exceptionItem.doctor) }}</td>
               <td class="border-b border-slate-100 px-6 py-4">{{ exceptionItem.exception_date }}</td>
               <td class="border-b border-slate-100 px-6 py-4">{{ getExceptionTypeLabel(exceptionItem.type) }}</td>

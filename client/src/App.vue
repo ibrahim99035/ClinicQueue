@@ -1,43 +1,58 @@
 <script setup>
+import { X, CheckCircle, AlertTriangle } from "lucide-vue-next";
 import useToast from "./composables/useToast";
 
 const { toastMessage, toastType, closeToast } = useToast();
 </script>
 
 <template>
-  <div>
-    <div
-      v-if="toastMessage"
-      class="fixed top-6 right-6 z-[9999] w-[420px] rounded border px-4 py-4"
-      :class="toastType === 'error'
-        ? 'border-danger/40 bg-surface text-danger'
-        : 'border-accent/40 bg-surface text-accent'"
-    >
-      <div class="flex items-start gap-3">
-        <div class="flex-1">
-          <p class="font-mono text-[11px] uppercase tracking-mono-wide">
-            {{ toastType === "error" ? "Login Error" : "Success" }}
-          </p>
+  <div class="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <!-- Global Toast -->
+    <Transition name="toast-slide">
+      <div
+        v-if="toastMessage"
+        class="fixed top-6 right-6 z-[9999] w-full max-w-sm rounded-2xl border p-4 shadow-xl"
+        :class="toastType === 'error'
+          ? 'border-red-200 bg-red-50 text-red-800 dark:border-red-800 dark:bg-red-950/50 dark:text-red-300'
+          : 'border-green-200 bg-green-50 text-green-800 dark:border-green-800 dark:bg-green-950/50 dark:text-green-300'"
+      >
+        <div class="flex items-start gap-3">
+          <component :is="toastType === 'error' ? AlertTriangle : CheckCircle" class="mt-0.5 h-5 w-5 flex-shrink-0" />
 
-          <p class="mt-1 font-sans text-sm text-text1">
-            {{ toastMessage }}
-          </p>
+          <div class="flex-1">
+            <p class="text-sm font-bold">
+              {{ toastType === "error" ? "Error" : "Success" }}
+            </p>
 
-          <p class="mt-2 font-mono text-[10px] text-text3">
-            This message will disappear after 30 seconds.
-          </p>
+            <p class="mt-1 text-sm leading-6 opacity-90">
+              {{ toastMessage }}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            class="flex h-6 w-6 items-center justify-center rounded-lg transition hover:opacity-70"
+            @click="closeToast"
+          >
+            <X class="h-4 w-4" />
+          </button>
         </div>
-
-        <button
-          type="button"
-          class="p-2 rounded bg-transparent text-text2 hover:text-text1 hover:bg-surface2 transition-all duration-150 cursor-pointer"
-          @click="closeToast"
-        >
-          ×
-        </button>
       </div>
-    </div>
+    </Transition>
 
     <router-view />
   </div>
 </template>
+
+<style scoped>
+.toast-slide-enter-active,
+.toast-slide-leave-active {
+  transition: all 0.25s ease;
+}
+
+.toast-slide-enter-from,
+.toast-slide-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
+</style>

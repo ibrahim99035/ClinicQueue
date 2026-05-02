@@ -231,30 +231,30 @@ function getAppointmentStart(appointment) {
 
 function getStatusBadgeClass(status) {
   if (status === "REQUESTED") {
-    return "bg-amber-100 text-amber-800";
+    return "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300";
   }
 
   if (status === "CONFIRMED") {
-    return "bg-blue-100 text-blue-700";
+    return "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300";
   }
 
   if (status === "CHECKED_IN") {
-    return "bg-purple-100 text-purple-700";
+    return "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300";
   }
 
   if (status === "COMPLETED") {
-    return "bg-green-100 text-green-700";
+    return "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300";
   }
 
   if (status === "CANCELLED") {
-    return "bg-red-100 text-red-700";
+    return "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300";
   }
 
   if (status === "NO_SHOW") {
-    return "bg-slate-100 text-slate-700";
+    return "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
   }
 
-  return "bg-slate-100 text-slate-700";
+  return "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
 }
 
 onMounted(() => {
@@ -263,11 +263,11 @@ onMounted(() => {
 
 </script>
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6">
+  <div class="min-h-screen p-6">
     <div class="mx-auto flex max-w-7xl flex-col gap-6">
 
       <!-- Header -->
-      <div class="rounded-3xl bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white shadow-lg">
+      <div class="rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white shadow-sm border border-slate-200 dark:border-slate-700">
         <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <p class="mb-2 text-sm font-semibold uppercase tracking-wide text-blue-100">
@@ -297,89 +297,89 @@ onMounted(() => {
       <!-- Error Message -->
       <p
         v-if="errorMessage"
-        class="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-semibold text-red-700 shadow-sm"
+        class="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm font-semibold text-red-700 shadow-sm dark:border-red-800 dark:bg-red-950/50 dark:text-red-300"
       >
         {{ errorMessage }}
       </p>
 
       <!-- Summary Cards -->
       <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-5">
-        <div class="rounded-3xl border border-white/70 bg-white/85 p-6 shadow-sm backdrop-blur transition hover:-translate-y-1 hover:shadow-md">
-          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100 text-lg font-bold text-blue-700">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-lg font-bold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
             T
           </div>
 
-          <span class="text-sm font-semibold text-slate-500">
+          <span class="text-sm font-semibold text-slate-500 dark:text-slate-400">
             Total
           </span>
 
-          <strong class="mt-2 block text-3xl font-bold text-slate-900">
+          <strong class="mt-2 block text-3xl font-bold text-slate-900 dark:text-slate-100">
             {{ totalAppointments }}
           </strong>
         </div>
 
-        <div class="rounded-3xl border border-white/70 bg-white/85 p-6 shadow-sm backdrop-blur transition hover:-translate-y-1 hover:shadow-md">
-          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-lg font-bold text-amber-700">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 text-lg font-bold text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
             R
           </div>
 
-          <span class="text-sm font-semibold text-slate-500">
+          <span class="text-sm font-semibold text-slate-500 dark:text-slate-400">
             Requested
           </span>
 
-          <strong class="mt-2 block text-3xl font-bold text-slate-900">
+          <strong class="mt-2 block text-3xl font-bold text-slate-900 dark:text-slate-100">
             {{ requestedCount }}
           </strong>
         </div>
 
-        <div class="rounded-3xl border border-white/70 bg-white/85 p-6 shadow-sm backdrop-blur transition hover:-translate-y-1 hover:shadow-md">
-          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100 text-lg font-bold text-blue-700">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-lg font-bold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
             C
           </div>
 
-          <span class="text-sm font-semibold text-slate-500">
+          <span class="text-sm font-semibold text-slate-500 dark:text-slate-400">
             Confirmed
           </span>
 
-          <strong class="mt-2 block text-3xl font-bold text-slate-900">
+          <strong class="mt-2 block text-3xl font-bold text-slate-900 dark:text-slate-100">
             {{ confirmedCount }}
           </strong>
         </div>
 
-        <div class="rounded-3xl border border-white/70 bg-white/85 p-6 shadow-sm backdrop-blur transition hover:-translate-y-1 hover:shadow-md">
-          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-100 text-lg font-bold text-purple-700">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100 text-lg font-bold text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">
             I
           </div>
 
-          <span class="text-sm font-semibold text-slate-500">
+          <span class="text-sm font-semibold text-slate-500 dark:text-slate-400">
             Checked In
           </span>
 
-          <strong class="mt-2 block text-3xl font-bold text-slate-900">
+          <strong class="mt-2 block text-3xl font-bold text-slate-900 dark:text-slate-100">
             {{ checkedInCount }}
           </strong>
         </div>
 
-        <div class="rounded-3xl border border-white/70 bg-white/85 p-6 shadow-sm backdrop-blur transition hover:-translate-y-1 hover:shadow-md">
-          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-green-100 text-lg font-bold text-green-700">
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+          <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-green-100 text-lg font-bold text-green-700 dark:bg-green-900/30 dark:text-green-300">
             ✓
           </div>
 
-          <span class="text-sm font-semibold text-slate-500">
+          <span class="text-sm font-semibold text-slate-500 dark:text-slate-400">
             Completed
           </span>
 
-          <strong class="mt-2 block text-3xl font-bold text-slate-900">
+          <strong class="mt-2 block text-3xl font-bold text-slate-900 dark:text-slate-100">
             {{ completedCount }}
           </strong>
         </div>
       </div>
 
       <!-- Filters -->
-      <div class="rounded-3xl border border-white/70 bg-white/90 p-6 shadow-sm backdrop-blur">
+      <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-7">
           <div class="xl:col-span-2">
-            <label class="mb-1.5 block text-sm font-semibold text-slate-700">
+            <label class="mb-1.5 block text-sm font-semibold text-slate-700 dark:text-slate-300">
               Search
             </label>
 
@@ -387,7 +387,7 @@ onMounted(() => {
               v-model="filters.search"
               type="text"
               placeholder="Appointment ID or patient name"
-              class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             />
           </div>
 
@@ -398,7 +398,7 @@ onMounted(() => {
 
             <select
               v-model="filters.status"
-              class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             >
               <option value="">All Statuses</option>
 
@@ -419,7 +419,7 @@ onMounted(() => {
 
             <select
               v-model="filters.doctor"
-              class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             >
               <option value="">All Doctors</option>
 
@@ -440,7 +440,7 @@ onMounted(() => {
 
             <select
               v-model="filters.patient"
-              class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             >
               <option value="">All Patients</option>
 
@@ -462,7 +462,7 @@ onMounted(() => {
             <input
               v-model="filters.date_from"
               type="date"
-              class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             />
           </div>
 
@@ -474,7 +474,7 @@ onMounted(() => {
             <input
               v-model="filters.date_to"
               type="date"
-              class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             />
           </div>
         </div>
@@ -493,7 +493,7 @@ onMounted(() => {
             type="button"
             @click="resetFilters"
             :disabled="loading"
-            class="rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-60"
+            class="rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
           >
             Reset
           </button>
@@ -508,7 +508,7 @@ onMounted(() => {
               <p class="mt-1 text-sm text-slate-500">Filtered clinic appointment records.</p>
             </div>
             <div class="ml-auto">
-              <span class="w-fit rounded-full bg-blue-100 px-4 py-2 text-sm font-bold text-blue-700">{{ appointments.length }} result(s)</span>
+              <span class="w-fit rounded-full bg-blue-100 px-4 py-2 text-sm font-bold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">{{ appointments.length }} result(s)</span>
             </div>
           </div>
         </template>
@@ -524,7 +524,7 @@ onMounted(() => {
         </template>
 
         <template #tbody="{ items }">
-          <tr v-for="appointment in items" :key="appointment.id" class="text-sm text-slate-900 transition hover:bg-blue-50/60">
+          <tr v-for="appointment in items" :key="appointment.id" class="text-sm text-slate-900 transition hover:bg-blue-50/60 dark:text-slate-200 dark:hover:bg-slate-800/50">
             <td class="border-b border-slate-100 px-6 py-4 font-bold text-slate-700">#{{ appointment.id }}</td>
             <td class="border-b border-slate-100 px-6 py-4">{{ getPatientName(appointment) }}</td>
             <td class="border-b border-slate-100 px-6 py-4">{{ getDoctorName(appointment) }}</td>
@@ -543,7 +543,7 @@ onMounted(() => {
       <!-- Loading Details -->
       <div
         v-if="loadingDetails"
-        class="rounded-3xl border border-white/70 bg-white/90 p-6 text-sm font-semibold text-slate-500 shadow-sm backdrop-blur"
+        class="rounded-2xl border border-slate-200 bg-white p-6 text-sm font-semibold text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400"
       >
         Loading appointment details...
       </div>
@@ -551,15 +551,15 @@ onMounted(() => {
       <!-- Appointment Details -->
       <div
         v-if="selectedAppointment"
-        class="rounded-3xl border border-white/70 bg-white/90 p-6 shadow-sm backdrop-blur"
+        class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900"
       >
         <div class="mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
-            <h3 class="text-2xl font-bold text-slate-900">
+            <h3 class="text-2xl font-bold text-slate-900 dark:text-slate-100">
               Appointment #{{ selectedAppointment.id }}
             </h3>
 
-            <p class="mt-1 text-sm text-slate-500">
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
               {{ getPatientName(selectedAppointment) }}
               with
               {{ getDoctorName(selectedAppointment) }}
@@ -569,25 +569,25 @@ onMounted(() => {
           <button
             type="button"
             @click="closeDetails"
-            class="w-fit rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-200"
+            class="w-fit rounded-xl bg-slate-100 px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
           >
             Close
           </button>
         </div>
 
         <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <span class="block text-sm font-semibold text-slate-500">
+          <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800">
+            <span class="block text-sm font-semibold text-slate-500 dark:text-slate-400">
               Status
             </span>
 
-            <strong class="mt-1 block text-base text-slate-900">
+            <strong class="mt-1 block text-base text-slate-900 dark:text-slate-100">
               {{ formatStatus(selectedAppointment.status) }}
             </strong>
           </div>
 
           <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <span class="block text-sm font-semibold text-slate-500">
+            <span class="block text-sm font-semibold text-slate-500 dark:text-slate-400">
               Type
             </span>
 
@@ -597,7 +597,7 @@ onMounted(() => {
           </div>
 
           <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <span class="block text-sm font-semibold text-slate-500">
+            <span class="block text-sm font-semibold text-slate-500 dark:text-slate-400">
               Start
             </span>
 
@@ -607,7 +607,7 @@ onMounted(() => {
           </div>
 
           <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <span class="block text-sm font-semibold text-slate-500">
+            <span class="block text-sm font-semibold text-slate-500 dark:text-slate-400">
               Created
             </span>
 
@@ -617,7 +617,7 @@ onMounted(() => {
           </div>
 
           <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <span class="block text-sm font-semibold text-slate-500">
+            <span class="block text-sm font-semibold text-slate-500 dark:text-slate-400">
               Checked In
             </span>
 
@@ -627,7 +627,7 @@ onMounted(() => {
           </div>
 
           <div class="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-            <span class="block text-sm font-semibold text-slate-500">
+            <span class="block text-sm font-semibold text-slate-500 dark:text-slate-400">
               Completed
             </span>
 
@@ -637,24 +637,24 @@ onMounted(() => {
           </div>
         </div>
 
-        <div class="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-          <h4 class="text-base font-bold text-slate-900">
+        <div class="mt-5 rounded-2xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800">
+          <h4 class="text-base font-bold text-slate-900 dark:text-slate-100">
             Reason
           </h4>
 
-          <p class="mt-2 text-sm leading-6 text-slate-600">
+          <p class="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
             {{ selectedAppointment.reason || "No reason provided." }}
           </p>
         </div>
 
         <div class="mt-6">
-          <h4 class="text-base font-bold text-slate-900">
+          <h4 class="text-base font-bold text-slate-900 dark:text-slate-100">
             Reschedule History
           </h4>
 
           <div
             v-if="selectedHistory.length === 0"
-            class="mt-3 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-500"
+            class="mt-3 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400"
           >
             No reschedule history found.
           </div>
@@ -663,7 +663,7 @@ onMounted(() => {
             <div
               v-for="item in selectedHistory"
               :key="item.id"
-              class="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 md:flex-row md:items-start md:justify-between"
+              class="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 md:flex-row md:items-start md:justify-between dark:border-slate-700 dark:bg-slate-800"
             >
               <div>
                 <strong class="text-sm text-slate-900">

@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-6 bg-bg text-text1 font-sans">
+  <div class="space-y-6 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans">
     <PageHeader title="Dashboard" subtitle="Welcome back to ClinicQueue" />
 
     <div class="grid grid-cols-3 gap-4">
@@ -20,21 +20,21 @@
       />
     </div>
 
-    <div class="rounded border border-border bg-surface p-4">
-      <h2 class="mb-4 font-sans text-xl font-bold leading-tight text-text1">Upcoming Appointments</h2>
-      <div v-if="loading" class="font-sans text-sm text-text2">Loading...</div>
-      <div v-else-if="upcomingAppointments.length === 0" class="font-sans text-sm text-text2">
-        No upcoming appointments. <router-link to="/patient/book" class="font-mono text-[11px] uppercase tracking-mono text-accent transition-all duration-150 cursor-pointer hover:text-accent-dim">Book one now</router-link>
+    <div class="rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4">
+      <h2 class="mb-4 font-sans text-xl font-bold leading-tight text-slate-900 dark:text-slate-100">Upcoming Appointments</h2>
+      <div v-if="loading" class="font-sans text-sm text-slate-500 dark:text-slate-400">Loading...</div>
+      <div v-else-if="upcomingAppointments.length === 0" class="font-sans text-sm text-slate-500 dark:text-slate-400">
+        No upcoming appointments. <router-link to="/patient/book" class="font-mono text-[11px] uppercase tracking-wide text-blue-600 dark:text-blue-400 transition-all duration-150 cursor-pointer hover:text-blue-700 dark:hover:text-blue-300">Book one now</router-link>
       </div>
       <div v-else class="space-y-3">
         <div
           v-for="apt in upcomingAppointments"
           :key="apt.id"
-          class="flex items-center justify-between rounded border border-border bg-surface2 p-3"
+          class="flex items-center justify-between rounded border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 p-3"
         >
           <div>
-            <p class="font-sans text-sm font-semibold text-text1">Dr. {{ apt.doctor?.name }}</p>
-            <p class="font-mono text-[11px] uppercase tracking-mono text-text2">{{ formatDateTime(apt.slot?.start) }}</p>
+            <p class="font-sans text-sm font-semibold text-slate-900 dark:text-slate-100">Dr. {{ apt.doctor?.name }}</p>
+            <p class="font-mono text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ formatDateTime(apt.slot?.start) }}</p>
           </div>
           <StatusBadge :status="apt.status" />
         </div>

@@ -1,82 +1,101 @@
+<script setup>
+import { ref } from "vue";
+import { RouterLink, useRouter, useRoute } from "vue-router";
+import { clearAuthData, getAuthUser } from "../api/auth";
+import useTheme from "../composables/useTheme";
+import {
+  LayoutDashboard, ListChecks, CalendarDays, LogOut, Sun, Moon, Menu
+} from "lucide-vue-next";
+
+const router = useRouter();
+const route = useRoute();
+const { isDark, toggleTheme } = useTheme();
+
+const sidebarOpen = ref(false);
+const user = getAuthUser();
+const userName = user?.first_name || user?.email?.split("@")[0] || "Doctor";
+
+function logout() {
+  clearAuthData();
+  router.push("/login");
+}
+
+const navLinks = [
+  { to: "/doctor", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/doctor/queue", label: "Appointment Queue", icon: ListChecks },
+  { to: "/doctor/schedule", label: "My Schedule", icon: CalendarDays },
+];
+
+function isActive(path) {
+  return route.path === path;
+}
+</script>
+
 <template>
-  <div class="min-h-screen bg-bg text-text1 font-sans">
-    <!-- Header -->
-    <nav class="border-b border-border bg-surface">
-      <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 md:px-12">
-        <h1 class="font-sans text-2xl font-bold leading-tight tracking-tight text-text1">ClinicQueue</h1>
-        <div class="flex items-center gap-4">
-          <span class="font-mono text-[11px] uppercase tracking-mono text-text2">Dr. {{ userName }}</span>
-          <button
-            @click="logout"
-            class="rounded border border-danger px-4 py-2 font-mono text-[11px] uppercase tracking-mono-wide text-danger transition-all duration-150 cursor-pointer hover:bg-danger/10"
-          >
-            Logout
-          </button>
+  <div class="flex h-screen bg-slate-50 dark:bg-slate-950">
+    <!-- Mobile Overlay -->
+    <Transition name="fade">
+      <div v-if="sidebarOpen" class="fixed inset-0 z-40 bg-black/50 lg:hidden" @click="sidebarOpen = false" />
+    </Transition>
+
+    <!-- Sidebar -->
+    <aside
+      :class="[
+        'fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-slate-200 bg-white transition-transform duration-200 dark:border-slate-800 dark:bg-slate-950 lg:static lg:translate-x-0',
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      ]"
+    >
+      <div class="flex h-16 items-center gap-3 border-b border-slate-200 px-5 dark:border-slate-800">
+        <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-green-600 text-sm font-bold text-white">Dr</div>
+        <div>
+          <p class="text-sm font-bold text-slate-900 dark:text-slate-100">ClinicQueue</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Doctor Panel</p>
         </div>
       </div>
-    </nav>
 
-    <!-- Sidebar + Main -->
-    <div class="mx-auto flex max-w-7xl gap-6 px-6 py-8 md:px-12">
-      <!-- Sidebar -->
-      <aside class="w-64 h-fit sticky top-20 rounded border border-border bg-surface">
-        <nav class="flex flex-col gap-0.5 p-4">
-          <router-link
-            to="/doctor"
-            class="block rounded px-3 py-2 font-mono text-[11px] uppercase tracking-mono text-text2 transition-all duration-150 cursor-pointer hover:bg-surface2 hover:text-text1"
-            :class="[
-              $route.path === '/doctor'
-                ? 'bg-blue-100 text-blue-700 font-semibold'
-                : 'text-gray-700 hover:bg-gray-100',
-            ]"
-          >
-            Dashboard
-          </router-link>
-          <router-link
-            to="/doctor/queue"
-            class="block rounded px-3 py-2 font-mono text-[11px] uppercase tracking-mono text-text2 transition-all duration-150 cursor-pointer hover:bg-surface2 hover:text-text1"
-            :class="[
-              $route.path === '/doctor/queue'
-                ? 'bg-blue-100 text-blue-700 font-semibold'
-                : 'text-gray-700 hover:bg-gray-100',
-            ]"
-          >
-            Appointment Queue
-          </router-link>
-          <router-link
-            to="/doctor/schedule"
-            class="block rounded px-3 py-2 font-mono text-[11px] uppercase tracking-mono text-text2 transition-all duration-150 cursor-pointer hover:bg-surface2 hover:text-text1"
-            :class="[
-              $route.path === '/doctor/schedule'
-                ? 'bg-blue-100 text-blue-700 font-semibold'
-                : 'text-gray-700 hover:bg-gray-100',
-            ]"
-          >
-            My Schedule
-          </router-link>
-        </nav>
-      </aside>
+      <nav class="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+        <RouterLink
+          v-for="link in navLinks" :key="link.to" :to="link.to" @click="sidebarOpen = false"
+          :class="[
+            'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150',
+            isActive(link.to) ? 'bg-green-600 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'
+          ]"
+        >
+          <component :is="link.icon" class="h-5 w-5 flex-shrink-0" />
+          <span>{{ link.label }}</span>
+        </RouterLink>
+      </nav>
 
-      <!-- Main Content -->
-      <main class="flex-1">
-        <router-view />
-      </main>
+      <div class="border-t border-slate-200 px-3 py-3 dark:border-slate-800">
+        <button @click="logout" class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30">
+          <LogOut class="h-5 w-5" />
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <div class="flex flex-1 flex-col overflow-hidden">
+      <header class="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 dark:border-slate-800 dark:bg-slate-950 lg:px-6">
+        <div class="flex items-center gap-3">
+          <button @click="sidebarOpen = !sidebarOpen" class="flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 lg:hidden">
+            <Menu class="h-5 w-5" />
+          </button>
+          <p class="text-sm font-medium text-slate-500 dark:text-slate-400">Welcome, <span class="font-semibold text-slate-900 dark:text-slate-100">Dr. {{ userName }}</span></p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button @click="toggleTheme" class="flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800">
+            <Moon v-if="!isDark" class="h-5 w-5" /><Sun v-else class="h-5 w-5" />
+          </button>
+          <div class="flex h-9 w-9 items-center justify-center rounded-full bg-green-600 text-xs font-bold text-white">{{ userName.charAt(0).toUpperCase() }}</div>
+        </div>
+      </header>
+      <main class="flex-1 overflow-y-auto p-4 lg:p-6"><router-view /></main>
     </div>
   </div>
 </template>
 
-<script setup>
-import { computed } from "vue";
-import useAuth from "../composables/useAuth";
-import { useRouter } from "vue-router";
-
-const { user, logout: authLogout } = useAuth();
-const router = useRouter();
-
-const userName = computed(() => user.value?.name || "Doctor");
-
-function logout() {
-  authLogout();
-  router.push("/login");
-}
-</script>
+<style scoped>
+.fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+</style>

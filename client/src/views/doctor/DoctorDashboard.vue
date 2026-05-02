@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-6 bg-bg text-text1 font-sans">
+  <div class="space-y-6 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans">
     <PageHeader 
       title="Doctor Dashboard" 
       subtitle="Overview of your appointments"
@@ -24,36 +24,36 @@
     </div>
 
     <div class="grid gap-6 md:grid-cols-2">
-      <div class="rounded border border-border bg-surface p-4">
-        <h2 class="mb-4 font-sans text-xl font-bold leading-tight text-text1">Quick Actions</h2>
+      <div class="rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4">
+        <h2 class="mb-4 font-sans text-xl font-bold leading-tight text-slate-900 dark:text-slate-100">Quick Actions</h2>
         <div class="space-y-2">
           <router-link
             to="/doctor/queue"
-            class="block rounded border border-border bg-surface2 px-4 py-3 text-center font-mono text-[11px] uppercase tracking-mono text-text1 transition-all duration-150 cursor-pointer hover:border-accent hover:text-accent"
+            class="block rounded border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 px-4 py-3 text-center font-mono text-[11px] uppercase tracking-wide text-slate-900 dark:text-slate-100 transition-all duration-150 cursor-pointer hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400"
           >
             View Appointment Queue
           </router-link>
           <router-link
             to="/doctor/schedule"
-            class="block rounded border border-border bg-surface2 px-4 py-3 text-center font-mono text-[11px] uppercase tracking-mono text-text1 transition-all duration-150 cursor-pointer hover:border-accent hover:text-accent"
+            class="block rounded border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 px-4 py-3 text-center font-mono text-[11px] uppercase tracking-wide text-slate-900 dark:text-slate-100 transition-all duration-150 cursor-pointer hover:border-blue-500 hover:text-blue-600 dark:hover:text-blue-400"
           >
             View My Schedule
           </router-link>
         </div>
       </div>
 
-      <div class="rounded border border-border bg-surface p-4">
-        <h2 class="mb-4 font-sans text-xl font-bold leading-tight text-text1">Today's Schedule</h2>
-        <div v-if="todayAppointments.length === 0" class="font-sans text-sm text-text2">
+      <div class="rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4">
+        <h2 class="mb-4 font-sans text-xl font-bold leading-tight text-slate-900 dark:text-slate-100">Today's Schedule</h2>
+        <div v-if="todayAppointments.length === 0" class="font-sans text-sm text-slate-500 dark:text-slate-400">
           No appointments today
         </div>
         <div v-else class="space-y-2">
           <div
             v-for="apt in todayAppointments.slice(0, 5)"
             :key="apt.id"
-            class="flex items-center justify-between rounded border border-border bg-surface2 p-3"
+            class="flex items-center justify-between rounded border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 p-3"
           >
-            <span class="font-mono text-sm text-text1">{{ formatTime(apt.slot?.start) }}</span>
+            <span class="font-mono text-sm text-slate-900 dark:text-slate-100">{{ formatTime(apt.slot?.start) }}</span>
             <StatusBadge :status="apt.status" />
           </div>
         </div>
