@@ -1,26 +1,26 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-6 bg-bg text-text1 font-sans">
     <PageHeader
       title="My Schedule"
       subtitle="Your working hours and exceptions"
     />
 
-    <div class="grid md:grid-cols-2 gap-6">
+    <div class="grid gap-6 md:grid-cols-2">
       <!-- Weekly Schedules -->
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-lg font-semibold mb-4">Working Hours</h2>
-        <div v-if="loadingSchedules" class="text-gray-500">Loading...</div>
-        <div v-else-if="schedules.length === 0" class="text-gray-500">
+      <div class="rounded border border-border bg-surface p-4">
+        <h2 class="mb-4 font-sans text-xl font-bold leading-tight text-text1">Working Hours</h2>
+        <div v-if="loadingSchedules" class="font-sans text-sm text-text2">Loading...</div>
+        <div v-else-if="schedules.length === 0" class="font-sans text-sm text-text2">
           No schedules configured
         </div>
         <div v-else class="space-y-2">
           <div
             v-for="schedule in schedules"
             :key="schedule.id"
-            class="p-3 border rounded-lg text-sm"
+            class="rounded border border-border bg-surface2 p-3 text-sm"
           >
-            <p class="font-semibold">{{ getDayName(schedule.day_of_week) }}</p>
-            <p class="text-gray-600">
+            <p class="font-sans font-semibold text-text1">{{ getDayName(schedule.day_of_week) }}</p>
+            <p class="font-mono text-[11px] uppercase tracking-mono text-text2">
               {{ formatTime(schedule.start_time) }} - {{ formatTime(schedule.end_time) }}
             </p>
           </div>
@@ -28,20 +28,20 @@
       </div>
 
       <!-- Exceptions -->
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-lg font-semibold mb-4">Upcoming Exceptions</h2>
-        <div v-if="loadingExceptions" class="text-gray-500">Loading...</div>
-        <div v-else-if="exceptions.length === 0" class="text-gray-500">
+      <div class="rounded border border-border bg-surface p-4">
+        <h2 class="mb-4 font-sans text-xl font-bold leading-tight text-text1">Upcoming Exceptions</h2>
+        <div v-if="loadingExceptions" class="font-sans text-sm text-text2">Loading...</div>
+        <div v-else-if="exceptions.length === 0" class="font-sans text-sm text-text2">
           No exceptions
         </div>
         <div v-else class="space-y-2">
           <div
             v-for="exception in exceptions"
             :key="exception.id"
-            class="p-3 border rounded-lg text-sm"
+            class="rounded border border-border bg-surface2 p-3 text-sm"
           >
-            <p class="font-semibold">{{ exception.exception_type }}</p>
-            <p class="text-gray-600">
+            <p class="font-sans font-semibold text-text1">{{ exception.exception_type }}</p>
+            <p class="font-mono text-[11px] uppercase tracking-mono text-text2">
               {{ formatDate(exception.date) }}
             </p>
           </div>

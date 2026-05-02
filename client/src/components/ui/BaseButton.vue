@@ -3,16 +3,13 @@
     :type="type"
     :disabled="disabled || loading"
     :class="[
-      'rounded-lg px-4 py-2.5 text-sm font-semibold transition-all duration-200',
-      'focus:outline-none focus:ring-2 focus:ring-offset-2',
-      'disabled:opacity-60 disabled:cursor-not-allowed',
-      'active:scale-95',
+      'inline-flex items-center justify-center gap-2 rounded px-4 py-2.5 font-mono text-[11px] uppercase tracking-mono-wide transition-all duration-150 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed focus:outline-none',
       variantClasses,
       sizeClasses,
     ]"
     @click="$emit('click')"
   >
-    <span v-if="loading" class="inline mr-2">⏳</span>
+    <span v-if="loading" class="inline mr-2 font-mono text-[11px] uppercase tracking-mono-wide">⏳</span>
     <slot />
   </button>
 </template>

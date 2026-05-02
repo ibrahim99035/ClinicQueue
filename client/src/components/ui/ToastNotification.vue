@@ -5,8 +5,7 @@
         v-for="toast in toasts"
         :key="toast.id"
         :class="[
-          'px-4 py-3 rounded-lg shadow-lg pointer-events-auto',
-          'text-white font-medium text-sm',
+          'pointer-events-auto rounded border px-4 py-3 font-sans text-sm',
           toastClasses[toast.type],
         ]"
       >
@@ -22,10 +21,10 @@ import useToast from "../../composables/useToast.js";
 const { toasts } = useToast();
 
 const toastClasses = {
-  success: "bg-green-500",
-  error: "bg-red-500",
-  info: "bg-blue-500",
-  warning: "bg-yellow-500",
+  success: "border-accent/40 bg-surface2 text-accent",
+  error: "border-danger/40 bg-surface2 text-danger",
+  info: "border-border bg-surface2 text-text1",
+  warning: "border-yellow-400/40 bg-surface2 text-yellow-400",
 };
 </script>
 

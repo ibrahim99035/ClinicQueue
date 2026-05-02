@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-6 bg-bg text-text1 font-sans">
     <PageHeader
       title="Reception Dashboard"
       subtitle="Overview of appointments today"
@@ -23,18 +23,18 @@
       />
     </div>
 
-    <div class="bg-white rounded-lg shadow-md p-6">
-      <h2 class="text-lg font-semibold mb-4">Quick Actions</h2>
+    <div class="rounded border border-border bg-surface p-4">
+      <h2 class="mb-4 font-sans text-xl font-bold leading-tight text-text1">Quick Actions</h2>
       <div class="space-y-2">
         <router-link
           to="/reception/check-in"
-          class="block px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-center"
+          class="block rounded border border-border bg-surface2 px-4 py-3 text-center font-mono text-[11px] uppercase tracking-mono text-text1 transition-all duration-150 cursor-pointer hover:border-accent hover:text-accent"
         >
           Go to Check-In Desk
         </router-link>
         <router-link
           to="/reception/slots"
-          class="block px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 text-center"
+          class="block rounded border border-border bg-surface2 px-4 py-3 text-center font-mono text-[11px] uppercase tracking-mono text-text1 transition-all duration-150 cursor-pointer hover:border-accent hover:text-accent"
         >
           Generate Appointment Slots
         </router-link>

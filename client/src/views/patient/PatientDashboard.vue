@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-6 bg-bg text-text1 font-sans">
     <PageHeader title="Dashboard" subtitle="Welcome back to ClinicQueue" />
 
     <div class="grid grid-cols-3 gap-4">
@@ -20,21 +20,21 @@
       />
     </div>
 
-    <div class="bg-white rounded-lg shadow-md p-6">
-      <h2 class="text-lg font-semibold mb-4">Upcoming Appointments</h2>
-      <div v-if="loading" class="text-gray-500">Loading...</div>
-      <div v-else-if="upcomingAppointments.length === 0" class="text-gray-500">
-        No upcoming appointments. <router-link to="/patient/book" class="text-blue-600 hover:underline">Book one now</router-link>
+    <div class="rounded border border-border bg-surface p-4">
+      <h2 class="mb-4 font-sans text-xl font-bold leading-tight text-text1">Upcoming Appointments</h2>
+      <div v-if="loading" class="font-sans text-sm text-text2">Loading...</div>
+      <div v-else-if="upcomingAppointments.length === 0" class="font-sans text-sm text-text2">
+        No upcoming appointments. <router-link to="/patient/book" class="font-mono text-[11px] uppercase tracking-mono text-accent transition-all duration-150 cursor-pointer hover:text-accent-dim">Book one now</router-link>
       </div>
       <div v-else class="space-y-3">
         <div
           v-for="apt in upcomingAppointments"
           :key="apt.id"
-          class="flex justify-between items-center p-3 border rounded-lg"
+          class="flex items-center justify-between rounded border border-border bg-surface2 p-3"
         >
           <div>
-            <p class="font-semibold">Dr. {{ apt.doctor?.name }}</p>
-            <p class="text-sm text-gray-600">{{ formatDateTime(apt.slot?.start) }}</p>
+            <p class="font-sans text-sm font-semibold text-text1">Dr. {{ apt.doctor?.name }}</p>
+            <p class="font-mono text-[11px] uppercase tracking-mono text-text2">{{ formatDateTime(apt.slot?.start) }}</p>
           </div>
           <StatusBadge :status="apt.status" />
         </div>

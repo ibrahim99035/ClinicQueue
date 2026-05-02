@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-6 bg-bg text-text1 font-sans">
     <PageHeader 
       title="Doctor Dashboard" 
       subtitle="Overview of your appointments"
@@ -23,37 +23,37 @@
       />
     </div>
 
-    <div class="grid md:grid-cols-2 gap-6">
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-lg font-semibold mb-4">Quick Actions</h2>
+    <div class="grid gap-6 md:grid-cols-2">
+      <div class="rounded border border-border bg-surface p-4">
+        <h2 class="mb-4 font-sans text-xl font-bold leading-tight text-text1">Quick Actions</h2>
         <div class="space-y-2">
           <router-link
             to="/doctor/queue"
-            class="block px-4 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-center"
+            class="block rounded border border-border bg-surface2 px-4 py-3 text-center font-mono text-[11px] uppercase tracking-mono text-text1 transition-all duration-150 cursor-pointer hover:border-accent hover:text-accent"
           >
             View Appointment Queue
           </router-link>
           <router-link
             to="/doctor/schedule"
-            class="block px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 text-center"
+            class="block rounded border border-border bg-surface2 px-4 py-3 text-center font-mono text-[11px] uppercase tracking-mono text-text1 transition-all duration-150 cursor-pointer hover:border-accent hover:text-accent"
           >
             View My Schedule
           </router-link>
         </div>
       </div>
 
-      <div class="bg-white rounded-lg shadow-md p-6">
-        <h2 class="text-lg font-semibold mb-4">Today's Schedule</h2>
-        <div v-if="todayAppointments.length === 0" class="text-gray-500">
+      <div class="rounded border border-border bg-surface p-4">
+        <h2 class="mb-4 font-sans text-xl font-bold leading-tight text-text1">Today's Schedule</h2>
+        <div v-if="todayAppointments.length === 0" class="font-sans text-sm text-text2">
           No appointments today
         </div>
         <div v-else class="space-y-2">
           <div
             v-for="apt in todayAppointments.slice(0, 5)"
             :key="apt.id"
-            class="flex justify-between items-center p-2 border rounded"
+            class="flex items-center justify-between rounded border border-border bg-surface2 p-3"
           >
-            <span>{{ formatTime(apt.slot?.start) }}</span>
+            <span class="font-mono text-sm text-text1">{{ formatTime(apt.slot?.start) }}</span>
             <StatusBadge :status="apt.status" />
           </div>
         </div>

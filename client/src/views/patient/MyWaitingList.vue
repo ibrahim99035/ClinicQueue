@@ -1,16 +1,16 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-6 bg-bg text-text1 font-sans">
     <PageHeader
       title="Waiting List"
       subtitle="Waiting list entries for appointments"
     />
 
-    <div v-if="loading" class="text-center py-8 text-gray-500">
+    <div v-if="loading" class="py-8 text-center font-sans text-sm text-text2">
       Loading...
     </div>
-    <div v-else-if="items.length === 0" class="bg-white rounded-lg shadow-md p-8 text-center text-gray-500">
+    <div v-else-if="items.length === 0" class="rounded border border-border bg-surface p-8 text-center font-sans text-sm text-text2">
       <p>You're not on any waiting lists</p>
-      <router-link to="/patient/book" class="text-blue-600 hover:underline">
+      <router-link to="/patient/book" class="font-mono text-[11px] uppercase tracking-mono text-accent transition-all duration-150 cursor-pointer hover:text-accent-dim">
         Book an appointment
       </router-link>
     </div>
@@ -19,30 +19,30 @@
       <div
         v-for="item in items"
         :key="item.id"
-        class="bg-white rounded-lg shadow-md p-6"
+        class="rounded border border-border bg-surface p-4"
       >
-        <div class="flex justify-between items-start">
+        <div class="flex items-start justify-between gap-4">
           <div>
-            <h3 class="text-lg font-semibold">
+            <h3 class="font-sans text-lg font-semibold text-text1">
               {{
                 item.doctorName && item.doctorName !== "Unknown"
                   ? `Dr. ${item.doctorName}`
                   : "Dr. Unknown"
               }}
             </h3>
-            <p class="text-sm text-gray-600 mt-2">
+            <p class="mt-2 font-mono text-[11px] uppercase tracking-mono text-text2">
               Preferred date: {{ formatDateTime(item.appointmentDateTime) }}
             </p>
-            <p class="text-xs text-gray-500 mt-1">
+            <p class="mt-1 font-mono text-[11px] uppercase tracking-mono text-text3">
               Added on: {{ formatDateTime(item.created_at) }}
             </p>
           </div>
           <span
             :class="[
-              'px-3 py-1 rounded-full text-sm font-semibold',
+              'inline-flex items-center gap-1 rounded border px-2 py-0.5 font-mono text-[10px] uppercase tracking-mono-wide',
               item.status === 'REQUESTED'
-                ? 'bg-yellow-100 text-yellow-700'
-                : 'bg-gray-100 text-gray-700',
+                ? 'border-yellow-400/40 text-yellow-400'
+                : 'border-border text-text2',
             ]"
           >
             {{ item.status || "REQUESTED" }}

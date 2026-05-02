@@ -1,20 +1,20 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-6 bg-bg text-text1 font-sans">
     <PageHeader
       title="Generate Appointment Slots"
       subtitle="Create available slots for doctors"
     />
 
-    <div class="grid md:grid-cols-2 gap-6">
+    <div class="grid gap-6 md:grid-cols-2">
       <!-- Generator Form -->
-      <div class="bg-white rounded-lg shadow-md p-6 space-y-4">
-        <h2 class="text-lg font-semibold">Generate New Slots</h2>
+      <div class="space-y-4 rounded border border-border bg-surface p-4">
+        <h2 class="font-sans text-xl font-bold leading-tight text-text1">Generate New Slots</h2>
 
         <div>
-          <label class="block mb-2 font-semibold">Select Doctor</label>
+          <label class="mb-1.5 block font-mono text-[11px] uppercase tracking-mono text-text2">Select Doctor</label>
           <select
             v-model="selectedDoctor"
-            class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full rounded border border-border bg-surface px-3 py-2 font-mono text-sm text-text1 outline-none transition-all duration-150 focus:border-accent focus:ring-2 focus:ring-accent/10"
           >
             <option value="">-- Choose a doctor --</option>
             <option v-for="doctor in doctors" :key="doctor.id" :value="doctor.id">
@@ -24,48 +24,48 @@
         </div>
 
         <div>
-          <label class="block mb-2 font-semibold">Start Date</label>
+          <label class="mb-1.5 block font-mono text-[11px] uppercase tracking-mono text-text2">Start Date</label>
           <input
             v-model="startDate"
             type="date"
-            class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full rounded border border-border bg-surface px-3 py-2 font-mono text-sm text-text1 outline-none transition-all duration-150 focus:border-accent focus:ring-2 focus:ring-accent/10"
           />
         </div>
 
         <div>
-          <label class="block mb-2 font-semibold">End Date</label>
+          <label class="mb-1.5 block font-mono text-[11px] uppercase tracking-mono text-text2">End Date</label>
           <input
             v-model="endDate"
             type="date"
-            class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full rounded border border-border bg-surface px-3 py-2 font-mono text-sm text-text1 outline-none transition-all duration-150 focus:border-accent focus:ring-2 focus:ring-accent/10"
           />
         </div>
 
         <button
           @click="generateSlots"
           :disabled="!selectedDoctor || !startDate || !endDate || generating"
-          class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300"
+          class="w-full rounded bg-accent px-4 py-2 font-mono text-[11px] uppercase tracking-mono-wide text-black transition-all duration-150 cursor-pointer hover:bg-accent-dim hover:-translate-y-px disabled:cursor-not-allowed disabled:opacity-60"
         >
           {{ generating ? "Generating..." : "Generate Slots" }}
         </button>
 
         <div v-if="generationMessage" :class="[
-          'p-3 rounded-lg text-sm',
-          generationSuccess ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+          'rounded border px-4 py-3 font-sans text-sm',
+          generationSuccess ? 'border-accent/40 bg-surface text-accent' : 'border-danger/40 bg-surface text-danger'
         ]">
           {{ generationMessage }}
         </div>
       </div>
 
       <!-- Slot Viewer -->
-      <div class="bg-white rounded-lg shadow-md p-6 space-y-4">
-        <h2 class="text-lg font-semibold">View Slots</h2>
+      <div class="space-y-4 rounded border border-border bg-surface p-4">
+        <h2 class="font-sans text-xl font-bold leading-tight text-text1">View Slots</h2>
 
         <div>
-          <label class="block mb-2 font-semibold">Select Doctor</label>
+          <label class="mb-1.5 block font-mono text-[11px] uppercase tracking-mono text-text2">Select Doctor</label>
           <select
             v-model="viewDoctor"
-            class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full rounded border border-border bg-surface px-3 py-2 font-mono text-sm text-text1 outline-none transition-all duration-150 focus:border-accent focus:ring-2 focus:ring-accent/10"
           >
             <option value="">-- Choose a doctor --</option>
             <option v-for="doctor in doctors" :key="doctor.id" :value="doctor.id">
@@ -75,28 +75,28 @@
         </div>
 
         <div>
-          <label class="block mb-2 font-semibold">Select Date</label>
+          <label class="mb-1.5 block font-mono text-[11px] uppercase tracking-mono text-text2">Select Date</label>
           <input
             v-model="viewDate"
             type="date"
             :disabled="!viewDoctor"
-            class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+            class="w-full rounded border border-border bg-surface px-3 py-2 font-mono text-sm text-text1 outline-none transition-all duration-150 focus:border-accent focus:ring-2 focus:ring-accent/10 disabled:cursor-not-allowed disabled:opacity-50"
             @change="fetchSlots"
           />
         </div>
 
-        <div v-if="loadingSlots" class="text-gray-500">Loading slots...</div>
-        <div v-else-if="viewSlots.length === 0" class="text-gray-500">
+        <div v-if="loadingSlots" class="font-sans text-sm text-text2">Loading slots...</div>
+        <div v-else-if="viewSlots.length === 0" class="font-sans text-sm text-text2">
           No slots available for this date
         </div>
         <div v-else class="space-y-2">
           <div
             v-for="slot in viewSlots"
             :key="slot.id"
-            class="p-3 border rounded-lg text-sm"
+            class="rounded border border-border bg-surface2 p-3 text-sm"
           >
-            <p class="font-semibold">{{ formatTime(slot.start_time) }}</p>
-            <p class="text-gray-600">{{ slot.is_available ? "Available" : "Booked" }}</p>
+            <p class="font-mono text-sm text-text1">{{ formatTime(slot.start_time) }}</p>
+            <p class="font-mono text-[11px] uppercase tracking-mono" :class="slot.is_available ? 'text-accent' : 'text-danger'">{{ slot.is_available ? "Available" : "Booked" }}</p>
           </div>
         </div>
       </div>

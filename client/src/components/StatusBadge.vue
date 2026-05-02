@@ -104,7 +104,7 @@ const displayStatus = computed(() => {
 
 <template>
   <div
-    class="inline-flex items-center gap-2 rounded-full font-semibold transition-all duration-200 hover:shadow-sm"
+    class="inline-flex items-center gap-2 rounded border px-2 py-0.5 font-mono text-[10px] uppercase tracking-mono-wide transition-all duration-150 cursor-pointer"
     :class="[config.bg, config.text, sizeClasses[props.size]]"
   >
     <span class="inline-block h-2 w-2 rounded-full" :class="config.dot"></span>

@@ -1,14 +1,14 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="min-h-screen bg-bg text-text1 font-sans">
     <!-- Header -->
-    <nav class="bg-white shadow-md">
-      <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-        <h1 class="text-2xl font-bold text-blue-600">ClinicQueue</h1>
-        <div class="flex gap-4">
-          <span class="text-gray-600">{{ userName }}</span>
+    <nav class="border-b border-border bg-surface">
+      <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 md:px-12">
+        <h1 class="font-sans text-2xl font-bold leading-tight tracking-tight text-text1">ClinicQueue</h1>
+        <div class="flex items-center gap-4">
+          <span class="font-mono text-[11px] uppercase tracking-mono text-text2">{{ userName }}</span>
           <button
             @click="logout"
-            class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+            class="rounded border border-danger px-4 py-2 font-mono text-[11px] uppercase tracking-mono-wide text-danger transition-all duration-150 cursor-pointer hover:bg-danger/10"
           >
             Logout
           </button>
@@ -17,13 +17,13 @@
     </nav>
 
     <!-- Sidebar + Main -->
-    <div class="flex max-w-7xl mx-auto gap-6 p-6">
+    <div class="mx-auto flex max-w-7xl gap-6 px-6 py-8 md:px-12">
       <!-- Sidebar -->
-      <aside class="w-64 bg-white rounded-lg shadow-md h-fit sticky top-20">
-        <nav class="p-4 space-y-2">
+      <aside class="w-64 h-fit sticky top-20 rounded border border-border bg-surface">
+        <nav class="flex flex-col gap-0.5 p-4">
           <router-link
             to="/reception"
-            class="block px-4 py-2 rounded-lg"
+            class="block rounded px-3 py-2 font-mono text-[11px] uppercase tracking-mono text-text2 transition-all duration-150 cursor-pointer hover:bg-surface2 hover:text-text1"
             :class="[
               $route.path === '/reception'
                 ? 'bg-blue-100 text-blue-700 font-semibold'
@@ -34,7 +34,7 @@
           </router-link>
           <router-link
             to="/reception/check-in"
-            class="block px-4 py-2 rounded-lg"
+            class="block rounded px-3 py-2 font-mono text-[11px] uppercase tracking-mono text-text2 transition-all duration-150 cursor-pointer hover:bg-surface2 hover:text-text1"
             :class="[
               $route.path === '/reception/check-in'
                 ? 'bg-blue-100 text-blue-700 font-semibold'
@@ -45,7 +45,7 @@
           </router-link>
           <router-link
             to="/reception/slots"
-            class="block px-4 py-2 rounded-lg"
+            class="block rounded px-3 py-2 font-mono text-[11px] uppercase tracking-mono text-text2 transition-all duration-150 cursor-pointer hover:bg-surface2 hover:text-text1"
             :class="[
               $route.path === '/reception/slots'
                 ? 'bg-blue-100 text-blue-700 font-semibold'

@@ -1,26 +1,26 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-6 bg-bg text-text1 font-sans">
     <PageHeader
       title="My Appointments"
       subtitle="Manage your appointments"
     />
 
-    <div v-if="loading" class="text-center py-8 text-gray-500">
+    <div v-if="loading" class="py-8 text-center font-sans text-sm text-text2">
       Loading appointments...
     </div>
     <div
       v-else-if="filteredAppointments.length === 0"
-      class="bg-white rounded-lg shadow-md p-8 text-center text-gray-500"
+      class="rounded border border-border bg-surface p-8 text-center font-sans text-sm text-text2"
     >
       <p>No appointments found</p>
-      <router-link to="/patient/book" class="text-blue-600 hover:underline">
+      <router-link to="/patient/book" class="font-mono text-[11px] uppercase tracking-mono text-accent transition-all duration-150 cursor-pointer hover:text-accent-dim">
         Book your first appointment
       </router-link>
     </div>
 
     <div
       v-else-if="errorMessage"
-      class="bg-white rounded-lg shadow-md p-8 text-center text-red-600"
+      class="rounded border border-danger/40 bg-surface p-8 text-center font-sans text-sm text-danger"
     >
       <p>{{ errorMessage }}</p>
     </div>
@@ -29,12 +29,12 @@
       <div
         v-for="appointment in filteredAppointments"
         :key="appointment.id"
-        class="bg-white rounded-lg shadow-md p-6 border-l-4"
+        class="rounded border bg-surface p-4"
         :class="getStatusBorderColor(appointment.status)"
       >
-        <div class="flex justify-between items-start mb-4">
+        <div class="mb-4 flex items-start justify-between gap-4">
           <div>
-            <h3 class="text-lg font-bold text-slate-900">
+            <h3 class="font-sans text-lg font-bold text-text1">
               {{
                 appointment.doctorName && appointment.doctorName !== "Unknown"
                   ? `Dr. ${appointment.doctorName}`
@@ -45,22 +45,22 @@
           <StatusBadge :status="appointment.status || 'UNKNOWN'" />
         </div>
 
-        <div class="grid md:grid-cols-2 gap-4 mb-4 text-sm">
+        <div class="mb-4 grid gap-4 text-sm md:grid-cols-2">
           <div>
-            <p class="text-gray-600">Date & Time</p>
-            <p class="font-semibold text-slate-900">{{ formatDateTime(appointment.appointmentDateTime) }}</p>
+            <p class="font-mono text-[11px] uppercase tracking-mono text-text2">Date & Time</p>
+            <p class="font-sans text-sm font-semibold text-text1">{{ formatDateTime(appointment.appointmentDateTime) }}</p>
           </div>
           <div>
-            <p class="text-gray-600">Reason</p>
-            <p class="font-semibold text-slate-900">{{ appointment.reason || "Not specified" }}</p>
+            <p class="font-mono text-[11px] uppercase tracking-mono text-text2">Reason</p>
+            <p class="font-sans text-sm font-semibold text-text1">{{ appointment.reason || "Not specified" }}</p>
           </div>
           <div v-if="appointment.status === 'CHECKED_IN'">
-            <p class="text-gray-600">Checked In</p>
-            <p class="font-semibold">{{ formatDateTime(appointment.checked_in_at) }}</p>
+            <p class="font-mono text-[11px] uppercase tracking-mono text-text2">Checked In</p>
+            <p class="font-sans text-sm font-semibold text-text1">{{ formatDateTime(appointment.checked_in_at) }}</p>
           </div>
           <div v-if="appointment.status === 'COMPLETED'">
-            <p class="text-gray-600">Completed</p>
-            <p class="font-semibold">{{ formatDateTime(appointment.completed_at) }}</p>
+            <p class="font-mono text-[11px] uppercase tracking-mono text-text2">Completed</p>
+            <p class="font-sans text-sm font-semibold text-text1">{{ formatDateTime(appointment.completed_at) }}</p>
           </div>
         </div>
 
@@ -68,21 +68,21 @@
           <button
             v-if="['REQUESTED', 'CONFIRMED'].includes(appointment.status)"
             @click="openRescheduleModal(appointment)"
-            class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm"
+            class="rounded border border-border px-4 py-2 font-mono text-[11px] uppercase tracking-mono text-text2 transition-all duration-150 cursor-pointer hover:border-accent hover:text-text1"
           >
             Reschedule
           </button>
           <button
             v-if="['REQUESTED', 'CONFIRMED'].includes(appointment.status)"
             @click="cancelAppointment(appointment.id)"
-            class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 text-sm"
+            class="rounded border border-danger px-4 py-2 font-mono text-[11px] uppercase tracking-mono-wide text-danger transition-all duration-150 cursor-pointer hover:bg-danger/10"
           >
             Cancel
           </button>
           <router-link
             v-if="appointment.status === 'COMPLETED'"
             :to="`/emr/appointments/${appointment.id}/consultation`"
-            class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 text-sm inline-block"
+            class="inline-flex items-center justify-center rounded bg-accent px-4 py-2 font-mono text-[11px] uppercase tracking-mono-wide text-black transition-all duration-150 cursor-pointer hover:bg-accent-dim hover:-translate-y-px"
           >
             View Consultation
           </router-link>
@@ -94,34 +94,34 @@
     <!-- Reschedule Modal -->
     <div
       v-if="showRescheduleModal"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/70"
     >
-      <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 space-y-4">
-        <h3 class="text-lg font-semibold">Reschedule Appointment</h3>
+      <div class="mx-4 w-full max-w-md space-y-4 rounded border border-border bg-surface p-6">
+        <h3 class="font-sans text-xl font-bold leading-tight text-text1">Reschedule Appointment</h3>
 
         <div>
-          <label class="block mb-2 font-semibold">New Date</label>
+          <label class="mb-1.5 block font-mono text-[11px] uppercase tracking-mono text-text2">New Date</label>
           <input
             v-model="rescheduleDate"
             type="date"
             :min="new Date().toISOString().split('T')[0]"
-            class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full rounded border border-border bg-surface px-3 py-2 font-mono text-sm text-text1 outline-none transition-all duration-150 focus:border-accent focus:ring-2 focus:ring-accent/10"
             @change="fetchRescheduleSlots"
           />
         </div>
 
         <div v-if="rescheduleSlots.length > 0">
-          <label class="block mb-2 font-semibold">New Time</label>
+          <label class="mb-1.5 block font-mono text-[11px] uppercase tracking-mono text-text2">New Time</label>
           <div class="grid grid-cols-2 gap-2">
             <button
               v-for="slot in rescheduleSlots"
               :key="slot.id"
               @click="rescheduleSlot = slot"
               :class="[
-                'px-3 py-2 border rounded-lg transition text-sm',
+                'rounded border px-3 py-2 transition-all duration-150 cursor-pointer font-mono text-sm',
                 rescheduleSlot?.id === slot.id
-                  ? 'border-blue-500 bg-blue-100'
-                  : 'border-gray-300 hover:border-blue-300',
+                  ? 'border-accent/40 bg-surface2 text-accent'
+                  : 'border-border text-text1 hover:border-accent/30',
               ]"
             >
               {{ formatTime(slot.start_datetime) }}
@@ -132,14 +132,14 @@
         <div class="flex gap-3">
           <button
             @click="closeRescheduleModal"
-            class="flex-1 border border-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-50"
+            class="flex-1 rounded border border-border px-4 py-2 font-mono text-[11px] uppercase tracking-mono text-text2 transition-all duration-150 cursor-pointer hover:border-accent hover:text-text1"
           >
             Cancel
           </button>
           <button
             @click="submitReschedule"
             :disabled="!rescheduleSlot || rescheduling"
-            class="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:bg-gray-300"
+            class="flex-1 rounded bg-accent px-4 py-2 font-mono text-[11px] uppercase tracking-mono-wide text-black transition-all duration-150 cursor-pointer hover:bg-accent-dim hover:-translate-y-px disabled:cursor-not-allowed disabled:opacity-60"
           >
             {{ rescheduling ? "Rescheduling..." : "Confirm" }}
           </button>

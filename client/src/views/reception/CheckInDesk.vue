@@ -1,33 +1,33 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-6 bg-bg text-text1 font-sans">
     <PageHeader
       title="Check-In Desk"
       subtitle="Check in patients for their appointments"
     />
 
-    <div v-if="loading" class="text-center py-8 text-gray-500">
+    <div v-if="loading" class="py-8 text-center font-sans text-sm text-text2">
       Loading appointments...
     </div>
-    <div v-else-if="confirmedAppointments.length === 0" class="bg-white rounded-lg shadow-md p-8 text-center text-gray-500">
+    <div v-else-if="confirmedAppointments.length === 0" class="rounded border border-border bg-surface p-8 text-center font-sans text-sm text-text2">
       <p>No confirmed appointments today</p>
     </div>
 
     <div v-else class="space-y-4">
-      <h2 class="text-lg font-semibold">Today's Confirmed Appointments</h2>
+      <h2 class="font-sans text-xl font-bold leading-tight text-text1">Today's Confirmed Appointments</h2>
       <div
         v-for="appointment in confirmedAppointments"
         :key="appointment.id"
-        class="bg-white rounded-lg shadow-md p-6 border-l-4 border-blue-500"
+        class="rounded border border-border bg-surface p-4"
       >
-        <div class="flex justify-between items-start mb-4">
+        <div class="mb-4 flex items-start justify-between gap-4">
           <div>
-            <h3 class="text-lg font-semibold">
+            <h3 class="font-sans text-lg font-semibold text-text1">
               {{ appointment.patient?.user?.name || "Patient" }}
             </h3>
-            <p class="text-sm text-gray-600">
+            <p class="font-mono text-[11px] uppercase tracking-mono text-text2">
               Dr. {{ appointment.doctor?.name }}
             </p>
-            <p class="text-sm text-gray-600">
+            <p class="font-mono text-[11px] uppercase tracking-mono text-text2">
               Slot: {{ formatDateTime(appointment.slot?.start) }}
             </p>
           </div>
@@ -38,14 +38,14 @@
           <button
             @click="checkIn(appointment.id)"
             :disabled="appointment.status === 'checked_in'"
-            class="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-gray-300"
+            class="rounded bg-accent px-4 py-2 font-mono text-[11px] uppercase tracking-mono-wide text-black transition-all duration-150 cursor-pointer hover:bg-accent-dim hover:-translate-y-px disabled:cursor-not-allowed disabled:opacity-60"
           >
             {{ appointment.status === "checked_in" ? "Checked In" : "Check In" }}
           </button>
           <button
             v-if="isPastSlotTime(appointment.slot?.start)"
             @click="markNoShow(appointment.id)"
-            class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+            class="rounded border border-danger px-4 py-2 font-mono text-[11px] uppercase tracking-mono-wide text-danger transition-all duration-150 cursor-pointer hover:bg-danger/10"
           >
             Mark No Show
           </button>
@@ -56,22 +56,22 @@
     <!-- Current Queue -->
     <div
       v-if="checkedInAppointments.length > 0"
-      class="bg-white rounded-lg shadow-md p-6"
+      class="rounded border border-border bg-surface p-4"
     >
-      <h2 class="text-lg font-semibold mb-4">Current Queue</h2>
+      <h2 class="mb-4 font-sans text-xl font-bold leading-tight text-text1">Current Queue</h2>
       <div class="space-y-2">
         <div
           v-for="appointment in checkedInAppointments"
           :key="appointment.id"
-          class="flex justify-between items-center p-3 border rounded-lg"
+          class="flex items-center justify-between rounded border border-border bg-surface2 p-3"
         >
           <div>
-            <p class="font-semibold">{{ appointment.patient?.user?.name }}</p>
-            <p class="text-sm text-gray-600">
+            <p class="font-sans text-sm font-semibold text-text1">{{ appointment.patient?.user?.name }}</p>
+            <p class="font-mono text-[11px] uppercase tracking-mono text-text2">
               Checked in: {{ formatTime(appointment.checked_in_at) }}
             </p>
           </div>
-          <span class="text-sm text-gray-500">
+          <span class="font-mono text-[11px] uppercase tracking-mono text-text2">
             Waiting: {{ getWaitingDuration(appointment.checked_in_at) }} min
           </span>
         </div>

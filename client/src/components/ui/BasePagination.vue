@@ -1,6 +1,6 @@
 <template>
-  <div v-if="totalItems > 0" class="flex items-center justify-between border-t border-gray-200 bg-gray-50/50 px-6 py-4">
-    <div class="text-sm font-semibold text-gray-700">
+  <div v-if="totalItems > 0" class="flex items-center justify-between border-t border-border px-4 py-4">
+    <div class="font-sans text-sm text-text1">
       Page {{ currentPage }} of {{ totalPages }} ({{ totalItems }} item{{ totalItems !== 1 ? "s" : "" }})
     </div>
 
@@ -9,7 +9,7 @@
         type="button"
         @click="previousPage"
         :disabled="currentPage === 1"
-        class="rounded-lg bg-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200"
+        class="rounded bg-transparent border border-border px-4 py-2 font-mono text-[11px] uppercase tracking-mono text-text2 hover:border-accent hover:text-text1 transition-all duration-150 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
       >
         ← Previous
       </button>
@@ -21,16 +21,16 @@
           :min="1"
           :max="totalPages"
           @change="goToPage"
-          class="w-12 rounded-lg border border-gray-300 px-2 py-1 text-center text-sm text-gray-700 outline-none focus:ring-2 focus:ring-blue-200"
+          class="w-12 rounded border border-border bg-surface px-2 py-1 text-center font-mono text-sm text-text1 outline-none transition-all duration-150 focus:border-accent focus:ring-2 focus:ring-accent/10"
         />
-        <span class="text-sm text-gray-600">/ {{ totalPages }}</span>
+        <span class="font-sans text-sm text-text2">/ {{ totalPages }}</span>
       </div>
 
       <button
         type="button"
         @click="nextPage"
         :disabled="currentPage === totalPages"
-        class="rounded-lg bg-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-400 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200"
+        class="rounded bg-transparent border border-border px-4 py-2 font-mono text-[11px] uppercase tracking-mono text-text2 hover:border-accent hover:text-text1 transition-all duration-150 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
       >
         Next →
       </button>

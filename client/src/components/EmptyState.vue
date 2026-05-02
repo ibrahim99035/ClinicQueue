@@ -26,19 +26,19 @@ defineEmits(['action']);
 </script>
 
 <template>
-  <div class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-gray-50/50 px-6 py-16 text-center transition-all duration-300 hover:border-gray-400 hover:bg-gray-50">
+  <div class="flex flex-col items-center justify-center rounded border border-dashed border-border bg-surface px-6 py-16 text-center transition-all duration-150 hover:border-accent/30">
     <!-- Icon -->
     <div class="mb-4 text-5xl">
       {{ icon }}
     </div>
 
     <!-- Title -->
-    <h3 class="mb-2 text-lg font-bold text-gray-900">
+    <h3 class="mb-2 font-sans font-semibold text-base text-text1">
       {{ title }}
     </h3>
 
     <!-- Description -->
-    <p v-if="description" class="mb-6 max-w-sm text-sm leading-6 text-gray-600">
+    <p v-if="description" class="mb-6 max-w-sm font-sans text-sm text-text2">
       {{ description }}
     </p>
 
@@ -46,7 +46,7 @@ defineEmits(['action']);
     <button
       v-if="actionLabel"
       @click="$emit('action')"
-      class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-blue-700 hover:shadow-md active:scale-95"
+      class="inline-flex items-center gap-2 rounded bg-accent px-4 py-2 font-mono text-[11px] uppercase tracking-mono-wide text-black transition-all duration-150 cursor-pointer hover:bg-accent-dim hover:-translate-y-px"
     >
       <span v-if="actionIcon">{{ actionIcon }}</span>
       {{ actionLabel }}

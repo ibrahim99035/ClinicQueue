@@ -119,13 +119,13 @@ async function handleRegister() {
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-slate-100 px-4">
-    <div class="w-full max-w-xl bg-white rounded-2xl shadow-lg p-8">
+  <div class="min-h-screen flex items-center justify-center bg-bg px-6 py-8 text-text1 font-sans md:px-12">
+    <div class="w-full max-w-xl rounded border border-border bg-surface p-8">
       <div class="mb-6 text-center">
-        <h1 class="text-3xl font-bold text-slate-800">
+        <h1 class="font-sans text-3xl font-bold leading-tight tracking-tight text-text1">
           Create Account
         </h1>
-        <p class="text-slate-500 mt-2">
+        <p class="mt-2 font-sans text-sm text-text2">
           Register as a patient or doctor
         </p>
       </div>
@@ -133,61 +133,61 @@ async function handleRegister() {
       <form @submit.prevent="handleRegister" class="space-y-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">
+            <label class="mb-1.5 block font-mono text-[11px] uppercase tracking-mono text-text2">
               First Name
             </label>
             <input
               v-model="form.first_name"
               type="text"
-              class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              class="w-full rounded border border-border bg-surface px-3 py-2 font-mono text-sm text-text1 placeholder:text-text3 outline-none transition-all duration-150 focus:border-accent focus:ring-2 focus:ring-accent/10"
               placeholder="Mohamed"
             />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-slate-700 mb-1">
+            <label class="mb-1.5 block font-mono text-[11px] uppercase tracking-mono text-text2">
               Last Name
             </label>
             <input
               v-model="form.last_name"
               type="text"
-              class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              class="w-full rounded border border-border bg-surface px-3 py-2 font-mono text-sm text-text1 placeholder:text-text3 outline-none transition-all duration-150 focus:border-accent focus:ring-2 focus:ring-accent/10"
               placeholder="Tarek"
             />
           </div>
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">
+          <label class="mb-1.5 block font-mono text-[11px] uppercase tracking-mono text-text2">
             Email
           </label>
           <input
             v-model="form.email"
             type="email"
-            class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            class="w-full rounded border border-border bg-surface px-3 py-2 font-mono text-sm text-text1 placeholder:text-text3 outline-none transition-all duration-150 focus:border-accent focus:ring-2 focus:ring-accent/10"
             placeholder="example@email.com"
           />
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">
+          <label class="mb-1.5 block font-mono text-[11px] uppercase tracking-mono text-text2">
             Phone
           </label>
           <input
             v-model="form.phone"
             type="text"
-            class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            class="w-full rounded border border-border bg-surface px-3 py-2 font-mono text-sm text-text1 placeholder:text-text3 outline-none transition-all duration-150 focus:border-accent focus:ring-2 focus:ring-accent/10"
             placeholder="01000000000"
           />
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">
+          <label class="mb-1.5 block font-mono text-[11px] uppercase tracking-mono text-text2">
             Register As
           </label>
           <select
             v-model="form.user_role"
-            class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+            class="w-full rounded border border-border bg-surface px-3 py-2 font-mono text-sm text-text1 outline-none transition-all duration-150 focus:border-accent focus:ring-2 focus:ring-accent/10"
           >
             <option value="patient">Patient</option>
             <option value="doctor">Doctor</option>
@@ -195,12 +195,12 @@ async function handleRegister() {
         </div>
 
         <div v-if="form.user_role === 'doctor'">
-          <label class="block text-sm font-medium text-slate-700 mb-1">
+          <label class="mb-1.5 block font-mono text-[11px] uppercase tracking-mono text-text2">
             Specialization
           </label>
           <select
             v-model="form.specialization"
-            class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+            class="w-full rounded border border-border bg-surface px-3 py-2 font-mono text-sm text-text1 outline-none transition-all duration-150 focus:border-accent focus:ring-2 focus:ring-accent/10"
           >
             <option value="">Select specialization</option>
             <option value="General Medicine">General Medicine</option>
@@ -216,39 +216,39 @@ async function handleRegister() {
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">
+          <label class="mb-1.5 block font-mono text-[11px] uppercase tracking-mono text-text2">
             Password
           </label>
           <input
             v-model="form.password"
             type="password"
-            class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            class="w-full rounded border border-border bg-surface px-3 py-2 font-mono text-sm text-text1 placeholder:text-text3 outline-none transition-all duration-150 focus:border-accent focus:ring-2 focus:ring-accent/10"
             placeholder="Enter password"
           />
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1">
+          <label class="mb-1.5 block font-mono text-[11px] uppercase tracking-mono text-text2">
             Confirm Password
           </label>
           <input
             v-model="form.password_confirm"
             type="password"
-            class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            class="w-full rounded border border-border bg-surface px-3 py-2 font-mono text-sm text-text1 placeholder:text-text3 outline-none transition-all duration-150 focus:border-accent focus:ring-2 focus:ring-accent/10"
             placeholder="Confirm password"
           />
         </div>
 
         <p
           v-if="errorMessage"
-          class="text-sm text-red-600 bg-red-50 p-3 rounded-lg"
+          class="rounded border border-danger/40 bg-surface px-4 py-3 font-sans text-sm text-danger"
         >
           {{ errorMessage }}
         </p>
 
         <p
           v-if="successMessage"
-          class="text-sm text-green-600 bg-green-50 p-3 rounded-lg"
+          class="rounded border border-accent/40 bg-surface px-4 py-3 font-sans text-sm text-accent"
         >
           {{ successMessage }}
         </p>
@@ -256,18 +256,18 @@ async function handleRegister() {
         <button
           type="submit"
           :disabled="loading"
-          class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-semibold py-3 rounded-lg transition"
+          class="w-full rounded bg-accent px-4 py-3 font-mono text-[11px] uppercase tracking-mono-wide text-black transition-all duration-150 cursor-pointer hover:bg-accent-dim hover:-translate-y-px disabled:cursor-not-allowed disabled:opacity-60"
         >
           {{ loading ? "Creating account..." : "Create Account" }}
         </button>
       </form>
 
       <div class="mt-6 text-center">
-        <p class="text-sm text-slate-600">
+        <p class="font-sans text-sm text-text2">
           Already have an account?
           <RouterLink
             to="/login"
-            class="text-blue-600 font-semibold hover:underline"
+            class="font-mono text-[11px] uppercase tracking-mono-wide text-accent transition-all duration-150 cursor-pointer hover:text-accent-dim"
           >
             Login
           </RouterLink>

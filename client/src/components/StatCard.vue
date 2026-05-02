@@ -55,18 +55,18 @@ const colorClasses = {
 
 <template>
   <div 
-    class="group relative overflow-hidden rounded-2xl border border-white/50 bg-white/80 p-6 shadow-sm backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-white/70"
+    class="group relative overflow-hidden rounded border border-border bg-surface p-4 transition-all duration-150 hover:border-accent/30"
     :class="colorClasses[color].bg"
   >
     <!-- Decorative gradient background -->
-    <div class="absolute inset-0 -z-10 opacity-0 transition-opacity duration-300 group-hover:opacity-5"
+    <div class="absolute inset-0 -z-10 opacity-0 transition-opacity duration-150 group-hover:opacity-5"
       :class="colorClasses[color].text"
     ></div>
 
     <!-- Icon -->
     <div
       v-if="icon"
-      class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl font-bold text-lg transition-transform duration-300 group-hover:scale-110"
+      class="mb-4 inline-flex h-12 w-12 items-center justify-center rounded font-bold text-lg transition-transform duration-150 group-hover:scale-105"
       :class="colorClasses[color].icon"
     >
       {{ icon }}
@@ -74,17 +74,17 @@ const colorClasses = {
 
     <!-- Content -->
     <div class="flex flex-col gap-3">
-      <span class="text-sm font-semibold text-gray-600">
+      <span class="font-mono text-[11px] uppercase tracking-mono text-text2">
         {{ label }}
       </span>
 
-      <strong class="text-3xl font-bold text-gray-900">
+      <strong class="font-mono text-sm tabular-nums text-text1">
         {{ value }}
       </strong>
     </div>
 
     <!-- Animated border on hover -->
-    <div class="absolute inset-0 -z-10 rounded-2xl border border-transparent transition-colors duration-300 group-hover:border-current"
+    <div class="absolute inset-0 -z-10 rounded border border-transparent transition-colors duration-150 group-hover:border-current"
       :class="colorClasses[color].text"
     ></div>
   </div>
@@ -92,12 +92,8 @@ const colorClasses = {
 
 <style scoped>
 @keyframes subtle-float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-2px);
-  }
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-2px); }
 }
 
 .group:hover {
