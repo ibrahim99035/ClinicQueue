@@ -1,16 +1,16 @@
 <template>
-  <div class="space-y-6 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans">
+  <div class="space-y-6 bg-bg text-text1 font-sans">
     <PageHeader
       title="My Consultations"
       subtitle="View your completed consultations"
     />
 
-    <div v-if="loading" class="py-8 text-center font-sans text-sm text-slate-500 dark:text-slate-400">
+    <div v-if="loading" class="py-8 text-center font-sans text-sm text-text2">
       Loading consultations...
     </div>
     <div
       v-else-if="consultations.length === 0"
-      class="rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 text-center font-sans text-sm text-slate-500 dark:text-slate-400"
+      class="rounded border border-border bg-surface p-8 text-center font-sans text-sm text-text2"
     >
       <p>No completed consultations yet</p>
     </div>
@@ -19,74 +19,74 @@
       <div
         v-for="appointment in consultations"
         :key="appointment.id"
-        class="rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4"
+        class="rounded border border-border bg-surface p-4"
       >
         <div class="mb-4 flex items-start justify-between gap-4">
           <div>
-            <h3 class="font-sans text-lg font-semibold text-slate-900 dark:text-slate-100">
+            <h3 class="font-sans text-lg font-semibold text-text1">
               Dr. {{ appointment.doctorName }}
             </h3>
-            <p class="font-mono text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            <p class="font-mono text-[11px] uppercase tracking-mono text-text2">
               Consultation on {{ formatDateTime(appointment.completed_at || appointment.appointmentDateTime) }}
             </p>
           </div>
           <button
             v-if="appointment.status === 'COMPLETED' || appointment.status === 'completed'"
             @click="toggleConsultation(appointment)"
-            class="font-mono text-[11px] uppercase tracking-wide text-blue-600 dark:text-blue-400 transition-all duration-150 cursor-pointer hover:text-blue-700 dark:hover:text-blue-300"
+            class="font-mono text-[11px] uppercase tracking-mono text-accent transition-all duration-150 cursor-pointer hover:text-accent-dim"
           >
             {{ selectedId === appointment.id ? "Collapse" : "View Details" }}
           </button>
           <span
             v-else
-            class="font-sans text-sm text-slate-500 dark:text-slate-400"
+            class="font-sans text-sm text-text2"
           >
             Consultation not available yet
           </span>
         </div>
 
-        <div v-if="selectedId === appointment.id" class="space-y-4 border-t border-slate-200 dark:border-slate-800 pt-4">
-          <div v-if="loadingDetailsId === appointment.id" class="font-sans text-sm text-slate-500 dark:text-slate-400">
+        <div v-if="selectedId === appointment.id" class="space-y-4 border-t border-border pt-4">
+          <div v-if="loadingDetailsId === appointment.id" class="font-sans text-sm text-text2">
             Loading consultation details...
           </div>
 
           <div v-else-if="consultationDetailsByAppointment[appointment.id]" class="space-y-4">
           <!-- Diagnosis -->
           <div>
-            <h4 class="mb-2 font-sans text-base font-semibold text-slate-900 dark:text-slate-100">Diagnosis</h4>
-            <p class="whitespace-pre-wrap font-sans text-sm text-slate-500 dark:text-slate-400">
+            <h4 class="mb-2 font-sans text-base font-semibold text-text1">Diagnosis</h4>
+            <p class="whitespace-pre-wrap font-sans text-sm text-text2">
               {{ consultationDetailsByAppointment[appointment.id].diagnosis || "Not recorded" }}
             </p>
           </div>
 
           <!-- Notes -->
           <div>
-            <h4 class="mb-2 font-sans text-base font-semibold text-slate-900 dark:text-slate-100">Doctor's Notes</h4>
-            <p class="whitespace-pre-wrap font-sans text-sm text-slate-500 dark:text-slate-400">
+            <h4 class="mb-2 font-sans text-base font-semibold text-text1">Doctor's Notes</h4>
+            <p class="whitespace-pre-wrap font-sans text-sm text-text2">
               {{ consultationDetailsByAppointment[appointment.id].notes || "No notes" }}
             </p>
           </div>
 
           <!-- Prescriptions -->
           <div v-if="consultationDetailsByAppointment[appointment.id].prescription_items?.length > 0">
-            <h4 class="mb-2 font-sans text-base font-semibold text-slate-900 dark:text-slate-100">Prescriptions</h4>
+            <h4 class="mb-2 font-sans text-base font-semibold text-text1">Prescriptions</h4>
             <table class="w-full border-collapse text-sm">
               <thead>
-                <tr class="bg-slate-50 dark:bg-slate-800">
-                  <th class="px-4 py-3 text-left font-mono text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Drug Name</th>
-                  <th class="px-4 py-3 text-left font-mono text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Dose</th>
-                  <th class="px-4 py-3 text-left font-mono text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Duration</th>
+                <tr class="bg-surface2">
+                  <th class="px-4 py-3 text-left font-mono text-[11px] uppercase tracking-mono text-text2">Drug Name</th>
+                  <th class="px-4 py-3 text-left font-mono text-[11px] uppercase tracking-mono text-text2">Dose</th>
+                  <th class="px-4 py-3 text-left font-mono text-[11px] uppercase tracking-mono text-text2">Duration</th>
                 </tr>
               </thead>
               <tbody>
                 <tr
                   v-for="item in consultationDetailsByAppointment[appointment.id].prescription_items"
                   :key="item.id"
-                  class="border-t border-slate-200 dark:border-slate-800 transition-colors duration-150 hover:bg-slate-50 dark:hover:bg-slate-800"
+                  class="border-t border-border transition-colors duration-150 hover:bg-surface2"
                 >
-                  <td class="px-4 py-3 font-sans text-sm text-slate-900 dark:text-slate-100">{{ item.drug_name }}</td>
-                  <td class="px-4 py-3 font-sans text-sm text-slate-900 dark:text-slate-100">{{ item.dose }}</td>
-                  <td class="px-4 py-3 font-sans text-sm text-slate-900 dark:text-slate-100">{{ item.duration }}</td>
+                  <td class="px-4 py-3 font-sans text-sm text-text1">{{ item.drug_name }}</td>
+                  <td class="px-4 py-3 font-sans text-sm text-text1">{{ item.dose }}</td>
+                  <td class="px-4 py-3 font-sans text-sm text-text1">{{ item.duration }}</td>
                 </tr>
               </tbody>
             </table>
@@ -94,22 +94,22 @@
 
           <!-- Tests -->
           <div v-if="consultationDetailsByAppointment[appointment.id].requested_tests?.length > 0">
-            <h4 class="mb-2 font-sans text-base font-semibold text-slate-900 dark:text-slate-100">Requested Tests</h4>
+            <h4 class="mb-2 font-sans text-base font-semibold text-text1">Requested Tests</h4>
             <table class="w-full border-collapse text-sm">
               <thead>
-                <tr class="bg-slate-50 dark:bg-slate-800">
-                  <th class="px-4 py-3 text-left font-mono text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Test Name</th>
-                  <th class="px-4 py-3 text-left font-mono text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Notes</th>
+                <tr class="bg-surface2">
+                  <th class="px-4 py-3 text-left font-mono text-[11px] uppercase tracking-mono text-text2">Test Name</th>
+                  <th class="px-4 py-3 text-left font-mono text-[11px] uppercase tracking-mono text-text2">Notes</th>
                 </tr>
               </thead>
               <tbody>
                 <tr
                   v-for="test in consultationDetailsByAppointment[appointment.id].requested_tests"
                   :key="test.id"
-                  class="border-t border-slate-200 dark:border-slate-800 transition-colors duration-150 hover:bg-slate-50 dark:hover:bg-slate-800"
+                  class="border-t border-border transition-colors duration-150 hover:bg-surface2"
                 >
-                  <td class="px-4 py-3 font-sans text-sm text-slate-900 dark:text-slate-100">{{ test.test_name }}</td>
-                  <td class="px-4 py-3 font-sans text-sm text-slate-900 dark:text-slate-100">{{ test.notes || "—" }}</td>
+                  <td class="px-4 py-3 font-sans text-sm text-text1">{{ test.test_name }}</td>
+                  <td class="px-4 py-3 font-sans text-sm text-text1">{{ test.notes || "—" }}</td>
                 </tr>
               </tbody>
             </table>
@@ -117,7 +117,7 @@
           </div>
           <div
             v-else-if="consultationDetailsByAppointment[appointment.id] === null"
-            class="rounded border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 px-4 py-3 font-sans text-sm text-slate-500 dark:text-slate-400"
+            class="rounded border border-border bg-surface2 px-4 py-3 font-sans text-sm text-text2"
           >
             No consultation summary is available for this appointment yet.
           </div>

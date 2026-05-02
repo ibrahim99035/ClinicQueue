@@ -6,6 +6,7 @@ from .views import (
     AppointmentsByMonthView,
     TopSpecializationsView,
     DoctorPerformanceView,
+    ExportAnalyticsCSVView,
 )
 
 
@@ -15,4 +16,5 @@ urlpatterns = [
     path("appointments-by-month/", AppointmentsByMonthView.as_view(), name="analytics-appointments-by-month"),
     path("top-specializations/", TopSpecializationsView.as_view(), name="analytics-top-specializations"),
     path("doctor-performance/", DoctorPerformanceView.as_view(), name="analytics-doctor-performance"),
+    path("export-csv/", ExportAnalyticsCSVView.as_view(), name="analytics-export-csv"),
 ]

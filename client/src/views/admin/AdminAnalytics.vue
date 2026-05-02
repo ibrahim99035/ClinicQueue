@@ -16,6 +16,15 @@
       >
         {{ analytics.loading ? "Loading..." : "Refresh" }}
       </button>
+
+      <button
+        type="button"
+        :disabled="analytics.loading || !analytics.hasData"
+        @click="downloadCSV"
+        class="w-fit rounded-xl bg-gradient-to-r from-green-600 to-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-md transition hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        {{ exporting ? "Exporting..." : "Export CSV" }}
+      </button>
     </div>
 
     <div
@@ -148,8 +157,10 @@ import { computed, onMounted, ref } from "vue";
 import { useAnalyticsStore } from "../../stores/analytics";
 import StatCard from "../../components/StatCard.vue";
 import BaseTable from "../../components/ui/BaseTable.vue";
+import * as analyticsApi from "../../api/analytics";
 
 const analytics = useAnalyticsStore();
+const exporting = ref(false);
 
 const sortKey = ref("total_appointments");
 const sortDirection = ref("desc");
@@ -221,6 +232,17 @@ const specializationChartOptions = computed(() => ({
 
 async function refreshAnalytics() {
   await analytics.loadAnalytics();
+}
+
+async function downloadCSV() {
+  exporting.value = true;
+  try {
+    await analyticsApi.exportAnalyticsCSV();
+  } catch (error) {
+    console.error("Failed to export CSV:", error);
+  } finally {
+    exporting.value = false;
+  }
 }
 
 function setSort(key) {

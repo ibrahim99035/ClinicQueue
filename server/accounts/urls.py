@@ -19,6 +19,7 @@ urlpatterns = [
     path('doctors/', DoctorsListView.as_view(), name='doctors-list'),
     
     path('admin/create-staff/', AdminUserCreateView.as_view(), name='create-staff'),
+    path('admin/create-internal-user/', AdminUserCreateView.as_view(), name='create-internal-user'),
     path('admin/pending-doctors/', PendingDoctorsListView.as_view(), name='pending-doctors'),
     path('admin/approve-doctor/<int:pk>/', ApproveDoctorView.as_view(), name='approve-doctor'),
 ]

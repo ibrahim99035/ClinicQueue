@@ -24,3 +24,17 @@ export async function getDoctorPerformance() {
   const response = await api.get("/analytics/doctor-performance/");
   return response.data;
 }
+
+export async function exportAnalyticsCSV() {
+  const response = await api.get("/analytics/export-csv/", {
+    responseType: 'blob',
+  });
+  const url = window.URL.createObjectURL(new Blob([response.data]));
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', 'analytics-report.csv');
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+}

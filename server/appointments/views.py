@@ -6,6 +6,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from django.db.models import Q
 
 from appointments.models import Appointment, RescheduleHistory, WaitingList
 from scheduling.models import TimeSlot
@@ -95,12 +96,34 @@ class AppointmentViewSet(viewsets.ModelViewSet):
             .select_related("doctor_id", "patient_id", "slot_id")
             .order_by("-id")
         )
+
+        doctor_param = self.request.query_params.get("doctor")
+        patient_param = self.request.query_params.get("patient")
+        search_param = self.request.query_params.get("search")
+        date_from_param = self.request.query_params.get("date_from")
+        date_to_param = self.request.query_params.get("date_to")
+
         if user.isPatient:
             qs = qs.filter(patient_id__user=user)
         elif user.isDoctor:
             qs = qs.filter(doctor_id__user=user)
         elif not (user.isReceptionist or user.isAdmin):
             return qs.none()
+
+        if user.isReceptionist or user.isAdmin:
+            if doctor_param:
+                qs = qs.filter(doctor_id_id=doctor_param)
+            if patient_param:
+                qs = qs.filter(patient_id_id=patient_param)
+            if search_param:
+                search_q = (
+                    Q(patient_id__user__first_name__icontains=search_param) |
+                    Q(patient_id__user__last_name__icontains=search_param) |
+                    Q(patient_id__user__email__icontains=search_param)
+                )
+                if search_param.isdigit():
+                    search_q |= Q(id=int(search_param))
+                qs = qs.filter(search_q)
 
         status_param = self.request.query_params.get("status")
         if status_param:
@@ -117,6 +140,16 @@ class AppointmentViewSet(viewsets.ModelViewSet):
             selected_date = parse_date(date_param)
             if selected_date:
                 qs = qs.filter(slot_id__start_datetime__date=selected_date)
+
+        if date_from_param:
+            date_from = parse_date(date_from_param)
+            if date_from:
+                qs = qs.filter(slot_id__start_datetime__date__gte=date_from)
+
+        if date_to_param:
+            date_to = parse_date(date_to_param)
+            if date_to:
+                qs = qs.filter(slot_id__start_datetime__date__lte=date_to)
 
         return qs
 
@@ -140,6 +173,8 @@ class AppointmentViewSet(viewsets.ModelViewSet):
             return [IsReceptionist()]
         if self.action == 'complete':
             return [IsDoctor()]
+        if self.action == 'reschedule':
+            return [IsAuthenticated()]
         if self.action == 'queue':
             return [IsDoctorOrReceptionist()]
         return [IsAuthenticated()]
@@ -185,6 +220,11 @@ class AppointmentViewSet(viewsets.ModelViewSet):
     def reschedule(self, request, pk=None):
         appointment = self.get_object()
 
+        is_patient_owner = request.user.isPatient and appointment.patient_id.user == request.user
+        is_staff = request.user.isDoctor or request.user.isReceptionist or request.user.isAdmin
+        if not (is_patient_owner or is_staff):
+            return Response({'detail': 'You do not have permission to reschedule this appointment.'}, status=status.HTTP_403_FORBIDDEN)
+
         if appointment.status not in ('REQUESTED', 'CONFIRMED'):
             return Response(
                 {'detail': f"Cannot reschedule an appointment with status '{appointment.status}'."},
@@ -200,6 +240,17 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         newSlot = get_object_or_404(TimeSlot, pk=serializer.validated_data['new_slot'])
         reason = serializer.validated_data.get('reason', '')
         oldSlot = appointment.slot_id
+
+        overlapping = Appointment.objects.filter(
+            patient_id=appointment.patient_id,
+            status__in=['REQUESTED', 'CONFIRMED', 'CHECKED_IN'],
+        ).exclude(pk=appointment.pk).filter(
+            slot_id__start_datetime__lt=newSlot.end_datetime,
+            slot_id__end_datetime__gt=newSlot.start_datetime,
+        ).exists()
+
+        if overlapping:
+            return Response({'detail': 'The new slot overlaps with another appointment for this patient.'}, status=status.HTTP_400_BAD_REQUEST)
 
         with transaction.atomic():
             RescheduleHistory.objects.create(

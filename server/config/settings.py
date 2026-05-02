@@ -121,3 +121,5 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(hours=2),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
 }
+
+SLOT_BUFFER_MINUTES = int(os.getenv('SLOT_BUFFER_MINUTES', '5'))

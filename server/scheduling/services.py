@@ -1,4 +1,5 @@
 import datetime
+from django.conf import settings
 from django.utils import timezone
 from accounts.models.doctor import DoctorProfile
 from scheduling.models import ScheduleException, WeeklySchedule, TimeSlot
@@ -20,6 +21,7 @@ def generate_slots(start_date, end_date, doctor_id):
         raise ValueError(f"Date range cannot exceed {max_days} days.")
 
     duration = datetime.timedelta(minutes=doctor.consultationDuration)
+    buffer_delta = datetime.timedelta(minutes=getattr(settings, 'SLOT_BUFFER_MINUTES', 5))
 
     finalSlots = []
     skipReasons = []
@@ -52,11 +54,11 @@ def generate_slots(start_date, end_date, doctor_id):
                 skipReasons.append(f"No active weekly schedule found for {currentDate}.")
 
         if workStartTime and workEndTime:
-            newCurrentDate = datetime.datetime.combine(currentDate, workStartTime)
+            newCurrentDate = datetime.datetime.combine(currentDate, workStartTime) + buffer_delta
             if timezone.is_naive(newCurrentDate):
                 newCurrentDate = timezone.make_aware(newCurrentDate)
 
-            endDatetime = datetime.datetime.combine(currentDate, workEndTime)
+            endDatetime = datetime.datetime.combine(currentDate, workEndTime) - buffer_delta
             if timezone.is_naive(endDatetime):
                 endDatetime = timezone.make_aware(endDatetime)
 
@@ -68,7 +70,7 @@ def generate_slots(start_date, end_date, doctor_id):
                     end_datetime=slot_end_dt,
                     is_available=True,
                 ))
-                newCurrentDate = slot_end_dt
+                newCurrentDate = slot_end_dt + buffer_delta
 
     if finalSlots:
         TimeSlot.objects.bulk_create(finalSlots, ignore_conflicts=True)

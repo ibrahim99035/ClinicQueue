@@ -1,16 +1,16 @@
 <template>
-  <div class="space-y-6 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans">
+  <div class="space-y-6 bg-bg text-text1 font-sans">
     <PageHeader
       title="Waiting List"
       subtitle="Waiting list entries for appointments"
     />
 
-    <div v-if="loading" class="py-8 text-center font-sans text-sm text-slate-500 dark:text-slate-400">
+    <div v-if="loading" class="py-8 text-center font-sans text-sm text-text2">
       Loading...
     </div>
-    <div v-else-if="items.length === 0" class="rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-8 text-center font-sans text-sm text-slate-500 dark:text-slate-400">
+    <div v-else-if="items.length === 0" class="rounded border border-border bg-surface p-8 text-center font-sans text-sm text-text2">
       <p>You're not on any waiting lists</p>
-      <router-link to="/patient/book" class="font-mono text-[11px] uppercase tracking-wide text-blue-600 dark:text-blue-400 transition-all duration-150 cursor-pointer hover:text-blue-700 dark:hover:text-blue-300">
+      <router-link to="/patient/book" class="font-mono text-[11px] uppercase tracking-mono text-accent transition-all duration-150 cursor-pointer hover:text-accent-dim">
         Book an appointment
       </router-link>
     </div>
@@ -19,30 +19,30 @@
       <div
         v-for="item in items"
         :key="item.id"
-        class="rounded border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-4"
+        class="rounded border border-border bg-surface p-4"
       >
         <div class="flex items-start justify-between gap-4">
           <div>
-            <h3 class="font-sans text-lg font-semibold text-slate-900 dark:text-slate-100">
+            <h3 class="font-sans text-lg font-semibold text-text1">
               {{
                 item.doctorName && item.doctorName !== "Unknown"
                   ? `Dr. ${item.doctorName}`
                   : "Dr. Unknown"
               }}
             </h3>
-            <p class="mt-2 font-mono text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
+            <p class="mt-2 font-mono text-[11px] uppercase tracking-mono text-text2">
               Preferred date: {{ formatDateTime(item.appointmentDateTime) }}
             </p>
-            <p class="mt-1 font-mono text-[11px] uppercase tracking-wide text-slate-400 dark:text-slate-500">
+            <p class="mt-1 font-mono text-[11px] uppercase tracking-mono text-text3">
               Added on: {{ formatDateTime(item.created_at) }}
             </p>
           </div>
           <span
             :class="[
-              'inline-flex items-center gap-1 rounded border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider',
+              'inline-flex items-center gap-1 rounded border px-2 py-0.5 font-mono text-[10px] uppercase tracking-mono-wide',
               item.status === 'REQUESTED'
                 ? 'border-yellow-400/40 text-yellow-400'
-                : 'border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400',
+                : 'border-border text-text2',
             ]"
           >
             {{ item.status || "REQUESTED" }}

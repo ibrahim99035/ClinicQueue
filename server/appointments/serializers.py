@@ -3,10 +3,41 @@ from rest_framework import serializers
 from appointments.models import Appointment, RescheduleHistory, WaitingList
 
 
+def _patient_has_overlap(patient_profile, slot, exclude_appointment_id=None):
+    if not patient_profile or not slot:
+        return False
+
+    qs = Appointment.objects.filter(
+        patient_id=patient_profile,
+        status__in=['REQUESTED', 'CONFIRMED', 'CHECKED_IN'],
+    ).select_related('slot_id')
+
+    if exclude_appointment_id:
+        qs = qs.exclude(id=exclude_appointment_id)
+
+    return qs.filter(
+        slot_id__start_datetime__lt=slot.end_datetime,
+        slot_id__end_datetime__gt=slot.start_datetime,
+    ).exists()
+
+
 class AppointmentWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Appointment
         fields = ('slot_id', 'doctor_id', 'reason')
+
+    def validate(self, attrs):
+        request = self.context.get('request')
+        user = getattr(request, 'user', None)
+        slot = attrs.get('slot_id')
+        patient_profile = getattr(user, 'patient_profile', None)
+
+        if slot and patient_profile and _patient_has_overlap(patient_profile, slot):
+            raise serializers.ValidationError({
+                'slot_id': 'You already have an overlapping appointment.'
+            })
+
+        return attrs
 
     def validate_slot_id(self, slot):
         if hasattr(slot, 'appointment'):
@@ -129,10 +160,11 @@ class RescheduleSerializer(serializers.Serializer):
 class QueueSerializer(serializers.ModelSerializer):
     patient_name = serializers.SerializerMethodField()
     doctor_name = serializers.SerializerMethodField()
+    waiting_minutes = serializers.SerializerMethodField()
 
     class Meta:
         model = Appointment
-        fields = ('id', 'patient_id', 'patient_name', 'doctor_id', 'doctor_name', 'checked_in_at')
+        fields = ('id', 'patient_id', 'patient_name', 'doctor_id', 'doctor_name', 'checked_in_at', 'waiting_minutes')
         read_only_fields = fields
 
     def get_patient_name(self, obj):
@@ -144,3 +176,9 @@ class QueueSerializer(serializers.ModelSerializer):
         user = obj.doctor_id.user
         fullName = (user.first_name + " " + user.last_name).strip()
         return fullName if fullName else user.email
+
+    def get_waiting_minutes(self, obj):
+        if obj.checked_in_at:
+            delta = timezone.now() - obj.checked_in_at
+            return max(0, int(delta.total_seconds() // 60))
+        return None
