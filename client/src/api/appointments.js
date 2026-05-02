@@ -57,6 +57,13 @@ export async function cancelAppointment(appointmentId) {
   return response.data;
 }
 
+export async function confirmAppointment(appointmentId) {
+  const response = await api.post(
+    `/appointments/appointments/${appointmentId}/confirm/`
+  );
+  return response.data;
+}
+
 export async function rescheduleAppointment(appointmentId, data) {
   const response = await api.post(
     `/appointments/appointments/${appointmentId}/reschedule/`,
@@ -77,6 +84,10 @@ export async function markNoShowAppointment(appointmentId) {
     `/appointments/appointments/${appointmentId}/no_show/`
   );
   return response.data;
+}
+
+export async function markNoShow(appointmentId) {
+  return markNoShowAppointment(appointmentId);
 }
 
 export async function completeAppointment(appointmentId) {

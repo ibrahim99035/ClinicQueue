@@ -1,11 +1,35 @@
 <template>
   <div class="mx-auto max-w-5xl space-y-6 p-6">
-    <PageHeader
-      title="Edit Consultation"
-      subtitle="Update diagnosis, notes, prescriptions, and requested tests."
-      :badge="consultation ? `#${consultation.id}` : null"
-      badgeColor="blue"
-    />
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div>
+      <div class="flex items-center gap-3">
+        <h1 class="text-2xl font-bold text-slate-900">
+          Edit Consultation
+        </h1>
+
+        <span
+          v-if="consultation"
+          class="rounded-full bg-blue-100 px-3 py-1 text-xs font-bold text-blue-700"
+        >
+          #{{ consultation.id }}
+        </span>
+      </div>
+
+      <p class="mt-2 text-sm text-slate-500">
+        Update diagnosis, notes, prescriptions, and requested tests.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      @click="goBack"
+      class="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+    >
+      Back
+    </button>
+  </div>
+</div>
 
     <div v-if="loading" class="rounded-2xl border border-slate-200 bg-white p-6 text-center text-sm text-slate-600 shadow-sm">
       Loading consultation...
@@ -152,7 +176,7 @@
 <script setup>
 import { reactive, ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
-import PageHeader from "../../components/PageHeader.vue";
+
 import { getConsultationById, updateConsultation } from "../../api/emr";
 
 const route = useRoute();
@@ -169,6 +193,15 @@ const form = reactive({
   prescription_items: [],
   requested_tests: [],
 });
+
+function goBack() {
+  if (window.history.length > 1) {
+    router.back();
+    return;
+  }
+
+  router.push("/doctor/queue");
+}
 
 function cloneArray(items) {
   return Array.isArray(items) ? items.map((item) => ({ ...item })) : [];

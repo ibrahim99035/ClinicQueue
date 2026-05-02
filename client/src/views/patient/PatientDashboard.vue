@@ -33,8 +33,8 @@
           class="flex items-center justify-between rounded border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 p-3"
         >
           <div>
-            <p class="font-sans text-sm font-semibold text-slate-900 dark:text-slate-100">Dr. {{ apt.doctor?.name }}</p>
-            <p class="font-mono text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ formatDateTime(apt.slot?.start) }}</p>
+            <p class="font-sans text-sm font-semibold text-slate-900 dark:text-slate-100">Dr. {{ apt.doctor_name || "Unknown" }}</p>
+            <p class="font-mono text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ formatDateTime(apt.slot_time) }}</p>
           </div>
           <StatusBadge :status="apt.status" />
         </div>
@@ -56,14 +56,14 @@ const loading = ref(false);
 const upcomingAppointments = computed(() =>
   appointmentsStore.list.filter(
     (a) =>
-      ["requested", "confirmed", "checked_in"].includes(a.status) &&
-      new Date(a.slot?.start) > new Date()
+      ["REQUESTED", "CONFIRMED", "CHECKED_IN"].includes(a.status) &&
+      new Date(a.slot_time) > new Date()
   )
 );
 
 const upcomingCount = computed(() => upcomingAppointments.value.length);
 const completedCount = computed(
-  () => appointmentsStore.list.filter((a) => a.status === "completed").length
+  () => appointmentsStore.list.filter((a) => a.status === "COMPLETED").length
 );
 const waitingCount = computed(
   () => appointmentsStore.list.filter((a) => a.status === "waiting").length

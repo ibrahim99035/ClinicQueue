@@ -31,7 +31,7 @@
         <div class="mb-4 flex items-start justify-between gap-4">
           <div>
             <h3 class="font-sans text-lg font-semibold text-slate-900 dark:text-slate-100">
-              {{ appointment.patient?.user?.name || "Patient" }}
+              {{ appointment.patient_name || "Patient" }}
             </h3>
             <p class="font-mono text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">
               Check-in: {{ formatDateTime(appointment.checked_in_at) }}
@@ -44,7 +44,7 @@
 
         <div class="mb-4">
           <p class="font-mono text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Reason</p>
-          <p class="font-sans text-sm text-slate-900 dark:text-slate-100">{{ appointment.reason || "Not specified" }}</p>
+          <p class="font-sans text-sm text-slate-900 dark:text-slate-100">Ready for consultation</p>
         </div>
 
         <router-link

@@ -54,10 +54,10 @@ const loading = ref(false);
 
 const totalCount = computed(() => appointmentsStore.list.length);
 const checkedInCount = computed(
-  () => appointmentsStore.list.filter((a) => a.status === "checked_in").length
+  () => appointmentsStore.list.filter((a) => a.status === "CHECKED_IN").length
 );
 const completedCount = computed(
-  () => appointmentsStore.list.filter((a) => a.status === "completed").length
+  () => appointmentsStore.list.filter((a) => a.status === "COMPLETED").length
 );
 
 onMounted(async () => {

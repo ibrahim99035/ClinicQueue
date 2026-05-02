@@ -1,6 +1,7 @@
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.utils.dateparse import parse_date
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -95,12 +96,29 @@ class AppointmentViewSet(viewsets.ModelViewSet):
             .order_by("-id")
         )
         if user.isPatient:
-            return qs.filter(patient_id__user=user)
-        if user.isDoctor:
-            return qs.filter(doctor_id__user=user)
-        if user.isReceptionist or user.isAdmin:
-            return qs
-        return qs.none()
+            qs = qs.filter(patient_id__user=user)
+        elif user.isDoctor:
+            qs = qs.filter(doctor_id__user=user)
+        elif not (user.isReceptionist or user.isAdmin):
+            return qs.none()
+
+        status_param = self.request.query_params.get("status")
+        if status_param:
+            statuses = [
+                item.strip().upper()
+                for item in status_param.split(",")
+                if item.strip()
+            ]
+            if statuses:
+                qs = qs.filter(status__in=statuses)
+
+        date_param = self.request.query_params.get("date")
+        if date_param:
+            selected_date = parse_date(date_param)
+            if selected_date:
+                qs = qs.filter(slot_id__start_datetime__date=selected_date)
+
+        return qs
 
     def get_serializer_class(self):
         if self.action == 'create':

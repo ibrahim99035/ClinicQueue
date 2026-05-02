@@ -1,9 +1,26 @@
 <template>
   <div class="mx-auto max-w-5xl space-y-6 p-6">
-    <PageHeader
-      title="Create Consultation"
-      subtitle="Document diagnosis, prescriptions, and requested tests for a checked-in appointment."
-    />
+    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+  <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-slate-900">
+        Create Consultation
+      </h1>
+
+      <p class="mt-2 text-sm text-slate-500">
+        Document diagnosis, prescriptions, and requested tests for a checked-in appointment.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      @click="goBack"
+      class="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+    >
+      Back
+    </button>
+  </div>
+</div>
 
     <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
       <form class="space-y-6" @submit.prevent="submitConsultation">
@@ -136,7 +153,7 @@
 <script setup>
 import { reactive, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import PageHeader from "../../components/PageHeader.vue";
+
 import { createConsultation } from "../../api/emr";
 
 const route = useRoute();
@@ -152,6 +169,15 @@ const form = reactive({
   prescription_items: [],
   requested_tests: [],
 });
+
+function goBack() {
+  if (window.history.length > 1) {
+    router.back();
+    return;
+  }
+
+  router.push("/doctor/queue");
+}
 
 function addPrescription() {
   form.prescription_items.push({

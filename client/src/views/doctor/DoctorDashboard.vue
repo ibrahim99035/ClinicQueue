@@ -53,7 +53,7 @@
             :key="apt.id"
             class="flex items-center justify-between rounded border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 p-3"
           >
-            <span class="font-mono text-sm text-slate-900 dark:text-slate-100">{{ formatTime(apt.slot?.start) }}</span>
+            <span class="font-mono text-sm text-slate-900 dark:text-slate-100">{{ formatTime(apt.slot_time) }}</span>
             <StatusBadge :status="apt.status" />
           </div>
         </div>
@@ -76,26 +76,26 @@ const todayAppointments = computed(() => {
   const today = new Date().toDateString();
   return appointmentsStore.list.filter(
     (a) =>
-      new Date(a.slot?.start).toDateString() === today &&
-      ["confirmed", "checked_in"].includes(a.status)
+      new Date(a.slot_time).toDateString() === today &&
+      ["REQUESTED", "CONFIRMED", "CHECKED_IN"].includes(a.status)
   );
 });
 
 const todayQueueCount = computed(
-  () => todayAppointments.value.filter((a) => a.status === "checked_in").length
+  () => todayAppointments.value.filter((a) => a.status === "CHECKED_IN").length
 );
 const upcomingCount = computed(() =>
   appointmentsStore.list.filter(
     (a) =>
-      a.status === "confirmed" &&
-      new Date(a.slot?.start) > new Date()
+      ["REQUESTED", "CONFIRMED"].includes(a.status) &&
+      new Date(a.slot_time) > new Date()
   ).length
 );
 const completedToday = computed(() => {
   const today = new Date().toDateString();
   return appointmentsStore.list.filter(
     (a) =>
-      a.status === "completed" &&
+      a.status === "COMPLETED" &&
       new Date(a.completed_at).toDateString() === today
   ).length;
 });
