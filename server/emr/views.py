@@ -87,10 +87,13 @@ class ConsultationRecordUpdateView(APIView):
 
         record = get_object_or_404(ConsultationRecord, pk=pk)
 
-        if not request.user.isDoctor:
-            raise PermissionDenied("You do not have permission to view this consultation.")
-
-        if not CanUpdateConsultationRecord().has_object_permission(request, self, record):
+        if request.user.isDoctor:
+            if not CanUpdateConsultationRecord().has_object_permission(request, self, record):
+                raise PermissionDenied("You do not have permission to view this consultation.")
+        elif request.user.isPatient:
+            if record.appointment_id.patient_id.user != request.user or record.appointment_id.status != "COMPLETED":
+                raise PermissionDenied("You do not have permission to view this consultation.")
+        else:
             raise PermissionDenied("You do not have permission to view this consultation.")
 
         return Response(ConsultationRecordSerializer(record).data, status=status.HTTP_200_OK)

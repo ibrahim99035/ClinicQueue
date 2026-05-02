@@ -22,6 +22,10 @@ export async function getAppointments(params) {
   return getListFromResponse(response);
 }
 
+export async function getDoctorAppointments(params = {}) {
+  return getAppointments(params);
+}
+
 export async function getMyAppointments(params = {}) {
   const response = await api.get("/appointments/appointments/", {
     params,
