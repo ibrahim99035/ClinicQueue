@@ -58,6 +58,8 @@ class AppointmentReadSerializer(serializers.ModelSerializer):
     patient_name = serializers.SerializerMethodField()
     doctor_name = serializers.SerializerMethodField()
     slot_time = serializers.DateTimeField(source='slot_id.start_datetime', read_only=True)
+    has_consultation = serializers.SerializerMethodField()
+    consultation_id = serializers.SerializerMethodField()
 
     class Meta:
         model = Appointment
@@ -71,8 +73,21 @@ class AppointmentReadSerializer(serializers.ModelSerializer):
             'checked_in_at',
             'completed_at',
             'created_at',
+            'has_consultation',
+            'consultation_id',
         )
         read_only_fields = fields
+
+    def get_has_consultation(self, obj):
+        from emr.models import ConsultationRecord
+
+        return ConsultationRecord.objects.filter(appointment_id=obj).exists()
+
+    def get_consultation_id(self, obj):
+        from emr.models import ConsultationRecord
+
+        consultation = ConsultationRecord.objects.filter(appointment_id=obj).first()
+        return consultation.id if consultation else None
 
     def get_patient_name(self, obj):
         user = obj.patient_id.user
@@ -160,11 +175,33 @@ class RescheduleSerializer(serializers.Serializer):
 class QueueSerializer(serializers.ModelSerializer):
     patient_name = serializers.SerializerMethodField()
     doctor_name = serializers.SerializerMethodField()
+
     waiting_minutes = serializers.SerializerMethodField()
 
     class Meta:
         model = Appointment
         fields = ('id', 'patient_id', 'patient_name', 'doctor_id', 'doctor_name', 'checked_in_at', 'waiting_minutes')
+
+    slot_time = serializers.DateTimeField(source='slot_id.start_datetime', read_only=True)
+    has_consultation = serializers.SerializerMethodField()
+    consultation_id = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Appointment
+        fields = (
+            'id',
+            'status',
+            'patient_id',
+            'patient_name',
+            'doctor_id',
+            'doctor_name',
+            'slot_id',
+            'slot_time',
+            'reason',
+            'checked_in_at',
+            'has_consultation',
+            'consultation_id',
+        )
         read_only_fields = fields
 
     def get_patient_name(self, obj):
@@ -177,8 +214,21 @@ class QueueSerializer(serializers.ModelSerializer):
         fullName = (user.first_name + " " + user.last_name).strip()
         return fullName if fullName else user.email
 
+
     def get_waiting_minutes(self, obj):
         if obj.checked_in_at:
             delta = timezone.now() - obj.checked_in_at
             return max(0, int(delta.total_seconds() // 60))
         return None
+
+    def get_has_consultation(self, obj):
+        from emr.models import ConsultationRecord
+
+        return ConsultationRecord.objects.filter(appointment_id=obj).exists()
+
+    def get_consultation_id(self, obj):
+        from emr.models import ConsultationRecord
+
+        consultation = ConsultationRecord.objects.filter(appointment_id=obj).first()
+        return consultation.id if consultation else None
+

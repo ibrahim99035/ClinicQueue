@@ -31,7 +31,7 @@
             </p>
           </div>
           <button
-            v-if="appointment.status === 'COMPLETED' || appointment.status === 'completed'"
+            v-if="canViewConsultation(appointment)"
             @click="toggleConsultation(appointment)"
             class="font-mono text-[11px] uppercase tracking-mono text-accent transition-all duration-150 cursor-pointer hover:text-accent-dim"
           >
@@ -41,7 +41,7 @@
             v-else
             class="font-sans text-sm text-text2"
           >
-            Consultation not available yet
+            Consultation summary will be available after completion.
           </span>
         </div>
 
@@ -149,7 +149,9 @@ onMounted(async () => {
       ? response
       : response.results || [];
 
-    consultations.value = rawAppointments.map(normalizeAppointment);
+    consultations.value = rawAppointments
+      .map(normalizeAppointment)
+      .filter(canViewConsultation);
   } catch (err) {
     toast.error("Failed to load consultations");
   } finally {
@@ -164,6 +166,20 @@ function normalizeAppointment(appointment) {
     appointmentDateTime: appointment.slot_time || "",
     status: appointment.status || "UNKNOWN",
   };
+}
+
+function hasConsultation(appointment) {
+  return Boolean(
+    appointment.has_consultation ||
+    appointment.hasConsultation ||
+    appointment.consultation_id ||
+    appointment.consultationId
+  );
+}
+
+function canViewConsultation(appointment) {
+  const status = appointment.status || "UNKNOWN";
+  return status === "COMPLETED" && hasConsultation(appointment);
 }
 
 async function toggleConsultation(appointment) {

@@ -6,10 +6,10 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from django.db.models import Q
 
 from appointments.models import Appointment, RescheduleHistory, WaitingList
 from scheduling.models import TimeSlot
+from emr.models import ConsultationRecord
 from appointments.permissions import IsPatient, IsDoctor, IsReceptionist, IsDoctorOrReceptionist
 from appointments.serializers import (
     AppointmentReadSerializer,
@@ -212,9 +212,29 @@ class AppointmentViewSet(viewsets.ModelViewSet):
     def no_show(self, request, pk=None):
         return self._transition_action(request, pk, 'no_show')
 
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=["post"])
     def complete(self, request, pk=None):
-        return self._transition_action(request, pk, 'complete')
+        appointment = self.get_object()
+
+        if not request.user.isDoctor:
+            raise PermissionDenied("Only doctors can complete appointments.")
+
+        if appointment.status != "CHECKED_IN":
+            raise ValidationError("Only checked-in appointments can be completed.")
+
+        has_consultation = ConsultationRecord.objects.filter(
+            appointment_id=appointment
+        ).exists()
+
+        if not has_consultation:
+            raise ValidationError("Consultation record is required before completing the appointment.")
+
+        appointment.status = "COMPLETED"
+        appointment.completed_at = timezone.now()
+        appointment.save(update_fields=["status", "completed_at", "updated_at"])
+
+        serializer = self.get_serializer(appointment)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['post'])
     def reschedule(self, request, pk=None):

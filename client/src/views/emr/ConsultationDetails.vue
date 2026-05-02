@@ -2,7 +2,7 @@
   <div class="page">
     <div class="header">
       <h2>Consultation Details</h2>
-      <button v-if="consultation" class="btn btn-primary" @click="goToEdit">
+      <button v-if="consultation && canEditConsultation" class="btn btn-primary" @click="goToEdit">
         Edit Consultation
       </button>
     </div>
@@ -115,6 +115,16 @@ export default {
       loading: true,
       error: "",
     };
+  },
+  computed: {
+    canEditConsultation() {
+      try {
+        const roles = JSON.parse(localStorage.getItem("roles") || "[]");
+        return roles.includes("Doctors");
+      } catch (e) {
+        return false;
+      }
+    },
   },
   mounted() {
     this.loadConsultation();
