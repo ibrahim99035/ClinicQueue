@@ -1,104 +1,234 @@
 <template>
-  <div class="page">
-    <div class="header">
-      <h2>Consultation Details</h2>
-      <button v-if="consultation && canEditConsultation" class="btn btn-primary" @click="goToEdit">
-        Edit Consultation
-      </button>
-    </div>
+  <div class="min-h-screen bg-slate-50 px-4 py-6 text-slate-900 dark:bg-slate-950 dark:text-slate-100 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-5xl space-y-6">
+      <div class="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <button
+            type="button"
+            class="mb-4 inline-flex items-center rounded-xl border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+            @click="goBack"
+          >
+            ← Back
+          </button>
 
-    <!-- Loading State -->
-    <div v-if="loading" class="loading-state">
-      <p>Loading consultation...</p>
-    </div>
+          <p class="text-sm font-medium text-blue-600 dark:text-blue-400">
+            Medical Record
+          </p>
+          <h2 class="mt-1 text-2xl font-bold tracking-tight">
+            Consultation Details
+          </h2>
+          <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            Review diagnosis, notes, prescriptions, and requested tests.
+          </p>
+        </div>
 
-    <!-- Error State -->
-    <div v-if="error && !loading" class="message error">
-      {{ error }}
-    </div>
-
-    <!-- Consultation Content -->
-    <div v-if="consultation && !loading" class="content">
-      <!-- Basic Info -->
-      <div class="info-section">
-        <div class="info-row">
-          <span class="label">Consultation ID:</span>
-          <span class="value">{{ consultation.id }}</span>
-        </div>
-        <div class="info-row">
-          <span class="label">Appointment ID:</span>
-          <span class="value">{{ consultation.appointment_id }}</span>
-        </div>
-        <div v-if="consultation.created_by" class="info-row">
-          <span class="label">Created By:</span>
-          <span class="value">{{ consultation.created_by }}</span>
-        </div>
-        <div v-if="consultation.created_at" class="info-row">
-          <span class="label">Created:</span>
-          <span class="value">{{ formatDate(consultation.created_at) }}</span>
-        </div>
+        <button
+          v-if="consultation && canEditConsultation"
+          type="button"
+          class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+          @click="goToEdit"
+        >
+          Edit Consultation
+        </button>
       </div>
 
-      <!-- Diagnosis and Notes -->
-      <div class="data-section">
-        <h3>Medical Information</h3>
-        
-        <div class="field-group">
-          <h4>Diagnosis</h4>
-          <p class="field-value">{{ consultation.diagnosis }}</p>
-        </div>
-
-        <div class="field-group">
-          <h4>Notes</h4>
-          <p class="field-value">{{ consultation.notes || '—' }}</p>
-        </div>
+      <div
+        v-if="loading"
+        class="rounded-2xl border border-slate-200 bg-white p-10 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900"
+      >
+        <div class="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600 dark:border-slate-700 dark:border-t-blue-400"></div>
+        <p class="text-sm font-medium text-slate-600 dark:text-slate-300">
+          Loading consultation...
+        </p>
       </div>
 
-      <!-- Prescription Items -->
-      <div v-if="consultation.prescription_items && consultation.prescription_items.length > 0" class="data-section">
-        <h3>Prescriptions</h3>
-        
-        <div v-for="(item, index) in consultation.prescription_items" :key="`rx-${index}`" class="item-card">
-          <div class="item-content">
-            <div class="item-row">
-              <span class="item-label">Drug:</span>
-              <span class="item-value">{{ item.drug_name }}</span>
+      <div
+        v-if="error && !loading"
+        class="rounded-2xl border border-red-200 bg-red-50 p-5 text-red-700 shadow-sm dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-300"
+      >
+        <p class="text-sm font-semibold">
+          {{ error }}
+        </p>
+      </div>
+
+      <div v-if="consultation && !loading" class="space-y-6">
+        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              Consultation ID
+            </p>
+            <p class="mt-2 text-lg font-bold">
+              #{{ consultation.id }}
+            </p>
+          </div>
+
+          <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              Appointment ID
+            </p>
+            <p class="mt-2 text-lg font-bold">
+              #{{ consultation.appointment_id }}
+            </p>
+          </div>
+
+          <div
+            v-if="consultation.created_by"
+            class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+          >
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              Created By
+            </p>
+            <p class="mt-2 text-lg font-bold">
+              {{ consultation.created_by }}
+            </p>
+          </div>
+
+          <div
+            v-if="consultation.created_at"
+            class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+          >
+            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+              Created
+            </p>
+            <p class="mt-2 text-sm font-semibold">
+              {{ formatDate(consultation.created_at) }}
+            </p>
+          </div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <div class="mb-5 border-b border-slate-200 pb-4 dark:border-slate-800">
+            <h3 class="text-lg font-bold">
+              Medical Information
+            </h3>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              Diagnosis and clinical notes recorded for this consultation.
+            </p>
+          </div>
+
+          <div class="space-y-5">
+            <div>
+              <h4 class="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
+                Diagnosis
+              </h4>
+              <div class="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-700 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200">
+                {{ consultation.diagnosis || "—" }}
+              </div>
             </div>
-            <div class="item-row">
-              <span class="item-label">Dose:</span>
-              <span class="item-value">{{ item.dose }}</span>
-            </div>
-            <div class="item-row">
-              <span class="item-label">Duration:</span>
-              <span class="item-value">{{ item.duration }}</span>
+
+            <div>
+              <h4 class="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-200">
+                Notes
+              </h4>
+              <div class="whitespace-pre-wrap rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-6 text-slate-700 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-200">
+                {{ consultation.notes || "—" }}
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Requested Tests -->
-      <div v-if="consultation.requested_tests && consultation.requested_tests.length > 0" class="data-section">
-        <h3>Requested Tests</h3>
-        
-        <div v-for="(test, index) in consultation.requested_tests" :key="`test-${index}`" class="item-card">
-          <div class="item-content">
-            <div class="item-row">
-              <span class="item-label">Test:</span>
-              <span class="item-value">{{ test.test_name }}</span>
-            </div>
-            <div v-if="test.notes" class="item-row">
-              <span class="item-label">Notes:</span>
-              <span class="item-value">{{ test.notes }}</span>
+        <div
+          v-if="consultation.prescription_items && consultation.prescription_items.length > 0"
+          class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+        >
+          <div class="mb-5 border-b border-slate-200 pb-4 dark:border-slate-800">
+            <h3 class="text-lg font-bold">
+              Prescriptions
+            </h3>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              Medication plan assigned during the consultation.
+            </p>
+          </div>
+
+          <div class="grid gap-4 md:grid-cols-2">
+            <div
+              v-for="(item, index) in consultation.prescription_items"
+              :key="`rx-${index}`"
+              class="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950"
+            >
+              <div class="space-y-3">
+                <div>
+                  <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                    Drug
+                  </p>
+                  <p class="mt-1 text-sm font-semibold">
+                    {{ item.drug_name }}
+                  </p>
+                </div>
+
+                <div>
+                  <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                    Dose
+                  </p>
+                  <p class="mt-1 text-sm">
+                    {{ item.dose }}
+                  </p>
+                </div>
+
+                <div>
+                  <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                    Duration
+                  </p>
+                  <p class="mt-1 text-sm">
+                    {{ item.duration }}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Empty States -->
-      <div v-if="(!consultation.prescription_items || consultation.prescription_items.length === 0) && 
-                (!consultation.requested_tests || consultation.requested_tests.length === 0)" 
-           class="empty-message">
-        No prescriptions or tests requested
+        <div
+          v-if="consultation.requested_tests && consultation.requested_tests.length > 0"
+          class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+        >
+          <div class="mb-5 border-b border-slate-200 pb-4 dark:border-slate-800">
+            <h3 class="text-lg font-bold">
+              Requested Tests
+            </h3>
+            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
+              Lab or diagnostic tests requested by the doctor.
+            </p>
+          </div>
+
+          <div class="grid gap-4 md:grid-cols-2">
+            <div
+              v-for="(test, index) in consultation.requested_tests"
+              :key="`test-${index}`"
+              class="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950"
+            >
+              <div class="space-y-3">
+                <div>
+                  <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                    Test
+                  </p>
+                  <p class="mt-1 text-sm font-semibold">
+                    {{ test.test_name }}
+                  </p>
+                </div>
+
+                <div v-if="test.notes">
+                  <p class="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                    Notes
+                  </p>
+                  <p class="mt-1 text-sm">
+                    {{ test.notes }}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          v-if="(!consultation.prescription_items || consultation.prescription_items.length === 0) &&
+            (!consultation.requested_tests || consultation.requested_tests.length === 0)"
+          class="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center shadow-sm dark:border-slate-700 dark:bg-slate-900"
+        >
+          <p class="text-sm font-medium text-slate-500 dark:text-slate-400">
+            No prescriptions or tests requested.
+          </p>
+        </div>
       </div>
     </div>
   </div>
@@ -151,6 +281,26 @@ export default {
         this.loading = false;
       }
     },
+    goBack() {
+      if (window.history.length > 1) {
+        this.$router.back();
+        return;
+      }
+
+      try {
+        const roles = JSON.parse(localStorage.getItem("roles") || "[]");
+
+        if (roles.includes("Doctors")) {
+          this.$router.push("/doctor");
+        } else if (roles.includes("Patients")) {
+          this.$router.push("/patient/appointments");
+        } else {
+          this.$router.push("/");
+        }
+      } catch (e) {
+        this.$router.push("/");
+      }
+    },
     goToEdit() {
       if (this.consultation) {
         this.$router.push(`/emr/consultations/${this.consultation.id}/edit`);
@@ -163,179 +313,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.page {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
-  gap: 20px;
-}
-
-h2 {
-  margin: 0;
-  flex: 1;
-}
-
-.loading-state {
-  padding: 40px 20px;
-  text-align: center;
-  color: var(--text);
-}
-
-.message {
-  padding: 15px;
-  border-radius: 4px;
-  border-left: 4px solid;
-  margin-bottom: 20px;
-}
-
-.message.error {
-  background: rgba(220, 38, 38, 0.1);
-  border-color: #dc2626;
-  color: #991b1b;
-}
-
-.content {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.info-section {
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 15px;
-  background: var(--code-bg);
-}
-
-.info-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--border);
-}
-
-.info-row:last-child {
-  border-bottom: none;
-}
-
-.label {
-  font-weight: 500;
-  color: var(--text-h);
-  min-width: 150px;
-}
-
-.value {
-  color: var(--text);
-  text-align: right;
-}
-
-.data-section {
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 20px;
-  background: var(--bg);
-}
-
-h3 {
-  font-size: 18px;
-  margin: 0 0 15px 0;
-  color: var(--text-h);
-}
-
-.field-group {
-  margin-bottom: 20px;
-}
-
-.field-group:last-child {
-  margin-bottom: 0;
-}
-
-h4 {
-  font-size: 14px;
-  margin: 0 0 8px 0;
-  color: var(--text-h);
-  font-weight: 500;
-}
-
-.field-value {
-  margin: 0;
-  color: var(--text);
-  padding: 10px;
-  background: var(--code-bg);
-  border-radius: 4px;
-  border: 1px solid var(--border);
-  white-space: pre-wrap;
-}
-
-.item-card {
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 15px;
-  margin-bottom: 10px;
-  background: var(--code-bg);
-}
-
-.item-card:last-child {
-  margin-bottom: 0;
-}
-
-.item-content {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.item-row {
-  display: flex;
-  gap: 15px;
-}
-
-.item-label {
-  font-weight: 500;
-  color: var(--text-h);
-  min-width: 100px;
-}
-
-.item-value {
-  color: var(--text);
-  flex: 1;
-}
-
-.empty-message {
-  padding: 30px;
-  text-align: center;
-  color: var(--text);
-  font-style: italic;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--code-bg);
-}
-
-.btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 4px;
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-primary {
-  background: var(--accent);
-  color: white;
-}
-
-.btn-primary:hover {
-  opacity: 0.9;
-}
-</style>
