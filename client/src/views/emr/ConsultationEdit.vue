@@ -175,11 +175,12 @@
 
 <script setup>
 import { reactive, ref, onMounted } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 import { getConsultationById, updateConsultation } from "../../api/emr";
 
 const route = useRoute();
+const router = useRouter();
 
 const loading = ref(true);
 const updating = ref(false);

@@ -80,12 +80,18 @@
             Cancel
           </button>
           <router-link
-            v-if="appointment.status === 'COMPLETED'"
+            v-if="canViewConsultation(appointment)"
             :to="`/emr/appointments/${appointment.id}/consultation`"
             class="inline-flex items-center justify-center rounded bg-accent px-4 py-2 font-mono text-[11px] uppercase tracking-mono-wide text-black transition-all duration-150 cursor-pointer hover:bg-accent-dim hover:-translate-y-px"
           >
             View Consultation
           </router-link>
+          <span
+            v-else-if="isBeforeConsultationCompletion(appointment)"
+            class="font-sans text-sm text-slate-500 dark:text-slate-400"
+          >
+            Consultation summary will be available after completion.
+          </span>
         </div>
       </div>
 
@@ -223,6 +229,23 @@ function normalizeAppointment(appointment) {
       "UNKNOWN",
     doctorId: appointment.doctor_id || null,
   };
+}
+
+function hasConsultation(appointment) {
+  return Boolean(
+    appointment.has_consultation ||
+    appointment.hasConsultation ||
+    appointment.consultation_id ||
+    appointment.consultationId
+  );
+}
+
+function canViewConsultation(appointment) {
+  return appointment.status === "COMPLETED" && hasConsultation(appointment);
+}
+
+function isBeforeConsultationCompletion(appointment) {
+  return ["REQUESTED", "CONFIRMED", "CHECKED_IN"].includes(appointment.status);
 }
 
 function getStatusBorderColor(status) {
