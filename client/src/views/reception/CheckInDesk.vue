@@ -5,75 +5,91 @@
       subtitle="Check in patients for their appointments"
     />
 
+    <!-- Status Filter -->
+    <div class="flex flex-wrap gap-2">
+      <button
+        v-for="status in statuses"
+        :key="status"
+        @click="selectedStatus = status"
+        :class="[
+          'rounded px-3 py-2 font-mono text-[11px] uppercase tracking-mono-wide transition-all duration-150',
+          selectedStatus === status
+            ? 'bg-accent text-black'
+            : 'border border-border bg-surface text-text1 hover:bg-surface2'
+        ]"
+      >
+        {{ status === 'all' ? 'All' : statusLabels[status] }}
+      </button>
+    </div>
+
     <div v-if="loading" class="py-8 text-center font-sans text-sm text-text2">
       Loading appointments...
     </div>
-    <div v-else-if="confirmedAppointments.length === 0" class="rounded border border-border bg-surface p-8 text-center font-sans text-sm text-text2">
-      <p>No confirmed appointments today</p>
+    <div v-else-if="filteredAppointments.length === 0" class="rounded border border-border bg-surface p-8 text-center font-sans text-sm text-text2">
+      <p>No {{ selectedStatus === 'all' ? '' : statusLabels[selectedStatus] }} appointments today</p>
     </div>
 
+    <!-- Appointments List -->
     <div v-else class="space-y-4">
-      <h2 class="font-sans text-xl font-bold leading-tight text-text1">Today's Confirmed Appointments</h2>
       <div
-        v-for="appointment in confirmedAppointments"
+        v-for="appointment in filteredAppointments"
         :key="appointment.id"
         class="rounded border border-border bg-surface p-4"
       >
         <div class="mb-4 flex items-start justify-between gap-4">
           <div>
             <h3 class="font-sans text-lg font-semibold text-text1">
-              {{ appointment.patient?.user?.name || "Patient" }}
+              {{ getPatientName(appointment) }}
             </h3>
             <p class="font-mono text-[11px] uppercase tracking-mono text-text2">
-              Dr. {{ appointment.doctor?.name }}
-            </p>
+            Dr. {{ getDoctorName(appointment) }}            </p>
             <p class="font-mono text-[11px] uppercase tracking-mono text-text2">
-              Slot: {{ formatDateTime(appointment.slot?.start) }}
-            </p>
+            Slot: {{ formatDateTime(getAppointmentDateTime(appointment)) }}            </p>
           </div>
           <StatusBadge :status="appointment.status" />
         </div>
 
         <div class="flex gap-2">
-          <button
-            @click="checkIn(appointment.id)"
-            :disabled="appointment.status === 'checked_in'"
-            class="rounded bg-accent px-4 py-2 font-mono text-[11px] uppercase tracking-mono-wide text-black transition-all duration-150 cursor-pointer hover:bg-accent-dim hover:-translate-y-px disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {{ appointment.status === "checked_in" ? "Checked In" : "Check In" }}
-          </button>
-          <button
-            v-if="isPastSlotTime(appointment.slot?.start)"
-            @click="markNoShow(appointment.id)"
-            class="rounded border border-danger px-4 py-2 font-mono text-[11px] uppercase tracking-mono-wide text-danger transition-all duration-150 cursor-pointer hover:bg-danger/10"
-          >
-            Mark No Show
-          </button>
-        </div>
-      </div>
-    </div>
+          <!-- REQUESTED: Approve and Cancel -->
+          <template v-if="normalizeStatus(appointment.status) === 'requested'">
+            <button
+              @click="confirmAppointmentAction(appointment.id)"
+              class="rounded bg-accent px-4 py-2 font-mono text-[11px] uppercase tracking-mono-wide text-black transition-all duration-150 cursor-pointer hover:bg-accent-dim hover:-translate-y-px"
+            >
+              Approve
+            </button>
+            <button
+              @click="cancelAppointmentAction(appointment.id)"
+              class="rounded border border-danger px-4 py-2 font-mono text-[11px] uppercase tracking-mono-wide text-danger transition-all duration-150 cursor-pointer hover:bg-danger/10"
+            >
+              Cancel
+            </button>
+          </template>
 
-    <!-- Current Queue -->
-    <div
-      v-if="checkedInAppointments.length > 0"
-      class="rounded border border-border bg-surface p-4"
-    >
-      <h2 class="mb-4 font-sans text-xl font-bold leading-tight text-text1">Current Queue</h2>
-      <div class="space-y-2">
-        <div
-          v-for="appointment in checkedInAppointments"
-          :key="appointment.id"
-          class="flex items-center justify-between rounded border border-border bg-surface2 p-3"
-        >
-          <div>
-            <p class="font-sans text-sm font-semibold text-text1">{{ appointment.patient?.user?.name }}</p>
-            <p class="font-mono text-[11px] uppercase tracking-mono text-text2">
-              Checked in: {{ formatTime(appointment.checked_in_at) }}
-            </p>
-          </div>
-          <span class="font-mono text-[11px] uppercase tracking-mono text-text2">
-            Waiting: {{ getWaitingDuration(appointment.checked_in_at) }} min
-          </span>
+          <!-- CONFIRMED: Check In, Cancel, and Mark No Show if past -->
+          <template v-else-if="normalizeStatus(appointment.status) === 'confirmed'">
+            <button
+              @click="checkIn(appointment.id)"
+              class="rounded bg-accent px-4 py-2 font-mono text-[11px] uppercase tracking-mono-wide text-black transition-all duration-150 cursor-pointer hover:bg-accent-dim hover:-translate-y-px"
+            >
+              Check In
+            </button>
+            <button
+              @click="cancelAppointmentAction(appointment.id)"
+              class="rounded border border-danger px-4 py-2 font-mono text-[11px] uppercase tracking-mono-wide text-danger transition-all duration-150 cursor-pointer hover:bg-danger/10"
+            >
+              Cancel
+            </button>
+            <button
+              v-if="isPastSlotTime(getAppointmentDateTime(appointment))"
+              @click="markNoShow(appointment.id)"
+              class="rounded border border-danger px-4 py-2 font-mono text-[11px] uppercase tracking-mono-wide text-danger transition-all duration-150 cursor-pointer hover:bg-danger/10"
+            >
+              Mark No Show
+            </button>
+          </template>
+
+          <!-- CHECKED_IN, COMPLETED, CANCELLED, NO_SHOW: view only -->
         </div>
       </div>
     </div>
@@ -90,25 +106,34 @@ import { useAppointmentsStore } from "../../stores/appointments";
 const toast = useToast();
 const appointmentsStore = useAppointmentsStore();
 const loading = ref(false);
+const selectedStatus = ref("all");
 let refreshTimer = null;
 
 const today = new Date().toDateString();
+const statuses = ["all", "requested", "confirmed", "checked_in", "completed", "cancelled", "no_show"];
+const statusLabels = {
+  requested: "Requested",
+  confirmed: "Confirmed",
+  checked_in: "Checked In",
+  completed: "Completed",
+  cancelled: "Cancelled",
+  no_show: "No Show",
+};
 
-const confirmedAppointments = computed(() =>
-  appointmentsStore.list.filter(
-    (a) =>
-      a.status === "confirmed" &&
-      new Date(a.slot?.start).toDateString() === today
-  )
+const allAppointments = computed(() =>
+  Array.isArray(appointmentsStore.list) ? appointmentsStore.list : []
 );
 
-const checkedInAppointments = computed(() =>
-  appointmentsStore.list.filter(
-    (a) =>
-      a.status === "checked_in" &&
-      new Date(a.slot?.start).toDateString() === today
-  )
-);
+const filteredAppointments = computed(() => {
+  if (selectedStatus.value === "all") {
+    return allAppointments.value;
+  }
+
+  return allAppointments.value.filter(
+    (appointment) =>
+      normalizeStatus(appointment.status) === selectedStatus.value
+  );
+});
 
 onMounted(async () => {
   loading.value = true;
@@ -127,13 +152,82 @@ onUnmounted(() => {
   }
 });
 
+function normalizeStatus(status) {
+  return String(status || "").toLowerCase();
+}
+
+function getAppointmentDateTime(appointment) {
+  return (
+    appointment.slot_time ||
+    appointment.slot?.start ||
+    appointment.appointment_datetime ||
+    appointment.start ||
+    appointment.datetime ||
+    appointment.slot_start ||
+    appointment.start_time ||
+    null
+  );
+}
+
+function getPatientName(appointment) {
+  return (
+    appointment.patient_name ||
+    appointment.patient?.user?.name ||
+    appointment.patient?.name ||
+    appointment.patient?.full_name ||
+    "Patient"
+  );
+}
+
+function getDoctorName(appointment) {
+  return (
+    appointment.doctor_name ||
+    appointment.doctor?.name ||
+    appointment.doctor?.user?.name ||
+    appointment.doctor?.full_name ||
+    "Doctor"
+  );
+}
+
+async function confirmAppointmentAction(appointmentId) {
+  try {
+    await appointmentsStore.confirmAppointment(appointmentId);
+    toast.success("Appointment approved");
+    await appointmentsStore.fetchAppointments();
+  } catch (err) {
+    console.error("Confirm error:", err.response?.data?.detail || err.message);
+    const errorDetail = err.response?.data?.detail || "Failed to approve appointment";
+    toast.error(errorDetail);
+  }
+}
+
+async function cancelAppointmentAction(appointmentId) {
+  if (!confirm("Cancel this appointment?")) return;
+  try {
+    await appointmentsStore.cancelAppointment(appointmentId);
+    toast.success("Appointment cancelled");
+    await appointmentsStore.fetchAppointments();
+  } catch (err) {
+    // Log detailed error for debugging
+    console.error("Cancel error status:", err.response?.status);
+    console.error("Cancel error data:", err.response?.data);
+    console.error("Cancel error headers:", err.response?.headers);
+    
+    // Show backend error detail if available
+    const errorDetail = err.response?.data?.detail || "Failed to cancel appointment";
+    toast.error(errorDetail);
+  }
+}
+
 async function checkIn(appointmentId) {
   try {
     await appointmentsStore.checkInAppointment(appointmentId);
     toast.success("Patient checked in");
     await appointmentsStore.fetchAppointments();
   } catch (err) {
-    toast.error("Failed to check in patient");
+    console.error("Check-in error:", err.response?.data?.detail || err.message);
+    const errorDetail = err.response?.data?.detail || "Failed to check in patient";
+    toast.error(errorDetail);
   }
 }
 
@@ -144,7 +238,9 @@ async function markNoShow(appointmentId) {
     toast.success("Marked as no-show");
     await appointmentsStore.fetchAppointments();
   } catch (err) {
-    toast.error("Failed to mark no-show");
+    console.error("Mark no-show error:", err.response?.data?.detail || err.message);
+    const errorDetail = err.response?.data?.detail || "Failed to mark no-show";
+    toast.error(errorDetail);
   }
 }
 

@@ -59,6 +59,22 @@ export const useAppointmentsStore = defineStore("appointments", {
       }
     },
 
+    async confirmAppointment(appointmentId) {
+      this.loading = true;
+      this.error = null;
+
+      try {
+        const result = await appointmentApi.confirmAppointment(appointmentId);
+        await this.fetchAppointments();
+        return result;
+      } catch (err) {
+        this.error = err.message || "Failed to confirm appointment";
+        throw err;
+      } finally {
+        this.loading = false;
+      }
+    },
+
     async cancelAppointment(appointmentId) {
       this.loading = true;
       this.error = null;
