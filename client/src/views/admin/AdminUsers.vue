@@ -203,6 +203,12 @@ watch([searchFilter, roleFilter, statusFilter], () => {
   currentPage.value = 1;
 });
 
+watch(totalPages, () => {
+  if (currentPage.value > totalPages.value) {
+    currentPage.value = totalPages.value;
+  }
+});
+
 function resetCreateForm() {
     createForm.value = {
     email: "",
@@ -391,6 +397,10 @@ async function handleDeleteUser(user) {
   }
 }
 
+function handlePageChange(newPage) {
+  currentPage.value = newPage;
+}
+
 onMounted(() => {
   loadUsers();
 });
@@ -568,114 +578,132 @@ onMounted(() => {
     </div>
 
     <!-- Table -->
-    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      <div class="flex items-center justify-between border-b border-slate-200 px-6 py-5 dark:border-slate-800">
-        <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">
-          Users List
-        </h3>
-        <span class="rounded-full bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-          {{ filteredUsers.length }} user(s)
-        </span>
-      </div>
+    <!-- Table -->
+<div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+  <div class="flex items-center justify-between border-b border-slate-200 px-6 py-5 dark:border-slate-800">
+    <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">
+      Users List
+    </h3>
 
-      <!-- Loading State -->
-      <div v-if="loading" class="p-6">
-        <SkeletonCard type="row" :count="3" />
-      </div>
+    <span class="rounded-full bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+      {{ filteredUsers.length }} user(s)
+    </span>
+  </div>
 
-      <!-- Empty State -->
-      <div v-else-if="filteredUsers.length === 0" class="p-6">
-        <EmptyState 
-          icon="🔍"
-          title="No users found"
-          description="Try adjusting your search filters or create a new user."
-          actionLabel="Create New User"
-          @action="showCreateForm = true"
-        />
-      </div>
+  <div v-if="loading" class="p-6">
+    <SkeletonCard type="row" :count="3" />
+  </div>
 
-      <!-- Table -->
-      <div v-else>
-        <BaseTable :items="paginatedUsers" :loading="loading" title="Users List" table-class="min-w-[950px]">
-          <template #thead>
-            <th class="px-6 py-4 font-bold text-slate-700 dark:text-slate-300">User</th>
-            <th class="px-6 py-4 font-bold text-slate-700 dark:text-slate-300">Phone</th>
-            <th class="px-6 py-4 font-bold text-slate-700 dark:text-slate-300">Role</th>
-            <th class="px-6 py-4 font-bold text-slate-700 dark:text-slate-300">Status</th>
-            <th class="w-52 px-6 py-4 font-bold text-slate-700 dark:text-slate-300">Actions</th>
+  <div v-else-if="filteredUsers.length === 0" class="p-6">
+    <EmptyState
+      icon="🔍"
+      title="No users found"
+      description="Try adjusting your search filters or create a new user."
+      actionLabel="Create New User"
+      @action="showCreateForm = true"
+    />
+  </div>
+
+  <div v-else>
+    <BaseTable
+      :items="paginatedUsers"
+      :loading="loading"
+      title="Users List"
+      table-class="min-w-[950px]"
+    >
+      <template #thead>
+        <th class="px-6 py-4 font-bold text-slate-700 dark:text-slate-300">User</th>
+        <th class="px-6 py-4 font-bold text-slate-700 dark:text-slate-300">Phone</th>
+        <th class="px-6 py-4 font-bold text-slate-700 dark:text-slate-300">Role</th>
+        <th class="px-6 py-4 font-bold text-slate-700 dark:text-slate-300">Status</th>
+        <th class="w-52 px-6 py-4 font-bold text-slate-700 dark:text-slate-300">Actions</th>
+      </template>
+
+      <template #tbody="{ items }">
+        <tr
+          v-for="(user, index) in items"
+          :key="user.id"
+          class="group border-b border-slate-100 transition-all duration-200 hover:bg-blue-50/50 dark:border-slate-800 dark:hover:bg-slate-800/50"
+          :style="{ animationDelay: `${index * 50}ms` }"
+        >
+          <template v-if="editUserId === user.id">
+            <td class="px-6 py-4">
+              <div class="space-y-2">
+                <input v-model="editForm.first_name" type="text" class="w-full rounded-lg border border-blue-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-100" placeholder="First name" />
+                <input v-model="editForm.last_name" type="text" class="w-full rounded-lg border border-blue-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-100" placeholder="Last name" />
+                <input v-model="editForm.email" type="email" class="w-full rounded-lg border border-blue-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-100" placeholder="Email" />
+              </div>
+            </td>
+
+            <td class="px-6 py-4">
+              <input v-model="editForm.phone" type="text" class="rounded-lg border border-blue-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-100" placeholder="Phone" />
+            </td>
+
+            <td class="px-6 py-4">
+              <span class="inline-flex rounded-full px-3 py-1 text-sm font-semibold" :class="getRoleBadgeClass(user)">
+                {{ getPrimaryRoleOfUser(user) }}
+              </span>
+            </td>
+
+            <td class="px-6 py-4">
+              <StatusBadge :status="user.is_active ? 'active' : 'inactive'" />
+            </td>
+
+            <td class="px-6 py-4">
+              <div class="flex gap-2">
+                <BaseButton size="sm" variant="primary" :loading="saving" @click="submitEditUser(user)">Save</BaseButton>
+                <BaseButton size="sm" variant="secondary" @click="cancelEdit">Cancel</BaseButton>
+              </div>
+            </td>
           </template>
 
-          <template #tbody="{ items }">
-            <tr
-              v-for="(user, index) in items"
-              :key="user.id"
-              class="group border-b border-slate-100 transition-all duration-200 hover:bg-blue-50/50 dark:border-slate-800 dark:hover:bg-slate-800/50"
-              :style="{ animationDelay: `${index * 50}ms` }"
-            >
-              <template v-if="editUserId === user.id">
-                <td class="px-6 py-4">
-                  <div class="space-y-2">
-                    <input v-model="editForm.first_name" type="text" class="w-full rounded-lg border border-blue-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-100" placeholder="First name" />
-                    <input v-model="editForm.last_name" type="text" class="w-full rounded-lg border border-blue-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-100" placeholder="Last name" />
-                    <input v-model="editForm.email" type="email" class="w-full rounded-lg border border-blue-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-100" placeholder="Email" />
-                  </div>
-                </td>
+          <template v-else>
+            <td class="px-6 py-4">
+              <div class="flex flex-col gap-1">
+                <strong class="font-bold text-slate-900 dark:text-slate-100">{{ formatName(user) }}</strong>
+                <span class="text-sm text-slate-600 dark:text-slate-400">{{ user.email }}</span>
+              </div>
+            </td>
 
-                <td class="px-6 py-4">
-                  <input v-model="editForm.phone" type="text" class="rounded-lg border border-blue-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-100" placeholder="Phone" />
-                </td>
+            <td class="px-6 py-4 text-slate-700 dark:text-slate-300">
+              {{ user.phone || "—" }}
+            </td>
 
-                <td class="px-6 py-4">
-                  <span class="inline-flex rounded-full px-3 py-1 text-sm font-semibold" :class="getRoleBadgeClass(user)">{{ getPrimaryRoleOfUser(user) }}</span>
-                </td>
+            <td class="px-6 py-4">
+              <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold" :class="getRoleBadgeClass(user)">
+                {{ getPrimaryRoleOfUser(user) }}
+              </span>
+            </td>
 
-                <td class="px-6 py-4">
-                  <StatusBadge :status="user.is_active ? 'active' : 'inactive'" />
-                </td>
+            <td class="px-6 py-4">
+              <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold" :class="getStatusBadgeClass(user)">
+                {{ user.is_active ? "Active" : "Inactive" }}
+              </span>
+            </td>
 
-                <td class="px-6 py-4">
-                  <div class="flex gap-2">
-                    <BaseButton size="sm" variant="primary" :loading="saving" @click="submitEditUser(user)">Save</BaseButton>
-                    <BaseButton size="sm" variant="secondary" @click="cancelEdit">Cancel</BaseButton>
-                  </div>
-                </td>
-              </template>
-
-              <template v-else>
-                <td class="px-6 py-4">
-                  <div class="flex flex-col gap-1">
-                    <strong class="font-bold text-slate-900 dark:text-slate-100">{{ formatName(user) }}</strong>
-                    <span class="text-sm text-slate-600 dark:text-slate-400">{{ user.email }}</span>
-                  </div>
-                </td>
-
-                <td class="px-6 py-4 text-slate-700 dark:text-slate-300">{{ user.phone || "—" }}</td>
-
-                <td class="px-6 py-4">
-                  <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold" :class="getRoleBadgeClass(user)">{{ getPrimaryRoleOfUser(user) }}</span>
-                </td>
-
-                <td class="px-6 py-4">
-                  <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-bold" :class="getStatusBadgeClass(user)">{{ user.is_active ? "Active" : "Inactive" }}</span>
-                </td>
-
-                <td class="px-6 py-4">
-                  <div class="flex gap-2">
-                    <BaseButton size="sm" variant="primary" @click="startEdit(user)">Edit</BaseButton>
-                    <BaseButton size="sm" variant="danger" :loading="deletingId === user.id" :disabled="user.id === currentUser.id" @click="handleDeleteUser(user)">Delete</BaseButton>
-                  </div>
-                </td>
-              </template>
-            </tr>
+            <td class="px-6 py-4">
+              <div class="flex gap-2">
+                <BaseButton size="sm" variant="primary" @click="startEdit(user)">Edit</BaseButton>
+                <BaseButton size="sm" variant="danger" :loading="deletingId === user.id" :disabled="user.id === currentUser.id" @click="handleDeleteUser(user)">Delete</BaseButton>
+              </div>
+            </td>
           </template>
+        </tr>
+      </template>
+    </BaseTable>
 
-          <template #pagination>
-            <BasePagination v-if="filteredUsers.length > 0" v-model:currentPage="currentPage" :items-per-page="itemsPerPage" :total-items="filteredUsers.length" />
-          </template>
-        </BaseTable>
-      </div>
-
+    <div
+      v-if="filteredUsers.length > itemsPerPage"
+      class="border-t border-slate-200 px-6 py-4 dark:border-slate-800"
+    >
+      <BasePagination
+        :current-page="currentPage"
+        :total-pages="totalPages"
+        @page-change="handlePageChange"
+      />
     </div>
+  </div>
+</div>
   </div>
 </template>
 
