@@ -171,11 +171,11 @@ class AdminUserCreateView(APIView):
     permission_classes = [IsAuthenticated, IsAdmin]
 
     def post(self, request):
-        email = request.data.get('email')
+        email = (request.data.get('email') or '').strip()
         password = request.data.get('password')
-        first_name = request.data.get('first_name')
-        last_name = request.data.get('last_name')
-        phone = request.data.get('phone')
+        first_name = (request.data.get('first_name') or '').strip()
+        last_name = (request.data.get('last_name') or '').strip()
+        phone = (request.data.get('phone') or '').strip()
         role = request.data.get('role')
 
         if not all([email, password, first_name, last_name, role]):
@@ -186,6 +186,12 @@ class AdminUserCreateView(APIView):
 
         if User.objects.filter(email=email).exists():
             return Response({'detail': 'User with this email already exists'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if phone and User.objects.filter(phone=phone).exists():
+            return Response(
+                {"phone": ["This phone number is already used."]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         user = User.create_user(
             email=email,
@@ -198,7 +204,7 @@ class AdminUserCreateView(APIView):
 
         group_name = 'Admins' if role == 'admin' else 'Receptionists'
         user.groups.add(Group.objects.get(name=group_name))
-        # FIX: is_active is already True by default; no redundant set+save needed
+
         return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
 
 

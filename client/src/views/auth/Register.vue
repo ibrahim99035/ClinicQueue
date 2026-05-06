@@ -25,17 +25,45 @@ const form = reactive({
 });
 
 function validateForm() {
-  if (!form.first_name.trim()) return "First name is required.";
-  if (!form.last_name.trim()) return "Last name is required.";
-  if (!form.email.trim()) return "Email is required.";
-  if (!form.phone.trim()) return "Phone is required.";
-  if (!form.password) return "Password is required.";
-  if (form.password.length < 8) return "Password must be at least 8 characters.";
-  if (form.password !== form.password_confirm) return "Passwords do not match.";
-  if (form.user_role === "doctor" && !form.specialization) return "Please select a doctor specialization.";
+  const firstName = form.first_name.trim();
+  const lastName = form.last_name.trim();
+  const email = form.email.trim();
+  const phone = form.phone.trim();
+  const password = form.password;
+  const passwordConfirm = form.password_confirm;
+  const role = form.user_role;
+  const specialization = form.specialization.trim();
+
+  if (!firstName || !lastName || !email || !phone || !password || !passwordConfirm || !role) {
+    return "Please fill all required fields.";
+  }
+
+  if (!/^\S+@\S+\.\S+$/.test(email)) {
+    return "Please enter a valid email address.";
+  }
+
+  if (!/^\+?[0-9\s-]{10,15}$/.test(phone)) {
+    return "Please enter a valid phone number.";
+  }
+
+  if (!["patient", "doctor"].includes(role)) {
+    return "Please select a valid account type.";
+  }
+
+  if (password.length < 8) {
+    return "Password must be at least 8 characters.";
+  }
+
+  if (password !== passwordConfirm) {
+    return "Passwords do not match.";
+  }
+
+  if (role === "doctor" && !specialization) {
+    return "Please select a doctor specialization.";
+  }
+
   return "";
 }
-
 async function handleRegister() {
   errorMessage.value = "";
   successMessage.value = "";
@@ -50,17 +78,17 @@ async function handleRegister() {
 
   try {
     const payload = {
-      first_name: form.first_name,
-      last_name: form.last_name,
-      email: form.email,
-      phone: form.phone,
-      user_role: form.user_role,
-      password: form.password,
-      password_confirm: form.password_confirm,
-    };
+    first_name: form.first_name.trim(),
+    last_name: form.last_name.trim(),
+    email: form.email.trim(),
+    phone: form.phone.trim(),
+    user_role: form.user_role,      
+    password: form.password,
+    password_confirm: form.password_confirm,
+  };
 
     if (form.user_role === "doctor") {
-      payload.specialization = form.specialization;
+      payload.specialization = form.specialization .trim();
     }
 
     await registerUser(payload);
@@ -121,27 +149,27 @@ async function handleRegister() {
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">First Name</label>
-            <input v-model="form.first_name" type="text" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" placeholder="Mohamed" />
+            <input v-model="form.first_name" type="text" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" placeholder="First Name" />
           </div>
           <div>
             <label class="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Last Name</label>
-            <input v-model="form.last_name" type="text" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" placeholder="Tarek" />
+            <input required v-model="form.last_name" type="text" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" placeholder="Last Name" />
           </div>
         </div>
 
         <div>
           <label class="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Email</label>
-          <input v-model="form.email" type="email" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" placeholder="example@email.com" />
+          <input required v-model="form.email" type="email" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" placeholder="example@email.com" />
         </div>
 
         <div>
           <label class="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Phone</label>
-          <input v-model="form.phone" type="text" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" placeholder="01000000000" />
+          <input required v-model="form.phone" type="text" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" placeholder="01000000000" />
         </div>
 
         <div>
           <label class="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Register As</label>
-          <select v-model="form.user_role" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+          <select required v-model="form.user_role" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
             <option value="patient">Patient</option>
             <option value="doctor">Doctor</option>
           </select>
@@ -149,7 +177,7 @@ async function handleRegister() {
 
         <div v-if="form.user_role === 'doctor'">
           <label class="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Specialization</label>
-          <select v-model="form.specialization" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
+          <select required v-model="form.specialization" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100">
             <option value="">Select specialization</option>
             <option value="General Medicine">General Medicine</option>
             <option value="Cardiology">Cardiology</option>
@@ -165,12 +193,12 @@ async function handleRegister() {
 
         <div>
           <label class="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Password</label>
-          <input v-model="form.password" type="password" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" placeholder="Enter password" />
-        </div>
+          <input required v-model="form.password" type="password" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" placeholder="Enter password" />
+        </div>    
 
         <div>
           <label class="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-500 dark:text-slate-400">Confirm Password</label>
-          <input v-model="form.password_confirm" type="password" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" placeholder="Confirm password" />
+          <input required v-model="form.password_confirm" type="password" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100" placeholder="Confirm password" />
         </div>
 
         <p v-if="errorMessage" class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950/50 dark:text-red-300">

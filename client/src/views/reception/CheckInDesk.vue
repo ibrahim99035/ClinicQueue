@@ -120,16 +120,28 @@ const statusLabels = {
   no_show: "No Show",
 };
 
-const allAppointments = computed(() =>
-  Array.isArray(appointmentsStore.list) ? appointmentsStore.list : []
-);
+const todayAppointments = computed(() => {
+  const appointments = Array.isArray(appointmentsStore.list)
+    ? appointmentsStore.list
+    : [];
+
+  return appointments.filter((appointment) => {
+    const dateTime = getAppointmentDateTime(appointment);
+
+    if (!dateTime) {
+      return false;
+    }
+
+    return new Date(dateTime).toDateString() === today;
+  });
+});
 
 const filteredAppointments = computed(() => {
   if (selectedStatus.value === "all") {
-    return allAppointments.value;
+    return todayAppointments.value;
   }
 
-  return allAppointments.value.filter(
+  return todayAppointments.value.filter(
     (appointment) =>
       normalizeStatus(appointment.status) === selectedStatus.value
   );

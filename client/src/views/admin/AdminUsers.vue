@@ -214,18 +214,65 @@ function resetCreateForm() {
   };
 }
 
+function validateCreateForm() {
+  const email = createForm.value.email.trim();
+  const password = createForm.value.password;
+  const firstName = createForm.value.first_name.trim();
+  const lastName = createForm.value.last_name.trim();
+  const phone = createForm.value.phone.trim();
+  const role = createForm.value.role;
+
+  if (!firstName || !lastName || !email || !password || !role) {
+    return "Please fill all required fields.";
+  }
+
+  if (!/^\S+@\S+\.\S+$/.test(email)) {
+    return "Please enter a valid email address.";
+  }
+
+  if (password.length < 8) {
+    return "Password must be at least 8 characters.";
+  }
+
+  if (phone && !/^\+?[0-9\s-]{10,15}$/.test(phone)) {
+    return "Please enter a valid phone number.";
+  }
+
+  if (!["admin", "receptionist"].includes(role)) {
+    return "Please select a valid role.";
+  }
+
+  return "";
+}
+
+function validateEditForm() {
+  const email = editForm.value.email.trim();
+  const firstName = editForm.value.first_name.trim();
+  const lastName = editForm.value.last_name.trim();
+  const phone = editForm.value.phone.trim();
+
+  if (!email) {
+    return "Email is required.";
+  }
+
+  if (!/^\S+@\S+\.\S+$/.test(email)) {
+    return "Please enter a valid email address.";
+  }
+
+  if (phone && !/^\+?[0-9\s-]{10,15}$/.test(phone)) {
+    return "Please enter a valid phone number.";
+  }
+
+  return "";
+}
 async function submitCreateUser() {
   errorMessage.value = "";
   successMessage.value = "";
 
-  if (
-    !createForm.value.email ||
-    !createForm.value.password ||
-    !createForm.value.first_name ||
-    !createForm.value.last_name ||
-    !createForm.value.role
-  ) {
-    errorMessage.value = "Please fill all required fields.";
+  const validationError = validateCreateForm();
+
+  if (validationError) {
+    errorMessage.value = validationError;
     showToast(errorMessage.value, "error");
     return;
   }
@@ -234,11 +281,11 @@ async function submitCreateUser() {
 
   try {
     await createStaffUser({
-      email: createForm.value.email,
+      email: createForm.value.email.trim(),
       password: createForm.value.password,
-      first_name: createForm.value.first_name,
-      last_name: createForm.value.last_name,
-      phone: createForm.value.phone,
+      first_name: createForm.value.first_name.trim(),
+      last_name: createForm.value.last_name.trim(),
+      phone: createForm.value.phone.trim(),
       role: createForm.value.role,
     });
 
@@ -281,8 +328,10 @@ async function submitEditUser(user) {
   errorMessage.value = "";
   successMessage.value = "";
 
-  if (!editForm.value.email) {
-    errorMessage.value = "Email is required.";
+  const validationError = validateEditForm();
+
+  if (validationError) {
+    errorMessage.value = validationError;
     showToast(errorMessage.value, "error");
     return;
   }
@@ -290,12 +339,12 @@ async function submitEditUser(user) {
   saving.value = true;
 
   try {
-await updateUser(user.id, {
-  email: editForm.value.email,
-  first_name: editForm.value.first_name,
-  last_name: editForm.value.last_name,
-  phone: editForm.value.phone,
-});
+    await updateUser(user.id, {
+      email: editForm.value.email.trim(),
+      first_name: editForm.value.first_name.trim(),
+      last_name: editForm.value.last_name.trim(),
+      phone: editForm.value.phone.trim(),
+    });
 
     successMessage.value = "User updated successfully.";
     showToast(successMessage.value, "success");
@@ -391,26 +440,6 @@ onMounted(() => {
       badgeColor="blue"
     />
 
-    <!-- Error Message -->
-    <transition name="fade">
-      <div
-        v-if="errorMessage"
-        class="rounded-2xl border border-red-200 bg-red-50/80 px-6 py-4 text-sm font-semibold text-red-700 shadow-sm backdrop-blur dark:border-red-800 dark:bg-red-950/50 dark:text-red-300"
-      >
-        {{ errorMessage }}
-      </div>
-    </transition>
-
-    <!-- Success Message -->
-    <transition name="fade">
-      <div
-        v-if="successMessage"
-        class="rounded-2xl border border-green-200 bg-green-50/80 px-6 py-4 text-sm font-semibold text-green-700 shadow-sm backdrop-blur dark:border-green-800 dark:bg-green-950/50 dark:text-green-300"
-      >
-        {{ successMessage }}
-      </div>
-    </transition>
-
     <BaseModal v-model="showCreateForm" title="Create New Staff User">
       <form class="grid gap-4 md:grid-cols-2" @submit.prevent="submitCreateUser">
         <div class="flex flex-col gap-2">
@@ -418,6 +447,7 @@ onMounted(() => {
           <input
             v-model="createForm.first_name"
             type="text"
+            required
             class="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
             placeholder="First name"
           />
@@ -428,6 +458,7 @@ onMounted(() => {
           <input
             v-model="createForm.last_name"
             type="text"
+            required
             class="rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             placeholder="Last name"
           />
@@ -436,11 +467,12 @@ onMounted(() => {
         <div class="flex flex-col gap-2">
           <label class="text-sm font-semibold text-gray-700">Email *</label>
           <input
-            v-model="createForm.email"
-            type="email"
-            class="rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-            placeholder="user@email.com"
-          />
+          v-model="createForm.email"
+          type="email"
+          required
+          class="rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+          placeholder="user@email.com"
+        />
         </div>
 
         <div class="flex flex-col gap-2">
@@ -448,6 +480,7 @@ onMounted(() => {
           <input
             v-model="createForm.phone"
             type="text"
+            required
             class="rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             placeholder="Phone number"
           />
@@ -458,6 +491,7 @@ onMounted(() => {
           <input
             v-model="createForm.password"
             type="password"
+            required
             class="rounded-lg border border-gray-300 px-3 py-2.5 text-sm outline-none transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             placeholder="Password"
           />
