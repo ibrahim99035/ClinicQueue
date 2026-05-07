@@ -8,7 +8,10 @@ def generate_slots(start_date, end_date, doctor_id):
     if end_date < start_date:
         raise ValueError("end_date must be on or after start_date.")
 
-    doctor = DoctorProfile.objects.get(id=doctor_id)
+    try:
+        doctor = DoctorProfile.objects.get(id=doctor_id)
+    except DoctorProfile.DoesNotExist:
+        raise ValueError("Doctor not found.")
 
     today = timezone.now().date()
     if start_date < today:

@@ -30,6 +30,7 @@ class AppointmentWriteSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         user = getattr(request, 'user', None)
         slot = attrs.get('slot_id')
+        doctor = attrs.get('doctor_id')
         patient_profile = getattr(user, 'patient_profile', None)
 
         if slot and patient_profile and _patient_has_overlap(patient_profile, slot):
@@ -37,10 +38,20 @@ class AppointmentWriteSerializer(serializers.ModelSerializer):
                 'slot_id': 'You already have an overlapping appointment.'
             })
 
+        if slot and not slot.is_available:
+            raise serializers.ValidationError({
+                'slot_id': 'This slot is not available.'
+            })
+
+        if slot and doctor and slot.doctor_id != doctor:
+            raise serializers.ValidationError({
+                'doctor_id': 'Selected slot does not belong to this doctor.'
+            })
+
         return attrs
 
     def validate_slot_id(self, slot):
-        if hasattr(slot, 'appointment'):
+        if Appointment.objects.filter(slot_id=slot).exists():
             raise serializers.ValidationError("This slot is already booked.")
         return slot
 

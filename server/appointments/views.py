@@ -263,6 +263,15 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         reason = serializer.validated_data.get('reason', '')
         oldSlot = appointment.slot_id
 
+        if not newSlot.is_available and newSlot != oldSlot:
+            return Response({'detail': 'The selected slot is not available.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if newSlot.doctor_id != appointment.doctor_id:
+            return Response({'detail': 'The selected slot does not belong to this doctor.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if Appointment.objects.filter(slot_id=newSlot).exclude(pk=appointment.pk).exists():
+            return Response({'detail': 'The selected slot is already booked.'}, status=status.HTTP_400_BAD_REQUEST)
+
         overlapping = Appointment.objects.filter(
             patient_id=appointment.patient_id,
             status__in=['REQUESTED', 'CONFIRMED', 'CHECKED_IN'],
